@@ -13,6 +13,8 @@
 #include "XSFConfig_SNSF.h"
 #include "convert.h"
 #include "snes9x/apu/apu.h"
+#define WA_UTILS_SIMPLE
+#include <loader/loader/utils.h>
 
 enum
 {

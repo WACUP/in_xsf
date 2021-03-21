@@ -11,6 +11,8 @@
 #include "XSFConfig.h"
 #include "convert.h"
 #include "vbam/gba/Sound.h"
+#define WA_UTILS_SIMPLE
+#include <loader/loader/utils.h>
 
 enum
 {

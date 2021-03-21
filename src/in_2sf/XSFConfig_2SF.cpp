@@ -12,6 +12,8 @@
 #include "convert.h"
 #include "desmume/NDSSystem.h"
 #include "desmume/version.h"
+#define WA_UTILS_SIMPLE
+#include <loader/loader/utils.h>
 
 enum
 {

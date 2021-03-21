@@ -12,6 +12,8 @@
 # include "resource.h"
 # include <CommCtrl.h>
 #endif
+#define WA_UTILS_SIMPLE
+#include <loader/loader/utils.h>
 
 enum
 {
