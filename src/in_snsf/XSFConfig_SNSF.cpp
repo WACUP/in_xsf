@@ -148,6 +148,8 @@ void XSFConfig_SNSF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 
 void XSFConfig_SNSF::About(HWND parent)
 {
-	MessageBoxW(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber + ", using xSF Winamp plugin framework (based on the vio*sf plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\n"
-		"Utilizes modified snes9x v1.53 for audio playback.").c_str(), ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber).c_str(), MB_OK);
+	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
+		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
+		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes modified snes9x v1.53 for playback.").c_str(),
+		ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
 }

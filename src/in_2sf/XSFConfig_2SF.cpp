@@ -134,6 +134,8 @@ void XSFConfig_2SF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 
 void XSFConfig_2SF::About(HWND parent)
 {
-	MessageBoxW(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber + ", using xSF Winamp plugin framework (based on the vio*sf plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\n"
-		"Utilizes modified " + EMU_DESMUME_NAME_AND_VERSION() + " for audio playback.").c_str(), ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber).c_str(), MB_OK);
+	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
+		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
+		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes modified " + EMU_DESMUME_NAME_AND_VERSION() +
+		" for playback.").c_str(), ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
 }

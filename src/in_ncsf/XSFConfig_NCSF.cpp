@@ -123,8 +123,11 @@ void XSFConfig_NCSF::CopySpecificConfigToMemory(XSFPlayer *xSFPlayer, bool)
 
 void XSFConfig_NCSF::About(HWND parent)
 {
-	MessageBoxW(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber + ", using xSF Winamp plugin framework (based on the vio*sf plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\n"
-		"Utilizes code adapted from the FeOS Sound System library by fincs, git revision 5204c55 on GitHub, for audio playback.").c_str(), ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber).c_str(), MB_OK);
+	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
+		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
+		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes code adapted from the FeOS Sound System "
+		"library by\nfincs, git revision 5204c55 on GitHub, for playback.").c_str(),
+		ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
 }
 
 #ifdef _DEBUG
