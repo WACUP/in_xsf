@@ -134,12 +134,23 @@ void getFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 		}
 		toFree = true;
 	}
-	if (title)
-		CopyToString(xSF->GetFormattedTitle(xSFConfig->GetTitleFormat()).substr(0, GETFILEINFO_TITLE_LENGTH - 1), title);
-	if (length_in_ms)
-		*length_in_ms = xSF->GetLengthMS(xSFConfig->GetDefaultLength()) + xSF->GetFadeMS(xSFConfig->GetDefaultFade());
-	if (toFree)
-		delete xSF;
+
+	if (xSF)
+	{
+		if (title)
+			CopyToString(xSF->GetFormattedTitle(xSFConfig->GetTitleFormat()).substr(0, GETFILEINFO_TITLE_LENGTH - 1), title);
+		if (length_in_ms)
+			*length_in_ms = xSF->GetLengthMS(xSFConfig->GetDefaultLength()) + xSF->GetFadeMS(xSFConfig->GetDefaultFade());
+		if (toFree)
+			delete xSF;
+	}
+	else
+	{
+		if (title)
+			CopyToString("", title);
+		if (length_in_ms)
+			*length_in_ms = -1000;
+	}
 }
 
 int infoBox(const in_char *file, HWND hwndParent)
