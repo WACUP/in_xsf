@@ -417,7 +417,7 @@ int wrapperWinampSetExtendedFileInfo(const char *data, const wchar_t *val)
 	return 1;
 }
 
-extern "C" __declspec(dllexport) int winampSetExtendedFileInfo(const char *fn, const char *data, const wchar_t *val)
+/*extern "C" __declspec(dllexport) int winampSetExtendedFileInfo(const char *fn, const char *data, const wchar_t *val)
 {
 	try
 	{
@@ -429,7 +429,7 @@ extern "C" __declspec(dllexport) int winampSetExtendedFileInfo(const char *fn, c
 	{
 		return 0;
 	}
-}
+}*/
 
 extern "C" __declspec(dllexport) int winampSetExtendedFileInfoW(const wchar_t *fn, const char *data, const wchar_t *val)
 {
@@ -453,10 +453,10 @@ extern "C" __declspec(dllexport) int winampWriteExtendedFileInfo()
 	return 1;
 }
 
-extern "C" __declspec(dllexport) int winampClearExtendedFileInfoW(const wchar_t *)
+/*extern "C" __declspec(dllexport) int winampClearExtendedFileInfoW(const wchar_t *)
 {
 	return 0;
-}
+}*/
 
 intptr_t wrapperWinampGetExtendedRead_open(std::unique_ptr<XSFPlayer> tmpxSFPlayer, int *size, int *bps, int *nch, int *srate)
 {
@@ -476,7 +476,7 @@ intptr_t wrapperWinampGetExtendedRead_open(std::unique_ptr<XSFPlayer> tmpxSFPlay
 	return reinterpret_cast<intptr_t>(tmpxSFPlayer.release());
 }
 
-extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_open(const char *fn, int *size, int *bps, int *nch, int *srate)
+/*extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_open(const char *fn, int *size, int *bps, int *nch, int *srate)
 {
 	try
 	{
@@ -487,7 +487,7 @@ extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_open(const char 
 	{
 		return 0;
 	}
-}
+}*/
 
 extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_openW(const wchar_t *fn, int *size, int *bps, int *nch, int *srate)
 {
