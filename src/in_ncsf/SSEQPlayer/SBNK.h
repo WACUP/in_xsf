@@ -1,7 +1,6 @@
 /*
  * SSEQ Player - SDAT SBNK (Sound Bank) structures
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-08
  *
  * Nintendo DS Nitro Composer (SDAT) Specification document found at
  * http://www.feshrine.net/hacking/doc/nds-sdat.html
@@ -9,50 +8,52 @@
 
 #pragma once
 
-#include "SWAR.h"
+#include <string>
+#include <vector>
+#include <cstdint>
 #include "INFOEntry.h"
-#include "common.h"
 
-struct SBNKInstrumentRange
+struct PseudoFile;
+struct SWAR;
+
+struct SBNKInstrument
 {
-	uint8_t lowNote;
-	uint8_t highNote;
-	uint16_t record;
-	uint16_t swav;
-	uint16_t swar;
-	uint8_t noteNumber;
-	uint8_t attackRate;
-	uint8_t decayRate;
-	uint8_t sustainLevel;
-	uint8_t releaseRate;
-	uint8_t pan;
+	std::uint8_t lowNote;
+	std::uint8_t highNote;
+	std::uint16_t record;
+	std::uint16_t swav;
+	std::uint16_t swar;
+	std::uint8_t noteNumber;
+	std::uint8_t attackRate;
+	std::uint8_t decayRate;
+	std::uint8_t sustainLevel;
+	std::uint8_t releaseRate;
+	std::uint8_t pan;
 
-	SBNKInstrumentRange(uint8_t lowerNote, uint8_t upperNote, int recordType);
+	SBNKInstrument(std::uint8_t lowerNote, std::uint8_t upperNote, int recordType);
 
 	void Read(PseudoFile &file);
 };
 
-struct SBNKInstrument
+struct SBNKInstrumentEntry
 {
-	uint8_t record;
-	std::vector<SBNKInstrumentRange> ranges;
+	std::uint8_t record;
+	std::vector<SBNKInstrument> instruments;
 
-	SBNKInstrument();
+	SBNKInstrumentEntry();
 
-	void Read(PseudoFile &file, uint32_t startOffset);
+	void Read(PseudoFile &file, std::uint32_t startOffset);
 };
 
 struct SBNK
 {
 	std::string filename;
-	std::vector<SBNKInstrument> instruments;
+	std::vector<SBNKInstrumentEntry> entries;
 
 	const SWAR *waveArc[4];
 	INFOEntryBANK info;
 
 	SBNK(const std::string &fn = "");
-	SBNK(const SBNK &sbnk);
-	SBNK &operator=(const SBNK &sbnk);
 
 	void Read(PseudoFile &file);
 };

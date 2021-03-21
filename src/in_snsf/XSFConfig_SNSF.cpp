@@ -1,7 +1,6 @@
 /*
  * xSF - SNSF configuration
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-24
  *
  * Partially based on the vio*sf framework
  *
@@ -10,6 +9,11 @@
  * snes9x.
  */
 
+#include <bitset>
+#include <sstream>
+#include <string>
+#include <cstdint>
+#include "windowsh_wrapper.h"
 #include "XSFConfig_SNSF.h"
 #include "convert.h"
 #include "snes9x/apu/apu.h"
@@ -71,15 +75,15 @@ void XSFConfig_SNSF::SaveSpecificConfig()
 
 void XSFConfig_SNSF::GenerateSpecificDialogs()
 {
-	/*this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Sixteen-Bit Sound").WithSize(80, 10).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 7), 2).WithTabStop().
+	/*this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Sixteen-Bit Sound").WithSize(80, 10).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7), 2).WithTabStop().
 		WithID(idSixteenBitSound));*/
-	this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Reverse Stereo").WithSize(80, 10).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 7), 2).WithTabStop().
+	this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Reverse Stereo").WithSize(80, 10).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7), 2).WithTabStop().
 		WithID(idReverseStereo));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Resampler").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 10)).IsLeftJustified());
-	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_TOPRIGHT, Point<short>(5, -3)).WithTabStop().IsDropDownList().
+	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Resampler").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10)).IsLeftJustified());
+	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithTabStop().IsDropDownList().
 		WithID(idResampler));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Mute").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddListBoxControl(DialogListBoxBuilder().WithSize(78, 45).WithExactHeight().InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_TOPRIGHT, Point<short>(5, -3)).WithID(idMutes).WithBorder().
+	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Mute").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+	this->configDialog.AddListBoxControl(DialogListBoxBuilder().WithSize(78, 45).WithExactHeight().InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idMutes).WithBorder().
 		WithVerticalScrollbar().WithMultipleSelect().WithTabStop());
 }
 
@@ -104,7 +108,7 @@ INT_PTR CALLBACK XSFConfig_SNSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 			// Mutes
 			for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"BRRPCM " + wstringify(x + 1)).c_str()));
+				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"BRRPCM " + std::to_wstring(x + 1)).c_str()));
 				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
 			}
 			break;
@@ -143,7 +147,7 @@ void XSFConfig_SNSF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 		Settings.ReverseStereo = this->reverseStereo;
 	}
 	else
-		S9xSetSoundControl(static_cast<uint8_t>(this->mutes.to_ulong()) ^ 0xFF);
+		S9xSetSoundControl(static_cast<std::uint8_t>(this->mutes.to_ulong()) ^ 0xFF);
 }
 
 void XSFConfig_SNSF::About(HWND parent)

@@ -1,7 +1,6 @@
 /*
  * xSF - GSF Player
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-24
  *
  * Based on a modified viogsf v0.08
  *
@@ -11,11 +10,16 @@
  * http://vba-m.com/
  */
 
+#include <algorithm>
+#include <filesystem>
 #include <memory>
+#include <string>
+#include <vector>
+#include <cstddef>
+#include <cstdint>
 #include <zlib.h>
-#include "convert.h"
-#include "XSFPlayer.h"
 #include "XSFCommon.h"
+#include "XSFPlayer.h"
 #include "vbam/gba/Globals.h"
 #include "vbam/gba/Sound.h"
 #include "vbam/common/SoundDriver.h"
@@ -29,7 +33,7 @@ public:
 #endif
 	~XSFPlayer_GSF() { this->Terminate(); }
 	bool Load();
-	void GenerateSamples(std::vector<uint8_t> &buf, unsigned offset, unsigned samples);
+	void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples);
 	void Terminate();
 };
 
@@ -52,25 +56,25 @@ XSFPlayer *XSFPlayer::Create(const std::wstring &fn)
 
 static struct
 {
-	std::vector<uint8_t> rom;
+	std::vector<std::uint8_t> rom;
 	unsigned entry;
-} loaderwork;
+} loaderwork = { std::vector<std::uint8_t>(), 0 };
 
-int mapgsf(uint8_t *d, int l, int &s)
+int mapgsf(std::uint8_t *d, int l, int &s)
 {
-	if (static_cast<size_t>(l) > loaderwork.rom.size())
+	if (static_cast<std::size_t>(l) > loaderwork.rom.size())
 		l = loaderwork.rom.size();
 	if (l)
-		memcpy(d, &loaderwork.rom[0], l);
+		std::copy_n(&loaderwork.rom[0], l, d);
 	s = l;
 	return l;
 }
 
 static struct
 {
-	std::vector<uint8_t> buf;
-	uint32_t len, fil, cur;
-} buffer = { std::vector<uint8_t>(), 0, 0, 0 };
+	std::vector<std::uint8_t> buf;
+	std::uint32_t len, fil, cur;
+} buffer = { std::vector<std::uint8_t>(), 0, 0, 0 };
 
 class GSFSoundDriver : public SoundDriver
 {
@@ -83,7 +87,7 @@ public:
 	bool init(long sampleRate)
 	{
 		freebuffer();
-		uint32_t len = (sampleRate / 10) << 2;
+		std::int32_t len = (sampleRate / 10) << 2;
 		buffer.buf.resize(len);
 		buffer.len = len;
 		return true;
@@ -101,13 +105,13 @@ public:
 	{
 	}
 
-	void write(uint16_t *finalWave, int length)
+	void write(std::uint16_t *finalWave, int length)
 	{
-		if (static_cast<uint32_t>(length) > buffer.len - buffer.fil)
+		if (static_cast<std::uint32_t>(length) > buffer.len - buffer.fil)
 			length = buffer.len - buffer.fil;
 		if (length > 0)
 		{
-			memcpy(&buffer.buf[buffer.fil], finalWave, length);
+			std::copy_n(reinterpret_cast<std::uint8_t *>(finalWave), length, &buffer.buf[buffer.fil]);
 			buffer.fil += length;
 		}
 	}
@@ -122,11 +126,11 @@ SoundDriver *systemSoundInit()
 	return new GSFSoundDriver();
 }
 
-static void Map2SFSection(const std::vector<uint8_t> &section, int level)
+static void MapGSFSection(const std::vector<std::uint8_t> &section, int level)
 {
 	auto &data = loaderwork.rom;
 
-	uint32_t entry = Get32BitsLE(&section[0]), offset = Get32BitsLE(&section[4]) & 0x1FFFFFF, size = Get32BitsLE(&section[8]), finalSize = size + offset;
+	std::uint32_t entry = Get32BitsLE(&section[0]), offset = Get32BitsLE(&section[4]) & 0x1FFFFFF, size = Get32BitsLE(&section[8]), finalSize = size + offset;
 	if (level == 1)
 		loaderwork.entry = entry;
 	finalSize = NextHighestPowerOf2(finalSize);
@@ -134,10 +138,10 @@ static void Map2SFSection(const std::vector<uint8_t> &section, int level)
 		data.resize(finalSize + 10, 0);
 	else if (data.size() < size + offset)
 		data.resize(offset + finalSize + 10);
-	memcpy(&data[offset], &section[12], size);
+	std::copy_n(&section[12], size, &data[offset]);
 }
 
-static bool Map2SF(XSFFile *xSF, int level)
+static bool MapGSF(XSFFile *xSF, int level)
 {
 	if (!xSF->IsValidType(0x22))
 		return false;
@@ -145,25 +149,25 @@ static bool Map2SF(XSFFile *xSF, int level)
 	auto &programSection = xSF->GetProgramSection();
 
 	if (!programSection.empty())
-		Map2SFSection(programSection, level);
+		MapGSFSection(programSection, level);
 
 	return true;
 }
 
-static bool RecursiveLoad2SF(XSFFile *xSF, int level)
+static bool RecursiveLoadGSF(XSFFile *xSF, int level)
 {
 	if (level <= 10 && xSF->GetTagExists("_lib"))
 	{
 #ifdef _WIN32
-		auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ConvertFuncs::StringToWString(ExtractDirectoryFromPath(xSF->GetFilename()) + xSF->GetTagValue("_lib")), 8, 12));
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue("_lib")).wstring(), 8, 12);
 #else
-		auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ExtractDirectoryFromPath(xSF->GetFilename()) + xSF->GetTagValue("_lib"), 8, 12));
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue("_lib")).string(), 8, 12);
 #endif
-		if (!RecursiveLoad2SF(libxSF.get(), level + 1))
+		if (!RecursiveLoadGSF(libxSF.get(), level + 1))
 			return false;
 	}
 
-	if (!Map2SF(xSF, level))
+	if (!MapGSF(xSF, level))
 		return false;
 
 	unsigned n = 2;
@@ -171,16 +175,16 @@ static bool RecursiveLoad2SF(XSFFile *xSF, int level)
 	do
 	{
 		found = false;
-		std::string libTag = "_lib" + stringify(n++);
+		std::string libTag = "_lib" + std::to_string(n++);
 		if (xSF->GetTagExists(libTag))
 		{
 			found = true;
 #ifdef _WIN32
-			auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ConvertFuncs::StringToWString(ExtractDirectoryFromPath(xSF->GetFilename()) + xSF->GetTagValue(libTag)), 8, 12));
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue(libTag)).wstring(), 8, 12);
 #else
-			auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ExtractDirectoryFromPath(xSF->GetFilename()) + xSF->GetTagValue(libTag), 8, 12));
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue(libTag)).string(), 8, 12);
 #endif
-			if (!RecursiveLoad2SF(libxSF.get(), level + 1))
+			if (!RecursiveLoadGSF(libxSF.get(), level + 1))
 				return false;
 		}
 	} while (found);
@@ -188,12 +192,12 @@ static bool RecursiveLoad2SF(XSFFile *xSF, int level)
 	return true;
 }
 
-static bool Load2SF(XSFFile *xSF)
+static bool LoadGSF(XSFFile *xSF)
 {
 	loaderwork.rom.clear();
 	loaderwork.entry = 0;
 
-	return RecursiveLoad2SF(xSF, 1);
+	return RecursiveLoadGSF(xSF, 1);
 }
 
 XSFPlayer_GSF::XSFPlayer_GSF(const std::string &filename) : XSFPlayer()
@@ -210,7 +214,7 @@ XSFPlayer_GSF::XSFPlayer_GSF(const std::wstring &filename) : XSFPlayer()
 
 bool XSFPlayer_GSF::Load()
 {
-	if (!Load2SF(this->xSF.get()))
+	if (!LoadGSF(this->xSF.get()))
 		return false;
 
 	cpuIsMultiBoot = (loaderwork.entry >> 24) == 2;
@@ -228,7 +232,7 @@ bool XSFPlayer_GSF::Load()
 	return XSFPlayer::Load();
 }
 
-void XSFPlayer_GSF::GenerateSamples(std::vector<uint8_t> &buf, unsigned offset, unsigned samples)
+void XSFPlayer_GSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples)
 {
 	unsigned bytes = samples << 2;
 	while (bytes)
@@ -244,7 +248,7 @@ void XSFPlayer_GSF::GenerateSamples(std::vector<uint8_t> &buf, unsigned offset, 
 		unsigned len = remainbytes;
 		if (len > bytes)
 			len = bytes;
-		memcpy(&buf[offset], &buffer.buf[buffer.cur], len);
+		std::copy_n(&buffer.buf[buffer.cur], len, &buf[offset]);
 		bytes -= len;
 		offset += len;
 		buffer.cur += len;

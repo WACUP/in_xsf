@@ -1,7 +1,6 @@
 /*
  * xSF - NCSF Player
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-10-25
  *
  * Partially based on the vio*sf framework
  *
@@ -9,16 +8,22 @@
  * https://github.com/fincs/FSS
  */
 
+#include <algorithm>
+#include <bitset>
+#include <filesystem>
 #include <memory>
-#include <cstdlib>
-#include <ctime>
+#include <string>
+#include <vector>
+#include <cstddef>
+#include <cstdint>
 #include <zlib.h>
-#include "convert.h"
-#include "XSFPlayer_NCSF.h"
-#include "XSFConfig_NCSF.h"
 #include "XSFCommon.h"
+#include "XSFConfig_NCSF.h"
+#include "XSFPlayer_NCSF.h"
 #include "SSEQPlayer/SDAT.h"
 #include "SSEQPlayer/Player.h"
+#include "SSEQPlayer/common.h"
+#include "SSEQPlayer/consts.h"
 
 const char *XSFPlayer::WinampDescription = "NCSF Decoder";
 const wchar_t *XSFPlayer::WinampExts = L"ncsf;minincsf\0DS Nitro Composer Sound Format files (*.ncsf;*.minincsf)\0";
@@ -39,14 +44,14 @@ XSFPlayer *XSFPlayer::Create(const std::wstring &fn)
 }
 #endif
 
-void XSFPlayer_NCSF::MapNCSFSection(const std::vector<uint8_t> &section)
+void XSFPlayer_NCSF::MapNCSFSection(const std::vector<std::uint8_t> &section)
 {
-	uint32_t size = Get32BitsLE(&section[8]), finalSize = size;
+	std::uint32_t size = Get32BitsLE(&section[8]), finalSize = size;
 	if (this->sdatData.empty())
 		this->sdatData.resize(finalSize, 0);
 	else if (this->sdatData.size() < size)
 		this->sdatData.resize(finalSize);
-	memcpy(&this->sdatData[0], &section[0], size);
+	std::copy_n(&section[0], size, &this->sdatData[0]);
 }
 
 bool XSFPlayer_NCSF::MapNCSF(XSFFile *xSFToLoad)
@@ -70,9 +75,9 @@ bool XSFPlayer_NCSF::RecursiveLoadNCSF(XSFFile *xSFToLoad, int level)
 	if (level <= 10 && xSFToLoad->GetTagExists("_lib"))
 	{
 #ifdef _WIN32
-		auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ConvertFuncs::StringToWString(ExtractDirectoryFromPath(xSFToLoad->GetFilename()) + xSFToLoad->GetTagValue("_lib")), 8, 12));
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue("_lib")).wstring(), 8, 12);
 #else
-		auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ExtractDirectoryFromPath(xSFToLoad->GetFilename()) + xSFToLoad->GetTagValue("_lib"), 8, 12));
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue("_lib")).string(), 8, 12);
 #endif
 		if (!this->RecursiveLoadNCSF(libxSF.get(), level + 1))
 			return false;
@@ -86,14 +91,14 @@ bool XSFPlayer_NCSF::RecursiveLoadNCSF(XSFFile *xSFToLoad, int level)
 	do
 	{
 		found = false;
-		std::string libTag = "_lib" + stringify(n++);
+		std::string libTag = "_lib" + std::to_string(n++);
 		if (xSFToLoad->GetTagExists(libTag))
 		{
 			found = true;
 #ifdef _WIN32
-			auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ConvertFuncs::StringToWString(ExtractDirectoryFromPath(xSFToLoad->GetFilename()) + xSFToLoad->GetTagValue(libTag)), 8, 12));
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue(libTag)).wstring(), 8, 12);
 #else
-			auto libxSF = std::unique_ptr<XSFFile>(new XSFFile(ExtractDirectoryFromPath(xSFToLoad->GetFilename()) + xSFToLoad->GetTagValue(libTag), 8, 12));
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue(libTag)).string(), 8, 12);
 #endif
 			if (!this->RecursiveLoadNCSF(libxSF.get(), level + 1))
 				return false;
@@ -108,14 +113,14 @@ bool XSFPlayer_NCSF::LoadNCSF()
 	return this->RecursiveLoadNCSF(this->xSF.get(), 1);
 }
 
-XSFPlayer_NCSF::XSFPlayer_NCSF(const std::string &filename) : XSFPlayer()
+XSFPlayer_NCSF::XSFPlayer_NCSF(const std::string &filename) : XSFPlayer(), sseq(0), sdatData(), sdat(), player(), secondsPerSample(0), secondsIntoPlayback(0), secondsUntilNextClock(0), mutes()
 {
 	this->uses32BitSamplesClampedTo16Bit = true;
 	this->xSF.reset(new XSFFile(filename, 8, 12));
 }
 
 #ifdef _WIN32
-XSFPlayer_NCSF::XSFPlayer_NCSF(const std::wstring &filename) : XSFPlayer()
+XSFPlayer_NCSF::XSFPlayer_NCSF(const std::wstring &filename) : XSFPlayer(), sseq(0), sdatData(), sdat(), player(), secondsPerSample(0), secondsIntoPlayback(0), secondsUntilNextClock(0), mutes()
 {
 	this->uses32BitSamplesClampedTo16Bit = true;
 	this->xSF.reset(new XSFFile(filename, 8, 12));
@@ -169,8 +174,6 @@ bool XSFPlayer_NCSF::Load()
 	soundViewThreadHandle = CreateThread(nullptr, 0, soundViewThread, this, 0, nullptr);
 #endif
 
-	std::srand(static_cast<unsigned>(std::time(nullptr)));
-
 	PseudoFile file;
 	file.data = &this->sdatData;
 	this->sdat.reset(new SDAT(file, this->sseq));
@@ -187,12 +190,12 @@ bool XSFPlayer_NCSF::Load()
 	return XSFPlayer::Load();
 }
 
-static inline int32_t muldiv7(int32_t val, uint8_t mul)
+static inline std::int32_t muldiv7(std::int32_t val, std::uint8_t mul)
 {
 	return mul == 127 ? val : ((val * mul) >> 7);
 }
 
-void XSFPlayer_NCSF::GenerateSamples(std::vector<uint8_t> &buf, unsigned offset, unsigned samples)
+void XSFPlayer_NCSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples)
 {
 	unsigned long mute = this->mutes.to_ulong();
 
@@ -200,22 +203,22 @@ void XSFPlayer_NCSF::GenerateSamples(std::vector<uint8_t> &buf, unsigned offset,
 	{
 		this->secondsIntoPlayback += this->secondsPerSample;
 
-		int32_t leftChannel = 0, rightChannel = 0;
+		std::int32_t leftChannel = 0, rightChannel = 0;
 
 		// I need to advance the sound channels here
 		for (int i = 0; i < 16; ++i)
 		{
 			Channel &chn = this->player.channels[i];
 
-			if (chn.state > CS_NONE)
+			if (chn.state > ChannelState::None)
 			{
-				int32_t sample = chn.GenerateSample();
+				std::int32_t sample = chn.GenerateSample();
 				chn.IncrementSample();
 
 				if (mute & BIT(i))
 					continue;
 
-				uint8_t datashift = chn.reg.volumeDiv;
+				std::uint8_t datashift = chn.reg.volumeDiv;
 				if (datashift == 3)
 					datashift = 4;
 				sample = muldiv7(sample, chn.reg.volumeMul) >> datashift;
@@ -258,7 +261,7 @@ void XSFPlayer_NCSF::SetMutes(const std::bitset<16> &newMutes)
 }
 
 #ifdef _DEBUG
-const Channel &XSFPlayer_NCSF::GetChannel(size_t chanNum) const
+const Channel &XSFPlayer_NCSF::GetChannel(std::size_t chanNum) const
 {
 	return this->player.channels[chanNum];
 }

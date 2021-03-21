@@ -1,7 +1,6 @@
 /*
  * SSEQ Player - SDAT INFO Entry structures
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-10-25
  *
  * Nintendo DS Nitro Composer (SDAT) Specification document found at
  * http://www.feshrine.net/hacking/doc/nds-sdat.html
@@ -9,7 +8,9 @@
 
 #pragma once
 
-#include "common.h"
+#include <cstdint>
+
+struct PseudoFile;
 
 struct INFOEntry
 {
@@ -22,10 +23,10 @@ struct INFOEntry
 
 struct INFOEntrySEQ : INFOEntry
 {
-	uint16_t fileID;
-	uint16_t bank;
-	uint8_t vol;
-	uint8_t ply;
+	std::uint32_t fileID;
+	std::uint16_t bank;
+	std::uint8_t vol;
+	std::uint8_t ply;
 
 	INFOEntrySEQ();
 
@@ -34,8 +35,8 @@ struct INFOEntrySEQ : INFOEntry
 
 struct INFOEntryBANK : INFOEntry
 {
-	uint16_t fileID;
-	uint16_t waveArc[4];
+	std::uint32_t fileID;
+	std::uint16_t waveArc[4];
 
 	INFOEntryBANK();
 
@@ -44,7 +45,7 @@ struct INFOEntryBANK : INFOEntry
 
 struct INFOEntryWAVEARC : INFOEntry
 {
-	uint16_t fileID;
+	std::uint32_t fileID;
 
 	INFOEntryWAVEARC();
 
@@ -53,7 +54,7 @@ struct INFOEntryWAVEARC : INFOEntry
 
 struct INFOEntryPLAYER : INFOEntry
 {
-	uint16_t channelMask;
+	std::uint16_t channelMask;
 
 	INFOEntryPLAYER();
 

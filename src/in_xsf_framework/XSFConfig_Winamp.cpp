@@ -1,13 +1,17 @@
 /*
  * xSF - Winamp-specification configuration handler
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-10-05
  *
  * Partially based on the vio*sf framework
  */
 
+#include <filesystem>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include "windowsh_wrapper.h"
 #include "XSFConfig.h"
-#include "XSFCommon.h"
+#include "convert.h"
 #include <winamp/in2.h>
 #include <winamp/wa_ipc.h>
 
@@ -51,7 +55,7 @@ XSFConfigIO_Winamp::XSFConfigIO_Winamp() : iniFilename(L"")
 		if (!result)
 			throw std::runtime_error("Unable to get path to plugin.");
 
-		this->iniFilename = ExtractDirectoryFromPath(std::wstring(executablePath.begin(), executablePath.begin() + result)) + L"plugins.ini";
+		this->iniFilename = (std::filesystem::path(std::wstring(executablePath.begin(), executablePath.begin() + result)).parent_path() / L"plugins.ini").wstring();
 	}
 }
 

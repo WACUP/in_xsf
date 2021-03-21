@@ -1,7 +1,6 @@
 /*
  * xSF Tag List
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-08
  *
  * Storage of tags from PSF-style files, specifications found at
  * http://wiki.neillcorlett.com/PSFTagFormat
@@ -10,6 +9,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 #include <vector>
 #include "eqstr.h"
 #include "ltstr.h"
@@ -24,6 +24,8 @@ private:
 
 	Tags tags;
 	TagsList tagsOrder;
+
+	TagsList::const_iterator GetTagOrder(const std::string &name) const;
 public:
 	TagList() : tags(), tagsOrder() { }
 	const TagsList &GetKeys() const;

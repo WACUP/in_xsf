@@ -1,7 +1,6 @@
 /*
  * xSF - Core Player
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-24
  *
  * Partially based on the vio*sf framework
  */
@@ -9,8 +8,10 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <vector>
+#include <cstdint>
 #include "XSFFile.h"
-
 #ifdef WINAMP_PLUGIN
 # include "windowsh_wrapper.h"
 # include <winamp/out.h>
@@ -20,12 +21,12 @@
 class XSFPlayer
 {
 protected:
-	static const uint32_t CHECK_SILENCE_BIAS = 0x8000000;
-	static const uint32_t CHECK_SILENCE_LEVEL = 7;
+	static const std::uint32_t CHECK_SILENCE_BIAS = 0x8000000;
+	static const std::uint32_t CHECK_SILENCE_LEVEL = 7;
 
 	std::unique_ptr<XSFFile> xSF;
 	unsigned sampleRate, detectedSilenceSample, detectedSilenceSec, skipSilenceOnStartSec, lengthSample, fadeSample, currentSample;
-	uint32_t prevSampleL, prevSampleR;
+	std::uint32_t prevSampleL, prevSampleR;
 	int lengthInMS, fadeInMS;
 	double volume;
 	bool ignoreVolume, uses32BitSamplesClampedTo16Bit;
@@ -33,7 +34,7 @@ protected:
 	XSFPlayer();
 	XSFPlayer(const XSFPlayer &xSFPLayer);
 public:
-	// These are not defined in XSFPlayer.cpp, they should be defined in your own player's source.  The Create functions should return a pointer to your player's class.
+	// These are not defined in XSFPlayer.cpp, they should be defined in your own player's source. The Create functions should return a pointer to your player's class.
 	static const char *WinampDescription;
 	static const wchar_t *WinampExts;
 	static const char *ShellDescription;
@@ -52,11 +53,11 @@ public:
 	void SetSampleRate(unsigned newSampleRate) { this->sampleRate = newSampleRate; }
 	void IgnoreVolume() { this->ignoreVolume = true; }
 	virtual bool Load();
-	bool FillBuffer(std::vector<uint8_t> &buf, unsigned &samplesWritten);
-	virtual void GenerateSamples(std::vector<uint8_t> &buf, unsigned offset, unsigned samples) = 0;
+	bool FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWritten);
+	virtual void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples) = 0;
 	void SeekTop();
 #ifdef WINAMP_PLUGIN
-	int Seek(unsigned seekPosition, volatile int *killswitch, std::vector<uint8_t> &buf, Out_Module *outMod);
+	int Seek(unsigned seekPosition, volatile int *killswitch, std::vector<std::uint8_t> &buf, Out_Module *outMod);
 #endif
 	virtual void Terminate() = 0;
 };

@@ -1,14 +1,23 @@
 /*
  * xSF - NCSF configuration
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-12-09
  *
  * Partially based on the vio*sf framework
  */
 
+#include <bitset>
+#include <sstream>
+#include <string>
+#include <cstddef>
+#include "windowsh_wrapper.h"
+#include <windowsx.h>
 #include "XSFConfig_NCSF.h"
+#include "XSFPlayer_NCSF.h"
 #include "convert.h"
 #ifdef _DEBUG
+# include <cstdint>
+# include "SSEQPlayer/common.h"
+# include "SSEQPlayer/consts.h"
 # include "resource.h"
 # include <CommCtrl.h>
 #endif
@@ -65,11 +74,11 @@ void XSFConfig_NCSF::SaveSpecificConfig()
 
 void XSFConfig_NCSF::GenerateSpecificDialogs()
 {
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Interpolation").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(110, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_TOPRIGHT, Point<short>(5, -3)).WithID(idInterpolation).
+	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Interpolation").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(110, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idInterpolation).
 		IsDropDownList().WithTabStop());
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Mute").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddListBoxControl(DialogListBoxBuilder().WithSize(78, 45).WithExactHeight().InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_TOPRIGHT, Point<short>(5, -3)).WithID(idMutes).
+	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Mute").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+	this->configDialog.AddListBoxControl(DialogListBoxBuilder().WithSize(78, 45).WithExactHeight().InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idMutes).
 		WithBorder().WithVerticalScrollbar().WithMultipleSelect().WithTabStop());
 }
 
@@ -86,9 +95,9 @@ INT_PTR CALLBACK XSFConfig_NCSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"16-point Sinc (Nuttall 3-term Window)"));
 			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, this->interpolation, 0);
 			// Mutes
-			for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+			for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + wstringify(x + 1)).c_str()));
+				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + std::to_wstring(x + 1)).c_str()));
 				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
 			}
 			break;
@@ -103,14 +112,14 @@ void XSFConfig_NCSF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
 	SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, XSFConfig_NCSF::initInterpolation, 0);
 	auto tmpMutes = std::bitset<16>(XSFConfig_NCSF::initMutes);
-	for (int x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
+	for (std::size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
 		SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_NCSF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
 	this->interpolation = static_cast<unsigned>(SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_GETCURSEL, 0, 0));
-	for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+	for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 		this->mutes[x] = !!SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_GETSEL, x, 0);
 }
 
@@ -241,7 +250,7 @@ static inline void ProgressSetPosImmediate(HWND hDlg, int nIDDlgItem, int nPos)
 	}
 }
 
-static inline int32_t muldiv7(int32_t val, uint8_t mul)
+static inline std::int32_t muldiv7(std::int32_t val, std::uint8_t mul)
 {
 	return mul == 127 ? val : ((val * mul) >> 7);
 }
@@ -251,23 +260,23 @@ void XSFConfig_NCSF::RefreshSoundView()
 	auto player = this->soundViewData->player;
 	auto hDlg = this->soundViewData->hDlg;
 	std::wstring buf;
-	for (size_t chanId = 0; chanId < 16; ++chanId)
+	for (std::size_t chanId = 0; chanId < 16; ++chanId)
 	{
-		auto chn = player->GetChannel(chanId);
+		const auto &chn = player->GetChannel(chanId);
 
-		if (chn.state > CS_START)
+		if (chn.state > ChannelState::Start)
 		{
 			ProgressSetPosImmediate(hDlg, IDC_SOUND0PANBAR + chanId, muldiv7(128, chn.reg.panning));
-			uint8_t datashift = chn.reg.volumeDiv;
+			std::uint8_t datashift = chn.reg.volumeDiv;
 			if (datashift == 3)
 				datashift = 4;
-			int32_t vol = muldiv7(128, chn.reg.volumeMul) >> datashift;
+			std::int32_t vol = muldiv7(128, chn.reg.volumeMul) >> datashift;
 			ProgressSetPosImmediate(hDlg, IDC_SOUND0VOLBAR + chanId, vol);
 
 			if (this->soundViewData->volModeAlternative)
-				buf = wstringify(chn.reg.volumeMul) + L"/" + wstringify(1 << datashift);
+				buf = std::to_wstring(chn.reg.volumeMul) + L"/" + std::to_wstring(1 << datashift);
 			else
-				buf = wstringify(vol);
+				buf = std::to_wstring(vol);
 			SetDlgItemTextW(hDlg, IDC_SOUND0VOL + chanId, buf.c_str());
 
 			if (!chn.reg.panning)
@@ -277,18 +286,18 @@ void XSFConfig_NCSF::RefreshSoundView()
 			else if (chn.reg.panning == 127)
 				buf = L"R";
 			else if (chn.reg.panning < 64)
-				buf = L"L" + wstringify(64 - chn.reg.panning);
+				buf = L"L" + std::to_wstring(64 - chn.reg.panning);
 			else //if (chn.reg.panning > 64)
-				buf = L"R" + wstringify(chn.reg.panning - 64);
+				buf = L"R" + std::to_wstring(chn.reg.panning - 64);
 			SetDlgItemTextW(hDlg, IDC_SOUND0PAN + chanId, buf.c_str());
 
 			static const std::wstring modes[] = { L"Manual", L"Loop Infinite", L"One-Shot", L"Prohibited" };
-			SetDlgItemTextW(hDlg, IDC_SOUND0REPEATMODE + chanId, (wstringify(chn.reg.repeatMode) + L" (" + modes[chn.reg.repeatMode] + L")").c_str());
+			SetDlgItemTextW(hDlg, IDC_SOUND0REPEATMODE + chanId, (std::to_wstring(chn.reg.repeatMode) + L" (" + modes[chn.reg.repeatMode] + L")").c_str());
 
 			if (chn.reg.format != 3)
 			{
 				static const std::wstring formats[] = { L"PCM8", L"PCM16", L"IMA-ADPCM" };
-				SetDlgItemTextW(hDlg, IDC_SOUND0FORMAT + chanId, (wstringify(chn.reg.format) + L" (" + formats[chn.reg.format] + L")").c_str());
+				SetDlgItemTextW(hDlg, IDC_SOUND0FORMAT + chanId, (std::to_wstring(chn.reg.format) + L" (" + formats[chn.reg.format] + L")").c_str());
 			}
 			else
 			{
@@ -296,7 +305,7 @@ void XSFConfig_NCSF::RefreshSoundView()
 				if (chanId < 8)
 					buf += L"PSG/Noise?";
 				else if (chanId < 14)
-					buf += wstringify(chn.reg.waveDuty == 7 ? 0 : 12.5 * (chn.reg.waveDuty + 1)) + L"% Square";
+					buf += ConvertFuncs::TrimDoubleString(std::to_wstring(chn.reg.waveDuty == 7 ? 0 : 12.5 * (chn.reg.waveDuty + 1))) + L"% Square";
 				else
 					buf += L"Noise";
 				buf += L")";
@@ -304,21 +313,21 @@ void XSFConfig_NCSF::RefreshSoundView()
 			}
 
 			static const std::wstring states[] = { L"NONE", L"START", L"ATTACK", L"DECAY", L"SUSTAIN", L"RELEASE" };
-			SetDlgItemTextW(hDlg, IDC_SOUND0STATE + chanId, states[chn.state].c_str());
+			SetDlgItemTextW(hDlg, IDC_SOUND0STATE + chanId, states[ToIntegral(chn.state)].c_str());
 
-			SetDlgItemTextW(hDlg, IDC_SOUND0PNT + chanId, (L"samp #" + wstringify(chn.reg.loopStart)).c_str());
+			SetDlgItemTextW(hDlg, IDC_SOUND0PNT + chanId, (L"samp #" + std::to_wstring(chn.reg.loopStart)).c_str());
 
 			std::wstring tmpBuf = ConvertFuncs::StringToWString(NumToHexString(chn.reg.timer)).substr(2);
 			buf = L"$" + tmpBuf + L" (";
-			tmpBuf = wstringify((ARM7_CLOCK / 2) / static_cast<double>(0x10000 - chn.reg.timer) / 8);
+			tmpBuf = ConvertFuncs::TrimDoubleString(std::to_wstring((ARM7_CLOCK / 2) / static_cast<double>(0x10000 - chn.reg.timer) / 8));
 			if (tmpBuf.find('.') != std::wstring::npos)
 				tmpBuf = tmpBuf.substr(0, tmpBuf.find('.') + 2);
 			buf += tmpBuf + L" Hz)";
 			SetDlgItemTextW(hDlg, IDC_SOUND0TMR + chanId, buf.c_str());
 
-			SetDlgItemTextW(hDlg, IDC_SOUND0POSLEN + chanId, (L"samp #" + wstringify(static_cast<uint32_t>(chn.reg.samplePosition)) + L" / " + wstringify(chn.reg.totalLength)).c_str());
+			SetDlgItemTextW(hDlg, IDC_SOUND0POSLEN + chanId, (L"samp #" + std::to_wstring(static_cast<std::uint32_t>(chn.reg.samplePosition)) + L" / " + std::to_wstring(chn.reg.totalLength)).c_str());
 		}
-		else if (this->soundViewData->channelLastStates[chanId] != CS_NONE)
+		else if (this->soundViewData->channelLastStates[chanId] != ChannelState::None)
 		{
 			ProgressSetPosImmediate(hDlg, IDC_SOUND0PANBAR + chanId, 0);
 			ProgressSetPosImmediate(hDlg, IDC_SOUND0VOLBAR + chanId, 0);

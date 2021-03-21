@@ -1,19 +1,23 @@
 /*
  * xSF - 2SF configuration
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-24
  *
  * Partially based on the vio*sf framework
  */
 
 #include <bitset>
-#include "XSFPlayer.h"
+#include <sstream>
+#include <string>
+#include <cstddef>
+#include "windowsh_wrapper.h"
 #include "XSFConfig.h"
 #include "convert.h"
 #include "desmume/NDSSystem.h"
 #include "desmume/version.h"
 #define WA_UTILS_SIMPLE
 #include <loader/loader/utils.h>
+
+class XSFPlayer;
 
 enum
 {
@@ -74,11 +78,11 @@ void XSFConfig_2SF::SaveSpecificConfig()
 
 void XSFConfig_2SF::GenerateSpecificDialogs()
 {
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Interpolation").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_TOPRIGHT, Point<short>(5, -3)).WithID(idInterpolation).IsDropDownList().
+	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Interpolation").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idInterpolation).IsDropDownList().
 		WithTabStop());
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Mute").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_BOTTOMLEFT, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddListBoxControl(DialogListBoxBuilder().WithSize(78, 45).WithExactHeight().InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::FROM_TOPRIGHT, Point<short>(5, -3)).WithID(idMutes).WithBorder().
+	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Mute").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+	this->configDialog.AddListBoxControl(DialogListBoxBuilder().WithSize(78, 45).WithExactHeight().InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idMutes).WithBorder().
 		WithVerticalScrollbar().WithMultipleSelect().WithTabStop());
 }
 
@@ -94,9 +98,9 @@ INT_PTR CALLBACK XSFConfig_2SF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM
 			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Sharp Interpolation"));
 			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, this->interpolation, 0);
 			// Mutes
-			for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+			for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + wstringify(x + 1)).c_str()));
+				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + std::to_wstring(x + 1)).c_str()));
 				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
 			}
 			break;
@@ -111,14 +115,14 @@ void XSFConfig_2SF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
 	SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, XSFConfig_2SF::initInterpolation, 0);
 	auto tmpMutes = std::bitset<16>(XSFConfig_2SF::initMutes);
-	for (size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
+	for (std::size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
 		SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_2SF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
 	this->interpolation = static_cast<unsigned>(SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_GETCURSEL, 0, 0));
-	for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+	for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 		this->mutes[x] = !!SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_GETSEL, x, 0);
 }
 
@@ -127,7 +131,7 @@ void XSFConfig_2SF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 	if (!preLoad)
 	{
 		CommonSettings.spuInterpolationMode = static_cast<SPUInterpolationMode>(this->interpolation);
-		for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+		for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			CommonSettings.spu_muteChannels[x] = this->mutes[x];
 	}
 }

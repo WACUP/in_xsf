@@ -1,20 +1,28 @@
 /*
  * xSF - File structure
  * By Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]
- * Last modification on 2014-09-24
  *
  * Partially based on the vio*sf framework
  */
 
 #include <algorithm>
-#include <functional>
+#include <filesystem>
+#include <fstream>
 #include <stdexcept>
-#include "zlib.h"
-#include "XSFFile.h"
+#include <string>
+#include <vector>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include "XSFCommon.h"
+#include "XSFFile.h"
 #include "convert.h"
+#if defined(_WIN32) && !defined(_MSC_VER)
+# include "fstream_wfopen.h"
+#endif
+#include "zlib.h"
 
-static inline void Set32BitsLE(uint32_t input, uint8_t *output)
+static inline void Set32BitsLE(std::uint32_t input, std::uint8_t *output)
 {
 	output[0] = input & 0xFF;
 	output[1] = (input >> 8) & 0xFF;
@@ -25,24 +33,26 @@ static inline void Set32BitsLE(uint32_t input, uint8_t *output)
 // The whitespace trimming was modified from the following answer on Stack Overflow:
 // http://stackoverflow.com/a/217605
 
-struct IsWhitespace
+bool IsWhitespace(const char &x)
 {
-  using argument_type = char;;
-	bool operator()(const char &x) const
-	{
-		return x >= 0x01 && x <= 0x20;
-	}
-};
+	return x >= 0x01 && x <= 0x20;
+}
 
 static inline std::string LeftTrimWhitespace(const std::string &orig)
 {
-	auto first_non_space = std::find_if(orig.begin(), orig.end(), std::not1(IsWhitespace()));
+	auto first_non_space = std::find_if(orig.begin(), orig.end(), [](const char &x)
+	{
+		return !IsWhitespace(x);
+	});
 	return std::string(first_non_space, orig.end());
 }
 
 static inline std::string RightTrimWhitespace(const std::string &orig)
 {
-	auto last_non_space = std::find_if(orig.rbegin(), orig.rend(), std::not1(IsWhitespace())).base();
+	auto last_non_space = std::find_if(orig.rbegin(), orig.rend(), [](const char &x)
+	{
+		return !IsWhitespace(x);
+	}).base();
 	return std::string(orig.begin(), last_non_space);
 }
 
@@ -60,7 +70,7 @@ XSFFile::XSFFile(const std::string &filename) : xSFType(0), hasFile(false), rawD
 	this->ReadXSF(filename, 0, 0, true);
 }
 
-XSFFile::XSFFile(const std::string &filename, uint32_t programSizeOffset, uint32_t programHeaderSize) : xSFType(0), hasFile(false), rawData(), reservedSection(), programSection(), tags(), fileName(filename)
+XSFFile::XSFFile(const std::string &filename, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize) : xSFType(0), hasFile(false), rawData(), reservedSection(), programSection(), tags(), fileName(filename)
 {
 	this->ReadXSF(filename, programSizeOffset, programHeaderSize);
 }
@@ -71,15 +81,15 @@ XSFFile::XSFFile(const std::wstring &filename) : xSFType(0), hasFile(false), raw
 	this->ReadXSF(filename, 0, 0, true);
 }
 
-XSFFile::XSFFile(const std::wstring &filename, uint32_t programSizeOffset, uint32_t programHeaderSize) : xSFType(0), hasFile(false), rawData(), reservedSection(), programSection(), tags(), fileName(ConvertFuncs::WStringToString(filename))
+XSFFile::XSFFile(const std::wstring &filename, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize) : xSFType(0), hasFile(false), rawData(), reservedSection(), programSection(), tags(), fileName(ConvertFuncs::WStringToString(filename))
 {
 	this->ReadXSF(filename, programSizeOffset, programHeaderSize);
 }
 #endif
 
-void XSFFile::ReadXSF(const std::string &filename, uint32_t programSizeOffset, uint32_t programHeaderSize, bool readTagsOnly)
+void XSFFile::ReadXSF(const std::string &filename, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize, bool readTagsOnly)
 {
-	if (!FileExists(filename))
+	if (!std::filesystem::is_regular_file(filename))
 		throw std::logic_error("File " + filename + " does not exist.");
 
 	std::ifstream xSF;
@@ -92,9 +102,9 @@ void XSFFile::ReadXSF(const std::string &filename, uint32_t programSizeOffset, u
 }
 
 #ifdef _WIN32
-void XSFFile::ReadXSF(const std::wstring &filename, uint32_t programSizeOffset, uint32_t programHeaderSize, bool readTagsOnly)
+void XSFFile::ReadXSF(const std::wstring &filename, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize, bool readTagsOnly)
 {
-	if (!FileExists(filename))
+	if (!std::filesystem::is_regular_file(filename))
 		throw std::logic_error("File " + ConvertFuncs::WStringToString(filename) + " does not exist.");
 
 #if defined(_WIN32) && !defined(_MSC_VER)
@@ -111,7 +121,7 @@ void XSFFile::ReadXSF(const std::wstring &filename, uint32_t programSizeOffset, 
 }
 #endif
 
-void XSFFile::ReadXSF(std::ifstream &xSF, uint32_t programSizeOffset, uint32_t programHeaderSize, bool readTagsOnly)
+void XSFFile::ReadXSF(std::ifstream &xSF, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize, bool readTagsOnly)
 {
 	xSF.seekg(0, std::ifstream::end);
 	auto filesize = xSF.tellg();
@@ -129,12 +139,12 @@ void XSFFile::ReadXSF(std::ifstream &xSF, uint32_t programSizeOffset, uint32_t p
 	this->xSFType = PSFHeader[3];
 
 	this->rawData.resize(4);
-	memcpy(&this->rawData[0], PSFHeader, 4);
+	std::copy_n(PSFHeader, 4, &this->rawData[0]);
 
 	if (filesize < 16)
 		throw std::runtime_error("File is too small.");
 
-	uint32_t reservedSize = Get32BitsLE(xSF), programCompressedSize = Get32BitsLE(xSF);
+	std::uint32_t reservedSize = Get32BitsLE(xSF), programCompressedSize = Get32BitsLE(xSF);
 	this->rawData.resize(reservedSize + programCompressedSize + 16);
 	Set32BitsLE(reservedSize, &this->rawData[4]);
 	Set32BitsLE(programCompressedSize, &this->rawData[8]);
@@ -151,7 +161,7 @@ void XSFFile::ReadXSF(std::ifstream &xSF, uint32_t programSizeOffset, uint32_t p
 		{
 			this->reservedSection.resize(reservedSize);
 			xSF.read(reinterpret_cast<char *>(&this->reservedSection[0]), reservedSize);
-			memcpy(&this->rawData[16], &this->reservedSection[0], reservedSize);
+			std::copy_n(&this->reservedSection[0], reservedSize, &this->rawData[16]);
 		}
 	}
 
@@ -164,11 +174,11 @@ void XSFFile::ReadXSF(std::ifstream &xSF, uint32_t programSizeOffset, uint32_t p
 			xSF.read(reinterpret_cast<char *>(&this->rawData[reservedSize + 16]), programCompressedSize);
 		else
 		{
-			auto programSectionCompressed = std::vector<uint8_t>(programCompressedSize);
+			auto programSectionCompressed = std::vector<std::uint8_t>(programCompressedSize);
 			xSF.read(reinterpret_cast<char *>(&programSectionCompressed[0]), programCompressedSize);
-			memcpy(&this->rawData[reservedSize + 16], &programSectionCompressed[0], programCompressedSize);
+			std::copy_n(&programSectionCompressed[0], programCompressedSize, &this->rawData[reservedSize + 16]);
 
-			auto programSectionUncompressed = std::vector<uint8_t>(programHeaderSize);
+			auto programSectionUncompressed = std::vector<std::uint8_t>(programHeaderSize);
 			unsigned long programUncompressedSize = programHeaderSize;
 			uncompress(&programSectionUncompressed[0], &programUncompressedSize, &programSectionCompressed[0], programCompressedSize);
 			programUncompressedSize = Get32BitsLE(&programSectionUncompressed[programSizeOffset]) + programHeaderSize;
@@ -226,7 +236,7 @@ void XSFFile::ReadXSF(std::ifstream &xSF, uint32_t programSizeOffset, uint32_t p
 	this->hasFile = true;
 }
 
-bool XSFFile::IsValidType(uint8_t type) const
+bool XSFFile::IsValidType(std::uint8_t type) const
 {
 	return this->xSFType == type;
 }
@@ -245,22 +255,22 @@ bool XSFFile::HasFile() const
 	return this->hasFile;
 }
 
-std::vector<uint8_t> &XSFFile::GetReservedSection()
+std::vector<std::uint8_t> &XSFFile::GetReservedSection()
 {
 	return this->reservedSection;
 }
 
-std::vector<uint8_t> XSFFile::GetReservedSection() const
+std::vector<std::uint8_t> XSFFile::GetReservedSection() const
 {
 	return this->reservedSection;
 }
 
-std::vector<uint8_t> &XSFFile::GetProgramSection()
+std::vector<std::uint8_t> &XSFFile::GetProgramSection()
 {
 	return this->programSection;
 }
 
-std::vector<uint8_t> XSFFile::GetProgramSection() const
+std::vector<std::uint8_t> XSFFile::GetProgramSection() const
 {
 	return this->programSection;
 }
@@ -317,44 +327,44 @@ unsigned long XSFFile::GetFadeMS(unsigned long defaultFade) const
 
 double XSFFile::GetVolume(VolumeType preferredVolumeType, PeakType preferredPeakType) const
 {
-	if (preferredVolumeType == VOLUMETYPE_NONE)
+	if (preferredVolumeType == VolumeType::None)
 		return 1.0;
 	std::string replaygain_album_gain = this->GetTagValue("replaygain_album_gain"), replaygain_album_peak = this->GetTagValue("replaygain_album_peak");
 	std::string replaygain_track_gain = this->GetTagValue("replaygain_track_gain"), replaygain_track_peak = this->GetTagValue("replaygain_track_peak");
 	std::string volume = this->GetTagValue("volume");
 	double gain = 0.0;
 	bool hadReplayGain = false;
-	if (preferredVolumeType == VOLUMETYPE_REPLAYGAIN_ALBUM && !replaygain_album_gain.empty())
+	if (preferredVolumeType == VolumeType::ReplayGainAlbum && !replaygain_album_gain.empty())
 	{
-		gain = convertTo<double>(replaygain_album_gain, false);
+		gain = convertTo<double>(replaygain_album_gain);
 		hadReplayGain = true;
 	}
-	if (!hadReplayGain && preferredVolumeType != VOLUMETYPE_VOLUME && !replaygain_track_gain.empty())
+	if (!hadReplayGain && preferredVolumeType != VolumeType::Volume && !replaygain_track_gain.empty())
 	{
-		gain = convertTo<double>(replaygain_track_gain, false);
+		gain = convertTo<double>(replaygain_track_gain);
 		hadReplayGain = true;
 	}
 	if (hadReplayGain)
 	{
 		double vol = std::pow(10.0, gain / 20.0), peak = 1.0;
-		if (preferredPeakType == PEAKTYPE_REPLAYGAIN_ALBUM && !replaygain_album_peak.empty())
-			peak = convertTo<double>(replaygain_album_peak, false);
-		else if (preferredPeakType != PEAKTYPE_NONE && !replaygain_track_peak.empty())
-			peak = convertTo<double>(replaygain_track_peak, false);
+		if (preferredPeakType == PeakType::ReplayGainAlbum && !replaygain_album_peak.empty())
+			peak = convertTo<double>(replaygain_album_peak);
+		else if (preferredPeakType != PeakType::None && !replaygain_track_peak.empty())
+			peak = convertTo<double>(replaygain_track_peak);
 		return !fEqual(peak, 1.0) ? std::min(vol, 1.0 / peak) : vol;
 	}
-	return volume.empty() ? 1.0 : convertTo<double>(volume, false);
+	return volume.empty() ? 1.0 : convertTo<double>(volume);
 }
 
 std::string XSFFile::FormattedTitleOptionalBlock(const std::string &block, bool &hadReplacement, unsigned level) const
 {
 	std::string formattedBlock;
-	for (size_t x = 0, len = block.length(); x < len; ++x)
+	for (std::size_t x = 0, len = block.length(); x < len; ++x)
 	{
 		char c = block[x];
 		if (c == '%')
 		{
-			size_t origX = x;
+			std::size_t origX = x;
 			for (++x; x < len; ++x)
 				if (block[x] == '%')
 					break;
@@ -372,7 +382,7 @@ std::string XSFFile::FormattedTitleOptionalBlock(const std::string &block, bool 
 		}
 		if (c == '[' && level + 1 < 10)
 		{
-			size_t origX = x;
+			std::size_t origX = x;
 			unsigned nests = 0;
 			for (++x; x < len; ++x)
 			{
@@ -403,12 +413,12 @@ std::string XSFFile::FormattedTitleOptionalBlock(const std::string &block, bool 
 std::string XSFFile::GetFormattedTitle(const std::string &format) const
 {
 	std::string formattedTitle;
-	for (size_t x = 0, len = format.length(); x < len; ++x)
+	for (std::size_t x = 0, len = format.length(); x < len; ++x)
 	{
 		char c = format[x];
 		if (c == '%')
 		{
-			size_t origX = x;
+			std::size_t origX = x;
 			for (++x; x < len; ++x)
 				if (format[x] == '%')
 					break;
@@ -424,7 +434,7 @@ std::string XSFFile::GetFormattedTitle(const std::string &format) const
 		}
 		else if (c == '[')
 		{
-			size_t origX = x;
+			std::size_t origX = x;
 			unsigned nests = 0;
 			for (++x; x < len; ++x)
 			{
@@ -459,7 +469,7 @@ std::string XSFFile::GetFilename() const
 
 std::string XSFFile::GetFilenameWithoutPath() const
 {
-	return ExtractFilenameFromPath(this->fileName);
+	return std::filesystem::path(this->fileName).filename().string();
 }
 
 void XSFFile::SaveFile() const
