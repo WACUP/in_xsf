@@ -14,6 +14,7 @@
 #include "convert.h"
 #include <winamp/in2.h>
 #include <winamp/wa_ipc.h>
+#include <loader/loader/paths.h>
 
 extern In_Module inMod;
 
@@ -21,7 +22,7 @@ class XSFConfigIO_Winamp : public XSFConfigIO
 {
 protected:
 	friend class XSFConfigIO;
-	std::wstring iniFilename;
+	//std::wstring iniFilename;
 	HINSTANCE hInst;
 
 	XSFConfigIO_Winamp();
@@ -37,9 +38,9 @@ XSFConfigIO *XSFConfigIO::Create()
 	return new XSFConfigIO_Winamp();
 }
 
-XSFConfigIO_Winamp::XSFConfigIO_Winamp() : iniFilename(L"")
+XSFConfigIO_Winamp::XSFConfigIO_Winamp()// : iniFilename(L"")
 {
-	if (SendMessage(inMod.hMainWindow, WM_WA_IPC, 0, IPC_GETVERSION) >= 0x2900)
+	/*if (SendMessage(inMod.hMainWindow, WM_WA_IPC, 0, IPC_GETVERSION) >= 0x2900)
 		this->iniFilename = ConvertFuncs::StringToWString(reinterpret_cast<char *>(SendMessage(inMod.hMainWindow, WM_WA_IPC, 0, IPC_GETINIFILE)));
 	else
 	{
@@ -56,12 +57,12 @@ XSFConfigIO_Winamp::XSFConfigIO_Winamp() : iniFilename(L"")
 			throw std::runtime_error("Unable to get path to plugin.");
 
 		this->iniFilename = (std::filesystem::path(std::wstring(executablePath.begin(), executablePath.begin() + result)).parent_path() / L"plugins.ini").wstring();
-	}
+	}*/
 }
 
 void XSFConfigIO_Winamp::SetValueString(const std::string &name, const std::string &value)
 {
-	WritePrivateProfileStringW(ConvertFuncs::StringToWString(XSFConfig::commonName).c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(value).c_str(), this->iniFilename.c_str());
+	WritePrivateProfileStringW(ConvertFuncs::StringToWString(XSFConfig::commonName).c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(value).c_str(), GetPaths()->winamp_ini_file/*/this->iniFilename.c_str()/**/);
 }
 
 std::string XSFConfigIO_Winamp::GetValueString(const std::string &name, const std::string &defaultValue) const
@@ -72,7 +73,7 @@ std::string XSFConfigIO_Winamp::GetValueString(const std::string &name, const st
 	do
 	{
 		value.resize(value.size() * 2);
-		result = GetPrivateProfileStringW(ConvertFuncs::StringToWString(XSFConfig::commonName).c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(defaultValue).c_str(), &value[0], value.size(), this->iniFilename.c_str());
+		result = GetPrivateProfileStringW(ConvertFuncs::StringToWString(XSFConfig::commonName).c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(defaultValue).c_str(), &value[0], value.size(), GetPaths()->winamp_ini_file/*/this->iniFilename.c_str()/**/);
 	} while (result + 1 == value.size());
 
 	if (!result)
