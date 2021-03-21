@@ -35,7 +35,8 @@ protected:
 public:
 	// These are not defined in XSFPlayer.cpp, they should be defined in your own player's source.  The Create functions should return a pointer to your player's class.
 	static const char *WinampDescription;
-	static const char *WinampExts;
+	static const wchar_t *WinampExts;
+	static const char *ShellDescription;
 	static XSFPlayer *Create(const std::string &fn);
 #ifdef _WIN32
 	static XSFPlayer *Create(const std::wstring &fn);

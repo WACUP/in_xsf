@@ -88,12 +88,22 @@ void about(HWND hwndParent)
 	xSFConfig->About(hwndParent);
 }
 
-void init()
+int init()
 {
 	xSFConfig = XSFConfig::Create();
-	xSFConfig->LoadConfig();
-	xSFConfig->GenerateDialogs();
-	xSFConfig->SetHInstance(inMod.hDllInstance);
+	if (xSFConfig)
+	{
+		inMod.description = (char *)_wcsdup(ConvertFuncs::StringToWString(XSFConfig::CommonNameWithVersion()).c_str());
+
+		// TODO can this instead be delayed until it's
+		//		actually needed to minimise doing bits
+		//		may never be needed for this instance?
+		xSFConfig->LoadConfig();
+		xSFConfig->GenerateDialogs();
+		xSFConfig->SetHInstance(inMod.hDllInstance);
+		return IN_INIT_SUCCESS;
+	}
+	return IN_INIT_FAILURE;
 }
 
 void quit()
@@ -267,17 +277,23 @@ void setPan(int pan)
 	inMod.outMod->SetPan(pan);
 }
 
-void eqSet(int, char [10], int)
+void GetFileExtensions(void)
 {
+	static bool loaded_extensions;
+	if (!loaded_extensions)
+	{
+		inMod.FileExtensions = (char *)XSFPlayer::WinampExts;
+		loaded_extensions = true;
+	}
 }
 
 In_Module inMod =
 {
-	IN_VER,
+	IN_VER_WACUP,
 	const_cast<char *>(XSFConfig::CommonNameWithVersion().c_str()), /* Unsafe but Winamp's SDK requires this */
 	nullptr, /* Filled by Winamp */
 	nullptr, /* Filled by Winamp */
-	const_cast<char *>(XSFPlayer::WinampExts), /* Unsafe but Winamp's SDK requires this */
+	nullptr,
 	1,
 	IN_MODULE_FLAG_USES_OUTPUT_PLUGIN | IN_MODULE_FLAG_REPLAYGAIN,
 	config,
@@ -299,9 +315,12 @@ In_Module inMod =
 	setPan,
 	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, /* Vis stuff, filled by Winamp */
 	nullptr, nullptr, /* DSP stuff, filled by Winamp */
-	eqSet,
+	nullptr,
 	nullptr, /* Filled by Winamp */
-	nullptr /* Filled by Winamp */
+	nullptr, /* Filled by Winamp */
+	NULL,	// api_service
+	GetFileExtensions,	// loading optimisation
+	IN_INIT_WACUP_END_STRUCT
 };
 
 extern "C" __declspec(dllexport) In_Module *winampGetInModule2()
@@ -311,8 +330,10 @@ extern "C" __declspec(dllexport) In_Module *winampGetInModule2()
 
 static eq_str eqstr;
 
-template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, const char *data, T *dest, size_t destlen)
+template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, T *dest, size_t destlen)
 {
+	// the core can send a *.<ext> to us so for these values we
+	// don't need to hit the files & can do a default response.
 	if (eqstr(data, "type"))
 	{
 		dest[0] = '0';
@@ -320,32 +341,37 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 		return 1;
 	}
 	else if (eqstr(data, "family"))
-		return 0;
-	else
 	{
-		try
+		CopyToString(const_cast<char *>(XSFPlayer::ShellDescription), dest);
+		return 1;
+	}
+	return 0;
+}
+
+template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, const char *data, T *dest, size_t destlen)
+{
+	try
+	{
+		std::string tagToGet = data;
+		if (eqstr(data, "album"))
+			tagToGet = "game";
+		std::string tag = "";
+		if (!file.GetTagExists(tagToGet))
 		{
-			std::string tagToGet = data;
-			if (eqstr(data, "album"))
-				tagToGet = "game";
-			std::string tag = "";
-			if (!file.GetTagExists(tagToGet))
-			{
-				if (eqstr(tagToGet, "replaygain_track_gain"))
-					return 1;
-				return 0;
-			}
-			else if (eqstr(tagToGet, "length"))
-				tag = stringify(file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade()));
-			else
-				tag = file.GetTagValue(tagToGet);
-			CopyToString(tag.substr(0, destlen - 1), dest);
-			return 1;
-		}
-		catch (const std::exception &)
-		{
+			if (eqstr(tagToGet, "replaygain_track_gain"))
+				return 1;
 			return 0;
 		}
+		else if (eqstr(tagToGet, "length"))
+			tag = stringify(file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade()));
+		else
+			tag = file.GetTagValue(tagToGet);
+		CopyToString(tag.substr(0, destlen - 1), dest);
+		return 1;
+	}
+	catch (const std::exception &)
+	{
+		return 0;
 	}
 }
 
@@ -353,8 +379,12 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfo(const char *fn, c
 {
 	try
 	{
-		auto file = XSFFile(fn);
-		return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
+		if (!nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
+		{
+			auto file = XSFFile(fn);
+			return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
+		}
+		return 1;
 	}
 	catch (const std::exception &)
 	{
@@ -366,8 +396,12 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 {
 	try
 	{
-		auto file = XSFFile(fn);
-		return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
+		if (!nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
+		{
+			auto file = XSFFile(fn);
+			return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
+		}
+		return 1;
 	}
 	catch (const std::exception &)
 	{
