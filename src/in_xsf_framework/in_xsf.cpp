@@ -345,7 +345,7 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 {
 	// the core can send a *.<ext> to us so for these values we
 	// don't need to hit the files & can do a default response.
-	if (eqstr(data, "type"))
+	if (eqstr(data, "type") || eqstr(data, "streammetadata"))
 	{
 		dest[0] = '0';
 		dest[1] = 0;
@@ -366,11 +366,24 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 		std::string tagToGet = data;
 		if (eqstr(data, "album"))
 			tagToGet = "game";
+		else if (eqstr(data, "publisher"))
+			tagToGet = "copyright";
 		std::string tag = "";
 		if (!file.GetTagExists(tagToGet))
 		{
 			if (eqstr(tagToGet, "replaygain_track_gain"))
 				return 1;
+			else if (eqstr(tagToGet, "formatinformation"))
+			{
+				const int fade = file.GetFadeMS(xSFConfig->GetDefaultFade()),
+						  length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + fade;
+				tag = "Length: " + stringify(((length > 0) ? (length / 1000) : 0)) + " seconds\n"
+					  "Fade: " + stringify((fade > 0) ? (fade / 1000) : 0) + " seconds\n"
+					  "Data: " + file.GetTagValue("_lib") + "\nRipped by: " +
+					  file.GetTagValue("2sfby") + "\nTagger: " + file.GetTagValue("tagger");
+				CopyToString(tag.substr(0, destlen - 1), dest);
+				return 1;
+			}
 			return 0;
 		}
 		else if (eqstr(tagToGet, "length"))
@@ -386,7 +399,7 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 	}
 }
 
-extern "C" __declspec(dllexport) int winampGetExtendedFileInfo(const char *fn, const char *data, char *dest, size_t destlen)
+/*extern "C" __declspec(dllexport) int winampGetExtendedFileInfo(const char *fn, const char *data, char *dest, size_t destlen)
 {
 	try
 	{
@@ -401,6 +414,26 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfo(const char *fn, c
 	{
 		return 0;
 	}
+}*/
+
+// return 1 if you want winamp to show it's own file info dialogue, 0 if you want to show your own (via In_Module.InfoBox)
+// if returning 1, remember to implement winampGetExtendedFileInfo("formatinformation")!
+extern "C" __declspec(dllexport) int winampUseUnifiedFileInfoDlg(const wchar_t * fn)
+{
+	return 1;
+}
+
+// should return a child window of 513x271 pixels (341x164 in msvc dlg units), or return NULL for no tab.
+// Fill in name (a buffer of namelen characters), this is the title of the tab (defaults to "Advanced").
+// filename will be valid for the life of your window. n is the tab number. This function will first be 
+// called with n == 0, then n == 1 and so on until you return NULL (so you can add as many tabs as you like).
+// The window you return will recieve WM_COMMAND, IDOK/IDCANCEL messages when the user clicks OK or Cancel.
+// when the user edits a field which is duplicated in another pane, do a SendMessage(GetParent(hwnd),WM_USER,(WPARAM)L"fieldname",(LPARAM)L"newvalue");
+// this will be broadcast to all panes (including yours) as a WM_USER.
+extern "C" __declspec(dllexport) HWND winampAddUnifiedFileInfoPane(int n, const wchar_t * filename,
+																   HWND parent, wchar_t *name, size_t namelen)
+{
+	return NULL;
 }
 
 extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *fn, const char *data, wchar_t *dest, size_t destlen)
