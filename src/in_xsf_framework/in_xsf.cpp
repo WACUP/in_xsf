@@ -493,8 +493,16 @@ extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_openW(const wcha
 {
 	try
 	{
-		auto tmpxSFPlayer = std::unique_ptr<XSFPlayer>(XSFPlayer::Create(fn));
-		return wrapperWinampGetExtendedRead_open(std::move(tmpxSFPlayer), size, bps, nch, srate);
+		// because some / all of the libraries being called
+		// are not thread-safe, it is not sensible for this
+		// to be allowed to run if there's anything playing
+		// otherwise it might play for a bit & then crashes
+		if (thread_handle == INVALID_HANDLE_VALUE)
+		{
+			auto tmpxSFPlayer = std::unique_ptr<XSFPlayer>(XSFPlayer::Create(fn));
+			return wrapperWinampGetExtendedRead_open(std::move(tmpxSFPlayer), size, bps, nch, srate);
+		}
+		return 0;
 	}
 	catch (const std::exception &)
 	{
