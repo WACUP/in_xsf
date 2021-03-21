@@ -93,6 +93,7 @@
     <ClCompile Include="XSFPlayer_GSF.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="vbam\apu\blargg_common.h" />
     <ClInclude Include="vbam\apu\blargg_config.h" />
     <ClInclude Include="vbam\apu\Blip_Buffer.h" />
@@ -112,6 +113,9 @@
     <ProjectReference Include="..\in_xsf_framework\in_xsf_framework.vcxproj">
       <Project>{9d6d2540-b3dc-462b-bbc0-5b7c32a4d581}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="in_gsf.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -95,6 +95,7 @@
     <ClCompile Include="XSFPlayer_SNSF.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="snes9x\apu\bspline_resampler.h" />
     <ClInclude Include="snes9x\apu\osculating_resampler.h" />
     <ClInclude Include="snes9x\apu\sinc_resampler.h" />
@@ -127,6 +128,9 @@
     <ProjectReference Include="..\in_xsf_framework\in_xsf_framework.vcxproj">
       <Project>{9d6d2540-b3dc-462b-bbc0-5b7c32a4d581}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="in_snsf.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

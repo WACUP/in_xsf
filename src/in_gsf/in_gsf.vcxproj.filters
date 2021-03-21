@@ -116,5 +116,13 @@
     <ClInclude Include="vbam\gba\Sound.h">
       <Filter>Header Files\vbam\gba</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="in_gsf.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -152,5 +152,13 @@
     <ClInclude Include="snes9x\apu\sinc_resampler.h">
       <Filter>Header Files\snes9x\apu</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="in_snsf.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
