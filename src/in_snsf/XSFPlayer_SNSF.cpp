@@ -45,6 +45,7 @@ public:
 const char *XSFPlayer::WinampDescription = "SNSF Decoder";
 const wchar_t *XSFPlayer::WinampExts = L"snsf;minisnsf\0SNES Sound Format files (*.snsf;*.minisnsf)\0";
 const char *XSFPlayer::ShellDescription = "SNES Sound Format";
+const char *XSFPlayer::SFby = "snsfby";
 
 extern XSFConfig *xSFConfig;
 

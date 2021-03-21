@@ -97,4 +97,5 @@ public:
 	VolumeType GetVolumeType() const;
 	PeakType GetPeakType() const;
 	const std::string &GetTitleFormat() const;
+	unsigned GetSampleRate() const { return sampleRate; }
 };

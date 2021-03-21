@@ -368,6 +368,8 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 			tagToGet = "game";
 		else if (eqstr(data, "publisher"))
 			tagToGet = "copyright";
+		else if (eqstr(data, "tool"))
+			tagToGet = XSFPlayer::SFby;
 		std::string tag = "";
 		if (!file.GetTagExists(tagToGet))
 		{
@@ -380,7 +382,23 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 				tag = "Length: " + stringify(((length > 0) ? (length / 1000) : 0)) + " seconds\n"
 					  "Fade: " + stringify((fade > 0) ? (fade / 1000) : 0) + " seconds\n"
 					  "Data: " + file.GetTagValue("_lib") + "\nRipped by: " +
-					  file.GetTagValue("2sfby") + "\nTagger: " + file.GetTagValue("tagger");
+					  file.GetTagValue(XSFPlayer::SFby) + "\nTagger: " + file.GetTagValue("tagger");
+				CopyToString(tag.substr(0, destlen - 1), dest);
+				return 1;
+			}
+			else if (eqstr(tagToGet, "bitrate"))
+			{
+				const int br = (xSFConfig->GetSampleRate() * NumChannels * BitsPerSample);
+				if (br > 0)
+				{
+					tag = stringify((br / 1000));
+					CopyToString(tag.substr(0, destlen - 1), dest);
+					return 1;
+				}
+			}
+			else if (eqstr(tagToGet, "samplerate"))
+			{
+				tag = stringify(xSFConfig->GetSampleRate());
 				CopyToString(tag.substr(0, destlen - 1), dest);
 				return 1;
 			}
