@@ -375,7 +375,7 @@ void XSFConfig::CopyConfigToMemory(XSFPlayer *xSFPlayer, bool preLoad)
 	this->CopySpecificConfigToMemory(xSFPlayer, preLoad);
 }
 
-void XSFConfig::SetHInstance(HINSTANCE hInstance)
+/*void XSFConfig::SetHInstance(HINSTANCE hInstance)
 {
 	this->configIO->SetHInstance(hInstance);
 }
@@ -383,7 +383,7 @@ void XSFConfig::SetHInstance(HINSTANCE hInstance)
 HINSTANCE XSFConfig::GetHInstance() const
 {
 	return this->configIO->GetHInstance();
-}
+}*/
 
 bool XSFConfig::GetPlayInfinitely() const
 {

@@ -54,8 +54,8 @@ public:
 	virtual std::string GetValueString(const std::string &name, const std::string &defaultValue) const = 0;
 	template<typename T> T GetValue(const std::string &name, const T &defaultValue) const { return this->GetValueInternal(name, defaultValue); }
 	std::string GetValue(const std::string &name, const std::string &defaultValue) const { return this->GetValueString(name, defaultValue); }
-	virtual void SetHInstance(HINSTANCE) { }
-	virtual HINSTANCE GetHInstance() const { return nullptr; }
+	/*virtual void SetHInstance(HINSTANCE) { }
+	virtual HINSTANCE GetHInstance() const { return nullptr; }*/
 };
 
 class XSFConfig
@@ -107,8 +107,8 @@ public:
 	void ResetConfigDefaults(HWND hwndDlg);
 	void SaveConfigDialog(HWND hwndDlg);
 	void CopyConfigToMemory(XSFPlayer *xSFPlayer, bool preLoad);
-	void SetHInstance(HINSTANCE hInstance);
-	HINSTANCE GetHInstance() const;
+	/*void SetHInstance(HINSTANCE hInstance);
+	HINSTANCE GetHInstance() const;*/
 
 	virtual void About(HWND parent) = 0;
 

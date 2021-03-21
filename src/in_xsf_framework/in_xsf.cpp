@@ -104,7 +104,7 @@ int init()
 		//		may never be needed for this instance?
 		xSFConfig->LoadConfig();
 		xSFConfig->GenerateDialogs();
-		xSFConfig->SetHInstance(inMod.hDllInstance);
+		//xSFConfig->SetHInstance(inMod.hDllInstance);
 		return IN_INIT_SUCCESS;
 	}
 	return IN_INIT_FAILURE;

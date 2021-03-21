@@ -23,14 +23,14 @@ class XSFConfigIO_Winamp : public XSFConfigIO
 protected:
 	friend class XSFConfigIO;
 	//std::wstring iniFilename;
-	HINSTANCE hInst;
+	//HINSTANCE hInst;
 
 	XSFConfigIO_Winamp();
 public:
 	void SetValueString(const std::string &name, const std::string &value);
 	std::string GetValueString(const std::string &name, const std::string &defaultValue) const;
-	void SetHInstance(HINSTANCE hInstance);
-	HINSTANCE GetHInstance() const;
+	//void SetHInstance(HINSTANCE hInstance);
+	//HINSTANCE GetHInstance() const;
 };
 
 XSFConfigIO *XSFConfigIO::Create()
@@ -82,7 +82,7 @@ std::string XSFConfigIO_Winamp::GetValueString(const std::string &name, const st
 	return ConvertFuncs::WStringToString(std::wstring(value.begin(), value.begin() + result));
 }
 
-void XSFConfigIO_Winamp::SetHInstance(HINSTANCE hInstance)
+/*void XSFConfigIO_Winamp::SetHInstance(HINSTANCE hInstance)
 {
 	this->hInst = hInstance;
 }
@@ -90,4 +90,4 @@ void XSFConfigIO_Winamp::SetHInstance(HINSTANCE hInstance)
 HINSTANCE XSFConfigIO_Winamp::GetHInstance() const
 {
 	return this->hInst;
-}
+}*/
