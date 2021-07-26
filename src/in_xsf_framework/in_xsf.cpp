@@ -479,7 +479,7 @@ static std::unique_ptr<XSFFile> extendedXSFFile;
 
 int wrapperWinampSetExtendedFileInfo(const char *data, const wchar_t *val)
 {
-	extendedXSFFile->SetTag(data, val);
+	extendedXSFFile->SetTag(data, (val ? val : L""));
 	return 1;
 }
 
