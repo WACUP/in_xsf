@@ -45,8 +45,11 @@ DWORD WINAPI playThread(void *b)
 		{
 			decode_pos_ms = seek_needed - (seek_needed % 1000);
 			seek_needed = -1;
-			auto dummyBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
-			xSFPlayer->Seek(static_cast<unsigned>(decode_pos_ms), nullptr, dummyBuffer, inMod.outMod);
+			if (xSFPlayer)
+			{
+				auto dummyBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
+				xSFPlayer->Seek(static_cast<unsigned>(decode_pos_ms), nullptr, dummyBuffer, inMod.outMod);
+			}
 		}
 
 		if (done)
@@ -63,7 +66,7 @@ DWORD WINAPI playThread(void *b)
 		{
 			auto sampleBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
 			unsigned samplesWritten = 0;
-			done = xSFPlayer->FillBuffer(sampleBuffer, samplesWritten);
+			done = (xSFPlayer ? xSFPlayer->FillBuffer(sampleBuffer, samplesWritten) : true);
 			if (samplesWritten)
 			{
 				inMod.SAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, static_cast<int>(decode_pos_ms));
@@ -89,7 +92,8 @@ void config(HWND hwndParent)
 
 void about(HWND hwndParent)
 {
-	xSFConfig->About(hwndParent);
+	if (xSFConfig)
+		xSFConfig->About(hwndParent);
 }
 
 int init()
@@ -112,8 +116,17 @@ int init()
 
 void quit()
 {
-	delete xSFPlayer;
-	delete xSFConfig;
+	if (xSFPlayer)
+	{
+		delete xSFPlayer;
+		xSFPlayer = nullptr;
+	}
+
+	if (xSFConfig)
+	{
+		delete xSFConfig;
+		xSFConfig = nullptr;
+	}
 }
 
 void getFileInfo(const in_char *file, in_char *title, int *length_in_ms)
