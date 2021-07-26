@@ -100,16 +100,16 @@ INT_PTR CALLBACK XSFConfig_GSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM
 		case WM_INITDIALOG:
 			// Low-Pass Filtering
 			if (this->lowPassFiltering)
-				SendMessageW(GetDlgItem(hwndDlg, idLowPassFiltering), BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, idLowPassFiltering, BM_SETCHECK, BST_CHECKED, 0);
 			// Mutes
-			SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Square 1"));
-			SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Square 2"));
-			SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Wave Pattern"));
-			SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Noise"));
-			SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"PCM A"));
-			SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"PCM B"));
+			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Square 1"));
+			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Square 2"));
+			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Wave Pattern"));
+			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Noise"));
+			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"PCM A"));
+			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"PCM B"));
 			for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
+				SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, this->mutes[x], x);
 			break;
 		case WM_COMMAND:
 			break;
@@ -120,17 +120,17 @@ INT_PTR CALLBACK XSFConfig_GSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM
 
 void XSFConfig_GSF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
-	SendMessageW(GetDlgItem(hwndDlg, idLowPassFiltering), BM_SETCHECK, XSFConfig_GSF::initLowPassFiltering ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(hwndDlg, idLowPassFiltering, BM_SETCHECK, XSFConfig_GSF::initLowPassFiltering ? BST_CHECKED : BST_UNCHECKED, 0);
 	auto tmpMutes = std::bitset<6>(XSFConfig_GSF::initMutes);
 	for (int x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
-		SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, tmpMutes[x], x);
+		SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_GSF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
-	this->lowPassFiltering = SendMessageW(GetDlgItem(hwndDlg, idLowPassFiltering), BM_GETCHECK, 0, 0) == BST_CHECKED;
+	this->lowPassFiltering = SendDlgItemMessage(hwndDlg, idLowPassFiltering, BM_GETCHECK, 0, 0) == BST_CHECKED;
 	for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
-		this->mutes[x] = !!SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_GETSEL, x, 0);
+		this->mutes[x] = !!SendDlgItemMessage(hwndDlg, idMutes, LB_GETSEL, x, 0);
 }
 
 void XSFConfig_GSF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)

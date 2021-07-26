@@ -60,9 +60,9 @@ const std::string &XSFConfig::CommonNameWithVersion()
 
 std::wstring XSFConfig::GetTextFromWindow(HWND hwnd)
 {
-	auto length = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0);
+	auto length = SendMessage(hwnd, WM_GETTEXTLENGTH, 0, 0);
 	auto value = std::vector<wchar_t>(length + 1);
-	length = SendMessageW(hwnd, WM_GETTEXT, length + 1, reinterpret_cast<LPARAM>(&value[0]));
+	length = SendMessage(hwnd, WM_GETTEXT, length + 1, reinterpret_cast<LPARAM>(&value[0]));
 	return std::wstring(value.begin(), value.begin() + length);
 }
 
@@ -229,29 +229,29 @@ INT_PTR CALLBACK XSFConfig::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 			break;
 		case WM_INITDIALOG:
 			if (this->playInfinitely)
-				SendMessageW(GetDlgItem(hwndDlg, idPlayInfinitely), BM_SETCHECK, BST_CHECKED, 0);
-			SetWindowTextW(GetDlgItem(hwndDlg, idDefaultLength), ConvertFuncs::MSToWString(this->defaultLength).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idDefaultFade), ConvertFuncs::MSToWString(this->defaultFade).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idSkipSilenceOnStartSec), ConvertFuncs::MSToWString(this->skipSilenceOnStartSec).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idDetectSilenceSec), ConvertFuncs::MSToWString(this->detectSilenceSec).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idVolume), ConvertFuncs::TrimDoubleString(std::to_wstring(this->volume)).c_str());
-			SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Disabled"));
-			SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Use Volume Tag"));
-			SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Track"));
-			SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Album"));
-			SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_SETCURSEL, static_cast<WPARAM>(this->volumeType), 0);
-			SendMessageW(GetDlgItem(hwndDlg, idClipProtect), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Disabled"));
-			SendMessageW(GetDlgItem(hwndDlg, idClipProtect), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Track"));
-			SendMessageW(GetDlgItem(hwndDlg, idClipProtect), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Album"));
-			SendMessageW(GetDlgItem(hwndDlg, idClipProtect), CB_SETCURSEL, static_cast<WPARAM>(this->peakType), 0);
+				SendDlgItemMessage(hwndDlg, idPlayInfinitely, BM_SETCHECK, BST_CHECKED, 0);
+			SetDlgItemText(hwndDlg, idDefaultLength, ConvertFuncs::MSToWString(this->defaultLength).c_str());
+			SetDlgItemText(hwndDlg, idDefaultFade, ConvertFuncs::MSToWString(this->defaultFade).c_str());
+			SetDlgItemText(hwndDlg, idSkipSilenceOnStartSec, ConvertFuncs::MSToWString(this->skipSilenceOnStartSec).c_str());
+			SetDlgItemText(hwndDlg, idDetectSilenceSec, ConvertFuncs::MSToWString(this->detectSilenceSec).c_str());
+			SetDlgItemText(hwndDlg, idVolume, ConvertFuncs::TrimDoubleString(std::to_wstring(this->volume)).c_str());
+			SendDlgItemMessage(hwndDlg, idReplayGain, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Disabled"));
+			SendDlgItemMessage(hwndDlg, idReplayGain, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Use Volume Tag"));
+			SendDlgItemMessage(hwndDlg, idReplayGain, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Track"));
+			SendDlgItemMessage(hwndDlg, idReplayGain, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Album"));
+			SendDlgItemMessage(hwndDlg, idReplayGain, CB_SETCURSEL, static_cast<WPARAM>(this->volumeType), 0);
+			SendDlgItemMessage(hwndDlg, idClipProtect, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Disabled"));
+			SendDlgItemMessage(hwndDlg, idClipProtect, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Track"));
+			SendDlgItemMessage(hwndDlg, idClipProtect, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Album"));
+			SendDlgItemMessage(hwndDlg, idClipProtect, CB_SETCURSEL, static_cast<WPARAM>(this->peakType), 0);
 			for (unsigned x = 0, rates = this->supportedSampleRates.size(); x < rates; ++x)
 			{
 				unsigned rate = this->supportedSampleRates[x];
-				SendMessageW(GetDlgItem(hwndDlg, idSampleRate), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(std::to_wstring(rate).c_str()));
+				SendDlgItemMessage(hwndDlg, idSampleRate, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(std::to_wstring(rate).c_str()));
 				if (this->sampleRate == rate)
-					SendMessageW(GetDlgItem(hwndDlg, idSampleRate), CB_SETCURSEL, x, 0);
+					SendDlgItemMessage(hwndDlg, idSampleRate, CB_SETCURSEL, x, 0);
 			}
-			SetWindowTextW(GetDlgItem(hwndDlg, idTitleFormat), ConvertFuncs::StringToWString(this->titleFormat).c_str());
+			SetDlgItemText(hwndDlg, idTitleFormat, ConvertFuncs::StringToWString(this->titleFormat).c_str());
 			break;
 		case WM_COMMAND:
 			switch (GET_WM_COMMAND_ID(wParam, lParam))
@@ -288,13 +288,13 @@ INT_PTR CALLBACK XSFConfig::InfoDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
 			break;
 		case WM_INITDIALOG:
 			SetWindowTextW(hwndDlg, ConvertFuncs::StringToWString(xSFFileInInfo->GetFilename()).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoTitle), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("title")).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoArtist), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("artist")).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoGame), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("game")).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoYear), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("year")).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoGenre), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("genre")).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoCopyright), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("copyright")).c_str());
-			SetWindowTextW(GetDlgItem(hwndDlg, idInfoComment), ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("comment")).c_str());
+			SetDlgItemText(hwndDlg, idInfoTitle, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("title")).c_str());
+			SetDlgItemText(hwndDlg, idInfoArtist, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("artist")).c_str());
+			SetDlgItemText(hwndDlg, idInfoGame, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("game")).c_str());
+			SetDlgItemText(hwndDlg, idInfoYear, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("year")).c_str());
+			SetDlgItemText(hwndDlg, idInfoGenre, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("genre")).c_str());
+			SetDlgItemText(hwndDlg, idInfoCopyright, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("copyright")).c_str());
+			SetDlgItemText(hwndDlg, idInfoComment, ConvertFuncs::StringToWString(xSFFileInInfo->GetTagValue("comment")).c_str());
 			break;
 		case WM_COMMAND:
 			switch (GET_WM_COMMAND_ID(wParam, lParam))
@@ -336,32 +336,32 @@ void XSFConfig::CallInfoDialog(HINSTANCE hInstance, HWND hwndParent)
 
 void XSFConfig::ResetConfigDefaults(HWND hwndDlg)
 {
-	SendMessageW(GetDlgItem(hwndDlg, idPlayInfinitely), BM_SETCHECK, XSFConfig::initPlayInfinitely ? BST_CHECKED : BST_UNCHECKED, 0);
-	SetWindowTextW(GetDlgItem(hwndDlg, idDefaultLength), ConvertFuncs::StringToWString(XSFConfig::initDefaultLength).c_str());
-	SetWindowTextW(GetDlgItem(hwndDlg, idDefaultFade), ConvertFuncs::StringToWString(XSFConfig::initDefaultFade).c_str());
-	SetWindowTextW(GetDlgItem(hwndDlg, idSkipSilenceOnStartSec), ConvertFuncs::StringToWString(XSFConfig::initSkipSilenceOnStartSec).c_str());
-	SetWindowTextW(GetDlgItem(hwndDlg, idDetectSilenceSec), ConvertFuncs::StringToWString(XSFConfig::initDetectSilenceSec).c_str());
-	SetWindowTextW(GetDlgItem(hwndDlg, idVolume), ConvertFuncs::TrimDoubleString(std::to_wstring(XSFConfig::initVolume)).c_str());
-	SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_SETCURSEL, static_cast<WPARAM>(XSFConfig::initVolumeType), 0);
-	SendMessageW(GetDlgItem(hwndDlg, idClipProtect), CB_SETCURSEL, static_cast<WPARAM>(XSFConfig::initPeakType), 0);
+	SendDlgItemMessage(hwndDlg, idPlayInfinitely, BM_SETCHECK, XSFConfig::initPlayInfinitely ? BST_CHECKED : BST_UNCHECKED, 0);
+	SetDlgItemText(hwndDlg, idDefaultLength, ConvertFuncs::StringToWString(XSFConfig::initDefaultLength).c_str());
+	SetDlgItemText(hwndDlg, idDefaultFade, ConvertFuncs::StringToWString(XSFConfig::initDefaultFade).c_str());
+	SetDlgItemText(hwndDlg, idSkipSilenceOnStartSec, ConvertFuncs::StringToWString(XSFConfig::initSkipSilenceOnStartSec).c_str());
+	SetDlgItemText(hwndDlg, idDetectSilenceSec, ConvertFuncs::StringToWString(XSFConfig::initDetectSilenceSec).c_str());
+	SetDlgItemText(hwndDlg, idVolume, ConvertFuncs::TrimDoubleString(std::to_wstring(XSFConfig::initVolume)).c_str());
+	SendDlgItemMessage(hwndDlg, idReplayGain, CB_SETCURSEL, static_cast<WPARAM>(XSFConfig::initVolumeType), 0);
+	SendDlgItemMessage(hwndDlg, idClipProtect, CB_SETCURSEL, static_cast<WPARAM>(XSFConfig::initPeakType), 0);
 	auto found = std::find(this->supportedSampleRates.begin(), this->supportedSampleRates.end(), XSFConfig::initSampleRate);
-	SendMessageW(GetDlgItem(hwndDlg, idSampleRate), CB_SETCURSEL, found - this->supportedSampleRates.begin(), 0);
-	SetWindowTextW(GetDlgItem(hwndDlg, idTitleFormat), ConvertFuncs::StringToWString(XSFConfig::initTitleFormat).c_str());
+	SendDlgItemMessage(hwndDlg, idSampleRate, CB_SETCURSEL, found - this->supportedSampleRates.begin(), 0);
+	SetDlgItemText(hwndDlg, idTitleFormat, ConvertFuncs::StringToWString(XSFConfig::initTitleFormat).c_str());
 
 	this->ResetSpecificConfigDefaults(hwndDlg);
 }
 
 void XSFConfig::SaveConfigDialog(HWND hwndDlg)
 {
-	this->playInfinitely = SendMessageW(GetDlgItem(hwndDlg, idPlayInfinitely), BM_GETCHECK, 0, 0) == BST_CHECKED;
+	this->playInfinitely = SendDlgItemMessage(hwndDlg, idPlayInfinitely, BM_GETCHECK, 0, 0) == BST_CHECKED;
 	this->defaultLength = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDefaultLength)));
 	this->defaultFade = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDefaultFade)));
 	this->skipSilenceOnStartSec = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idSkipSilenceOnStartSec)));
 	this->detectSilenceSec = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDetectSilenceSec)));
 	this->volume = convertTo<double>(this->GetTextFromWindow(GetDlgItem(hwndDlg, idVolume)));
-	this->volumeType = static_cast<VolumeType>(SendMessageW(GetDlgItem(hwndDlg, idReplayGain), CB_GETCURSEL, 0, 0));
-	this->peakType = static_cast<PeakType>(SendMessageW(GetDlgItem(hwndDlg, idClipProtect), CB_GETCURSEL, 0, 0));
-	this->sampleRate = XSFConfig::supportedSampleRates[SendMessageW(GetDlgItem(hwndDlg, idSampleRate), CB_GETCURSEL, 0, 0)];
+	this->volumeType = static_cast<VolumeType>(SendDlgItemMessage(hwndDlg, idReplayGain, CB_GETCURSEL, 0, 0));
+	this->peakType = static_cast<PeakType>(SendDlgItemMessage(hwndDlg, idClipProtect, CB_GETCURSEL, 0, 0));
+	this->sampleRate = XSFConfig::supportedSampleRates[SendDlgItemMessage(hwndDlg, idSampleRate, CB_GETCURSEL, 0, 0)];
 	this->titleFormat = ConvertFuncs::WStringToString(this->GetTextFromWindow(GetDlgItem(hwndDlg, idTitleFormat)));
 
 	this->SaveSpecificConfigDialog(hwndDlg);

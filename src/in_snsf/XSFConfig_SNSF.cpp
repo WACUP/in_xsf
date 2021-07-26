@@ -94,22 +94,22 @@ INT_PTR CALLBACK XSFConfig_SNSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		case WM_INITDIALOG:
 			// Sixteen-Bit Sound
 			/*if (this->sixteenBitSound)
-				SendMessageW(GetDlgItem(hwndDlg, idSixteenBitSound), BM_SETCHECK, BST_CHECKED, 0);*/
+				SendDlgItemMessage(hwndDlg, idSixteenBitSound, BM_SETCHECK, BST_CHECKED, 0);*/
 			// Reverse Stereo
 			if (this->reverseStereo)
-				SendMessageW(GetDlgItem(hwndDlg, idReverseStereo), BM_SETCHECK, BST_CHECKED, 0);
+				SendDlgItemMessage(hwndDlg, idReverseStereo, BM_SETCHECK, BST_CHECKED, 0);
 			// Resampler
-			SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Linear Resampler"));
-			SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Hermite Resampler"));
-			SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Bspline Resampler"));
-			SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Osculating Resampler"));
-			SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Sinc Resampler"));
-			SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_SETCURSEL, this->resampler, 0);
+			SendDlgItemMessage(hwndDlg, idResampler, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Linear Resampler"));
+			SendDlgItemMessage(hwndDlg, idResampler, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Hermite Resampler"));
+			SendDlgItemMessage(hwndDlg, idResampler, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Bspline Resampler"));
+			SendDlgItemMessage(hwndDlg, idResampler, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Osculating Resampler"));
+			SendDlgItemMessage(hwndDlg, idResampler, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Sinc Resampler"));
+			SendDlgItemMessage(hwndDlg, idResampler, CB_SETCURSEL, this->resampler, 0);
 			// Mutes
 			for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"BRRPCM " + std::to_wstring(x + 1)).c_str()));
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
+				SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"BRRPCM " + std::to_wstring(x + 1)).c_str()));
+				SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, this->mutes[x], x);
 			}
 			break;
 		case WM_COMMAND:
@@ -121,21 +121,21 @@ INT_PTR CALLBACK XSFConfig_SNSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 
 void XSFConfig_SNSF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
-	//SendMessageW(GetDlgItem(hwndDlg, idSixteenBitSound), BM_SETCHECK, XSFConfig_SNSF::initSixteenBitSound ? BST_CHECKED : BST_UNCHECKED, 0);
-	SendMessageW(GetDlgItem(hwndDlg, idReverseStereo), BM_SETCHECK, XSFConfig_SNSF::initReverseStereo ? BST_CHECKED : BST_UNCHECKED, 0);
-	SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_SETCURSEL, XSFConfig_SNSF::initResampler, 0);
+	//SendDlgItemMessage(hwndDlg, idSixteenBitSound, BM_SETCHECK, XSFConfig_SNSF::initSixteenBitSound ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(hwndDlg, idReverseStereo, BM_SETCHECK, XSFConfig_SNSF::initReverseStereo ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(hwndDlg, idResampler, CB_SETCURSEL, XSFConfig_SNSF::initResampler, 0);
 	auto tmpMutes = std::bitset<8>(XSFConfig_SNSF::initMutes);
 	for (int x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
-		SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, tmpMutes[x], x);
+		SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_SNSF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
-	//this->sixteenBitSound = SendMessageW(GetDlgItem(hwndDlg, idSixteenBitSound), BM_GETCHECK, 0, 0) == BST_CHECKED;
-	this->reverseStereo = SendMessageW(GetDlgItem(hwndDlg, idReverseStereo), BM_GETCHECK, 0, 0) == BST_CHECKED;
-	this->resampler = static_cast<unsigned>(SendMessageW(GetDlgItem(hwndDlg, idResampler), CB_GETCURSEL, 0, 0));
+	//this->sixteenBitSound = SendDlgItemMessage(hwndDlg, idSixteenBitSound, BM_GETCHECK, 0, 0) == BST_CHECKED;
+	this->reverseStereo = SendDlgItemMessage(hwndDlg, idReverseStereo, BM_GETCHECK, 0, 0) == BST_CHECKED;
+	this->resampler = static_cast<unsigned>(SendDlgItemMessage(hwndDlg, idResampler, CB_GETCURSEL, 0, 0));
 	for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
-		this->mutes[x] = !!SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_GETSEL, x, 0);
+		this->mutes[x] = !!SendDlgItemMessage(hwndDlg, idMutes, LB_GETSEL, x, 0);
 }
 
 void XSFConfig_SNSF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)

@@ -88,17 +88,17 @@ INT_PTR CALLBACK XSFConfig_NCSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 	{
 		case WM_INITDIALOG:
 			// Interpolation
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"None"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Linear"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"4-point, 3rd-order Legrange"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"6-point, 5th-order Legrange"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"16-point Sinc (Nuttall 3-term Window)"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, this->interpolation, 0);
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"None"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Linear"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"4-point, 3rd-order Legrange"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"6-point, 5th-order Legrange"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"16-point Sinc (Nuttall 3-term Window)"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_SETCURSEL, this->interpolation, 0);
 			// Mutes
 			for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + std::to_wstring(x + 1)).c_str()));
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
+				SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + std::to_wstring(x + 1)).c_str()));
+				SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, this->mutes[x], x);
 			}
 			break;
 		case WM_COMMAND:
@@ -110,17 +110,17 @@ INT_PTR CALLBACK XSFConfig_NCSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 
 void XSFConfig_NCSF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
-	SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, XSFConfig_NCSF::initInterpolation, 0);
+	SendDlgItemMessage(hwndDlg, idInterpolation, CB_SETCURSEL, XSFConfig_NCSF::initInterpolation, 0);
 	auto tmpMutes = std::bitset<16>(XSFConfig_NCSF::initMutes);
 	for (std::size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
-		SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, tmpMutes[x], x);
+		SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_NCSF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
-	this->interpolation = static_cast<unsigned>(SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_GETCURSEL, 0, 0));
+	this->interpolation = static_cast<unsigned>(SendDlgItemMessage(hwndDlg, idInterpolation, CB_GETCURSEL, 0, 0));
 	for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
-		this->mutes[x] = !!SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_GETSEL, x, 0);
+		this->mutes[x] = !!SendDlgItemMessage(hwndDlg, idMutes, LB_GETSEL, x, 0);
 }
 
 void XSFConfig_NCSF::CopySpecificConfigToMemory(XSFPlayer *xSFPlayer, bool)
@@ -157,9 +157,9 @@ INT_PTR CALLBACK XSFConfig_NCSF::SoundViewDialogProc(HWND hwndDlg, UINT uMsg, WP
 			data->hDlg = hwndDlg;
 			for (int chanId = 0; chanId < 16; ++chanId)
 			{
-				SendDlgItemMessageW(hwndDlg, IDC_SOUND0VOLBAR + chanId, PBM_SETRANGE, 0, MAKELPARAM(0, 128));
-				SendDlgItemMessageW(hwndDlg, IDC_SOUND0PANBAR + chanId, PBM_SETRANGE, 0, MAKELPARAM(0, 128));
-				SendDlgItemMessageW(hwndDlg, IDC_SOUND0MUTE + chanId, BM_SETCHECK, data->config->mutes[chanId], 0);
+				SendDlgItemMessage(hwndDlg, IDC_SOUND0VOLBAR + chanId, PBM_SETRANGE, 0, MAKELPARAM(0, 128));
+				SendDlgItemMessage(hwndDlg, IDC_SOUND0PANBAR + chanId, PBM_SETRANGE, 0, MAKELPARAM(0, 128));
+				SendDlgItemMessage(hwndDlg, IDC_SOUND0MUTE + chanId, BM_SETCHECK, data->config->mutes[chanId], 0);
 			}
 			break;
 		case WM_CLOSE:
@@ -196,7 +196,7 @@ INT_PTR CALLBACK XSFConfig_NCSF::SoundViewDialogProc(HWND hwndDlg, UINT uMsg, WP
 						break;
 					case IDC_SOUND_UNMUTE_ALL:
 						for (int chanId = 0; chanId < 16; ++chanId)
-							SendDlgItemMessageW(hwndDlg, IDC_SOUND0MUTE + chanId, BM_SETCHECK, false, 0);
+							SendDlgItemMessage(hwndDlg, IDC_SOUND0MUTE + chanId, BM_SETCHECK, false, 0);
 						data->config->mutes.reset();
 						data->config->SaveConfig();
 						data->player->SetMutes(data->config->mutes);
@@ -232,21 +232,21 @@ void XSFConfig_NCSF::CallSoundView(XSFPlayer *xSFPlayer, HINSTANCE hInstance, HW
 
 static inline void ProgressSetPosImmediate(HWND hDlg, int nIDDlgItem, int nPos)
 {
-	int nMin = SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_GETRANGE, true, reinterpret_cast<LPARAM>(nullptr));
-	int nMax = SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_GETRANGE, false, reinterpret_cast<LPARAM>(nullptr));
+	int nMin = SendDlgItemMessage(hDlg, nIDDlgItem, PBM_GETRANGE, true, reinterpret_cast<LPARAM>(nullptr));
+	int nMax = SendDlgItemMessage(hDlg, nIDDlgItem, PBM_GETRANGE, false, reinterpret_cast<LPARAM>(nullptr));
 
 	// get rid of fancy progress animation since Windows Vista
 	// http://stackoverflow.com/questions/1061715/how-do-i-make-tprogressbar-stop-lagging
 	if (nPos < nMax)
 	{
-		SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_SETPOS, nPos + 1, 0);
-		SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_SETPOS, nPos, 0); // This will set Progress backwards and give an instant update
+		SendDlgItemMessage(hDlg, nIDDlgItem, PBM_SETPOS, nPos + 1, 0);
+		SendDlgItemMessage(hDlg, nIDDlgItem, PBM_SETPOS, nPos, 0); // This will set Progress backwards and give an instant update
 	}
 	else
 	{
-		SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_SETRANGE32, nMin, nPos + 1);
-		SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_SETPOS, nPos + 1, 0);
-		SendDlgItemMessageW(hDlg, nIDDlgItem, PBM_SETRANGE32, nMin, nPos); // This will also set Progress backwards also so instant update
+		SendDlgItemMessage(hDlg, nIDDlgItem, PBM_SETRANGE32, nMin, nPos + 1);
+		SendDlgItemMessage(hDlg, nIDDlgItem, PBM_SETPOS, nPos + 1, 0);
+		SendDlgItemMessage(hDlg, nIDDlgItem, PBM_SETRANGE32, nMin, nPos); // This will also set Progress backwards also so instant update
 	}
 }
 
@@ -277,7 +277,7 @@ void XSFConfig_NCSF::RefreshSoundView()
 				buf = std::to_wstring(chn.reg.volumeMul) + L"/" + std::to_wstring(1 << datashift);
 			else
 				buf = std::to_wstring(vol);
-			SetDlgItemTextW(hDlg, IDC_SOUND0VOL + chanId, buf.c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0VOL + chanId, buf.c_str());
 
 			if (!chn.reg.panning)
 				buf = L"L";
@@ -289,15 +289,15 @@ void XSFConfig_NCSF::RefreshSoundView()
 				buf = L"L" + std::to_wstring(64 - chn.reg.panning);
 			else //if (chn.reg.panning > 64)
 				buf = L"R" + std::to_wstring(chn.reg.panning - 64);
-			SetDlgItemTextW(hDlg, IDC_SOUND0PAN + chanId, buf.c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0PAN + chanId, buf.c_str());
 
 			static const std::wstring modes[] = { L"Manual", L"Loop Infinite", L"One-Shot", L"Prohibited" };
-			SetDlgItemTextW(hDlg, IDC_SOUND0REPEATMODE + chanId, (std::to_wstring(chn.reg.repeatMode) + L" (" + modes[chn.reg.repeatMode] + L")").c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0REPEATMODE + chanId, (std::to_wstring(chn.reg.repeatMode) + L" (" + modes[chn.reg.repeatMode] + L")").c_str());
 
 			if (chn.reg.format != 3)
 			{
 				static const std::wstring formats[] = { L"PCM8", L"PCM16", L"IMA-ADPCM" };
-				SetDlgItemTextW(hDlg, IDC_SOUND0FORMAT + chanId, (std::to_wstring(chn.reg.format) + L" (" + formats[chn.reg.format] + L")").c_str());
+				SetDlgItemText(hDlg, IDC_SOUND0FORMAT + chanId, (std::to_wstring(chn.reg.format) + L" (" + formats[chn.reg.format] + L")").c_str());
 			}
 			else
 			{
@@ -309,13 +309,13 @@ void XSFConfig_NCSF::RefreshSoundView()
 				else
 					buf += L"Noise";
 				buf += L")";
-				SetDlgItemTextW(hDlg, IDC_SOUND0FORMAT + chanId, buf.c_str());
+				SetDlgItemText(hDlg, IDC_SOUND0FORMAT + chanId, buf.c_str());
 			}
 
 			static const std::wstring states[] = { L"NONE", L"START", L"ATTACK", L"DECAY", L"SUSTAIN", L"RELEASE" };
-			SetDlgItemTextW(hDlg, IDC_SOUND0STATE + chanId, states[ToIntegral(chn.state)].c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0STATE + chanId, states[ToIntegral(chn.state)].c_str());
 
-			SetDlgItemTextW(hDlg, IDC_SOUND0PNT + chanId, (L"samp #" + std::to_wstring(chn.reg.loopStart)).c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0PNT + chanId, (L"samp #" + std::to_wstring(chn.reg.loopStart)).c_str());
 
 			std::wstring tmpBuf = ConvertFuncs::StringToWString(NumToHexString(chn.reg.timer)).substr(2);
 			buf = L"$" + tmpBuf + L" (";
@@ -323,22 +323,22 @@ void XSFConfig_NCSF::RefreshSoundView()
 			if (tmpBuf.find('.') != std::wstring::npos)
 				tmpBuf = tmpBuf.substr(0, tmpBuf.find('.') + 2);
 			buf += tmpBuf + L" Hz)";
-			SetDlgItemTextW(hDlg, IDC_SOUND0TMR + chanId, buf.c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0TMR + chanId, buf.c_str());
 
-			SetDlgItemTextW(hDlg, IDC_SOUND0POSLEN + chanId, (L"samp #" + std::to_wstring(static_cast<std::uint32_t>(chn.reg.samplePosition)) + L" / " + std::to_wstring(chn.reg.totalLength)).c_str());
+			SetDlgItemText(hDlg, IDC_SOUND0POSLEN + chanId, (L"samp #" + std::to_wstring(static_cast<std::uint32_t>(chn.reg.samplePosition)) + L" / " + std::to_wstring(chn.reg.totalLength)).c_str());
 		}
 		else if (this->soundViewData->channelLastStates[chanId] != ChannelState::None)
 		{
 			ProgressSetPosImmediate(hDlg, IDC_SOUND0PANBAR + chanId, 0);
 			ProgressSetPosImmediate(hDlg, IDC_SOUND0VOLBAR + chanId, 0);
-			SetDlgItemTextW(hDlg, IDC_SOUND0VOL + chanId, L"---");
-			SetDlgItemTextW(hDlg, IDC_SOUND0PAN + chanId, L"---");
-			SetDlgItemTextW(hDlg, IDC_SOUND0REPEATMODE + chanId, L"---");
-			SetDlgItemTextW(hDlg, IDC_SOUND0FORMAT + chanId, L"---");
-			SetDlgItemTextW(hDlg, IDC_SOUND0STATE + chanId, L"NONE");
-			SetDlgItemTextW(hDlg, IDC_SOUND0PNT + chanId, L"---");
-			SetDlgItemTextW(hDlg, IDC_SOUND0TMR + chanId, L"---");
-			SetDlgItemTextW(hDlg, IDC_SOUND0POSLEN + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0VOL + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0PAN + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0REPEATMODE + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0FORMAT + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0STATE + chanId, L"NONE");
+			SetDlgItemText(hDlg, IDC_SOUND0PNT + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0TMR + chanId, L"---");
+			SetDlgItemText(hDlg, IDC_SOUND0POSLEN + chanId, L"---");
 		}
 
 		this->soundViewData->channelLastStates[chanId] = chn.state;

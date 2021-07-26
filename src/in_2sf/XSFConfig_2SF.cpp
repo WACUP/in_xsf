@@ -92,16 +92,16 @@ INT_PTR CALLBACK XSFConfig_2SF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM
 	{
 		case WM_INITDIALOG:
 			// Interpolation
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"No Interpolation"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Linear Interpolation"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Cosine Interpolation"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Sharp Interpolation"));
-			SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, this->interpolation, 0);
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"No Interpolation"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Linear Interpolation"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Cosine Interpolation"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Sharp Interpolation"));
+			SendDlgItemMessage(hwndDlg, idInterpolation, CB_SETCURSEL, this->interpolation, 0);
 			// Mutes
 			for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + std::to_wstring(x + 1)).c_str()));
-				SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, this->mutes[x], x);
+				SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"SPU " + std::to_wstring(x + 1)).c_str()));
+				SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, this->mutes[x], x);
 			}
 			break;
 		case WM_COMMAND:
@@ -113,17 +113,17 @@ INT_PTR CALLBACK XSFConfig_2SF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM
 
 void XSFConfig_2SF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
-	SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_SETCURSEL, XSFConfig_2SF::initInterpolation, 0);
+	SendDlgItemMessage(hwndDlg, idInterpolation, CB_SETCURSEL, XSFConfig_2SF::initInterpolation, 0);
 	auto tmpMutes = std::bitset<16>(XSFConfig_2SF::initMutes);
 	for (std::size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
-		SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_SETSEL, tmpMutes[x], x);
+		SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_2SF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
-	this->interpolation = static_cast<unsigned>(SendMessageW(GetDlgItem(hwndDlg, idInterpolation), CB_GETCURSEL, 0, 0));
+	this->interpolation = static_cast<unsigned>(SendDlgItemMessage(hwndDlg, idInterpolation, CB_GETCURSEL, 0, 0));
 	for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
-		this->mutes[x] = !!SendMessageW(GetDlgItem(hwndDlg, idMutes), LB_GETSEL, x, 0);
+		this->mutes[x] = !!SendDlgItemMessage(hwndDlg, idMutes, LB_GETSEL, x, 0);
 }
 
 void XSFConfig_2SF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
