@@ -85,6 +85,7 @@ DWORD WINAPI playThread(void *b)
 
 void config(HWND hwndParent)
 {
+	xSFConfig->InitConfig();
 	xSFConfig->CallConfigDialog(inMod.hDllInstance, hwndParent);
 	if (xSFPlayer)
 		xSFConfig->CopyConfigToMemory(xSFPlayer, false);
@@ -103,11 +104,10 @@ int init()
 	{
 		inMod.description = (char *)_wcsdup(ConvertFuncs::StringToWString(XSFConfig::CommonNameWithVersion()).c_str());
 
-		// TODO can this instead be delayed until it's
-		//		actually needed to minimise doing bits
-		//		may never be needed for this instance?
-		xSFConfig->LoadConfig();
-		xSFConfig->GenerateDialogs();
+		// changed from doing this to delaying until it's
+		// needed to minimise the impact on loading times
+		//xSFConfig->LoadConfig();
+		//xSFConfig->GenerateDialogs();
 		//xSFConfig->SetHInstance(inMod.hDllInstance);
 		return IN_INIT_SUCCESS;
 	}
@@ -172,6 +172,8 @@ void getFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 
 int infoBox(const in_char *file, HWND hwndParent)
 {
+	xSFConfig->InitConfig();
+
 	auto xSF = std::make_unique<XSFFile>();
 	if (!file || !*file)
 		*xSF = *xSFFile;
@@ -212,6 +214,7 @@ int play(const in_char *fn)
 {
 	try
 	{
+		xSFConfig->InitConfig();
 		auto tmpxSFPlayer = std::unique_ptr<XSFPlayer>(XSFPlayer::Create(fn));
 		xSFConfig->CopyConfigToMemory(tmpxSFPlayer.get(), true);
 		if (!tmpxSFPlayer->Load())
@@ -360,6 +363,8 @@ static eq_str eqstr;
 
 template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, T *dest, std::size_t destlen)
 {
+	xSFConfig->InitConfig();
+
 	// the core can send a *.<ext> to us so for these values we
 	// don't need to hit the files & can do a default response.
 	if (eqstr(data, "type") || eqstr(data, "streammetadata"))
@@ -500,6 +505,7 @@ int wrapperWinampSetExtendedFileInfo(const char *data, const wchar_t *val)
 {
 	try
 	{
+		xSFConfig->InitConfig();
 		if (!extendedXSFFile || extendedXSFFile->GetFilename() != fn)
 			extendedXSFFile.reset(new XSFFile(fn));
 		return wrapperWinampSetExtendedFileInfo(data, val);
@@ -514,6 +520,7 @@ extern "C" __declspec(dllexport) int winampSetExtendedFileInfoW(const wchar_t *f
 {
 	try
 	{
+		xSFConfig->InitConfig();
 		if (!extendedXSFFile || ConvertFuncs::StringToWString(extendedXSFFile->GetFilename()) != fn)
 			extendedXSFFile.reset(new XSFFile(fn));
 		return wrapperWinampSetExtendedFileInfo(data, val);
@@ -578,6 +585,7 @@ extern "C" __declspec(dllexport) std::intptr_t winampGetExtendedRead_openW(const
 		// otherwise it might play for a bit & then crashes
 		if (thread_handle == INVALID_HANDLE_VALUE)
 		{
+			xSFConfig->InitConfig();
 			auto tmpxSFPlayer = std::unique_ptr<XSFPlayer>(XSFPlayer::Create(fn));
 			return wrapperWinampGetExtendedRead_open(std::move(tmpxSFPlayer), size, bps, nch, srate);
 		}

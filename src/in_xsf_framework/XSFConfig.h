@@ -61,7 +61,7 @@ public:
 class XSFConfig
 {
 protected:
-	bool playInfinitely;
+	bool configLoaded, playInfinitely;
 	unsigned long skipSilenceOnStartSec, detectSilenceSec, defaultLength, defaultFade;
 	double volume;
 	VolumeType volumeType;
@@ -97,6 +97,7 @@ public:
 	static const std::string &CommonNameWithVersion();
 
 	virtual ~XSFConfig() { }
+	void InitConfig();
 	void LoadConfig();
 	void SaveConfig();
 	void GenerateDialogs();

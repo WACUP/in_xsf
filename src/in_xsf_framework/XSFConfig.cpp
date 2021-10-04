@@ -47,8 +47,10 @@ double XSFConfig::initVolume = 1.0;
 VolumeType XSFConfig::initVolumeType = VolumeType::ReplayGainAlbum;
 PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
 
-XSFConfig::XSFConfig() : playInfinitely(false), skipSilenceOnStartSec(0), detectSilenceSec(0), defaultLength(0), defaultFade(0), volume(0.0), volumeType(VolumeType::None), peakType(PeakType::None),
-	sampleRate(0), titleFormat(""), configDialog(), configDialogProperty(), infoDialog(), supportedSampleRates(), configIO(XSFConfigIO::Create())
+XSFConfig::XSFConfig() : configLoaded(false), playInfinitely(false), skipSilenceOnStartSec(0),
+	detectSilenceSec(0), defaultLength(0), defaultFade(0), volume(0.0), volumeType(VolumeType::None),
+	peakType(PeakType::None), sampleRate(0), titleFormat(""), configDialog(), configDialogProperty(),
+	infoDialog(), supportedSampleRates(), configIO(XSFConfigIO::Create())
 {
 }
 
@@ -64,6 +66,17 @@ std::wstring XSFConfig::GetTextFromWindow(HWND hwnd)
 	auto value = std::vector<wchar_t>(length + 1);
 	length = SendMessage(hwnd, WM_GETTEXT, length + 1, reinterpret_cast<LPARAM>(&value[0]));
 	return std::wstring(value.begin(), value.begin() + length);
+}
+
+void XSFConfig::InitConfig()
+{
+	if (!configLoaded)
+	{
+		configLoaded = true;
+
+		LoadConfig();
+		GenerateDialogs();
+	}
 }
 
 void XSFConfig::LoadConfig()
