@@ -67,7 +67,7 @@ protected:
 	VolumeType volumeType;
 	PeakType peakType;
 	unsigned sampleRate;
-	std::string titleFormat;
+	//std::string titleFormat;
 	DialogTemplate configDialog, configDialogProperty, infoDialog;
 	std::vector<unsigned> supportedSampleRates;
 	std::unique_ptr<XSFConfigIO> configIO;
@@ -92,6 +92,7 @@ public:
 	static unsigned initSampleRate;
 	static std::string commonName;
 	static std::string versionNumber;
+	static const wchar_t wacup_plugin_id[];
 	// The Create function is not defined in XSFConfig.cpp, it should be defined in your own config's source and return a pointer to your config's class.
 	static XSFConfig *Create();
 	static const std::string &CommonNameWithVersion();
@@ -121,6 +122,6 @@ public:
 	double GetVolume() const;
 	VolumeType GetVolumeType() const;
 	PeakType GetPeakType() const;
-	const std::string &GetTitleFormat() const;
+	//const std::string &GetTitleFormat() const;
 	unsigned GetSampleRate() const { return sampleRate; }
 };

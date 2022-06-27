@@ -156,7 +156,7 @@ static bool MapSNSF(XSFFile *xSF)
 				std::uint32_t offset = Get32BitsLE(&reservedSection[reservedPosition + 8]);
 				if (size > 4 && loaderwork.sram.size() > offset)
 				{
-					auto len = std::min(size - 4, loaderwork.sram.size() - offset);
+					auto len = std::min((size_t)(size - 4), loaderwork.sram.size() - offset);
 					std::copy_n(&reservedSection[reservedPosition + 12], len, &loaderwork.sram[offset]);
 				}
 			}
@@ -259,7 +259,8 @@ bool XSFPlayer_SNSF::Load()
 	if (!buffer.Init())
 		return false;
 
-	if (!Memory.LoadROMSNSF(&loaderwork.rom[0], loaderwork.rom.size(), &loaderwork.sram[0], loaderwork.sram.size()))
+	if (!Memory.LoadROMSNSF(&loaderwork.rom[0], static_cast<int32_t>(loaderwork.rom.size()),
+							&loaderwork.sram[0], static_cast<int32_t>(loaderwork.sram.size())))
 		return false;
 
 	//S9xSetPlaybackRate(Settings.SoundPlaybackRate);

@@ -609,13 +609,13 @@ void NDS_FillDefaultFirmwareConfigData(NDS_fw_config_data *fw_config)
 	fw_config->birth_day = 23;
 	fw_config->birth_month = 6;
 
-	int str_length = strlen(default_nickname);
+	int str_length = static_cast<int>(strlen(default_nickname));
 	int i;
 	for (i = 0; i < str_length; ++i)
 		fw_config->nickname[i] = default_nickname[i];
 	fw_config->nickname_len = str_length;
 
-	str_length = strlen(default_message);
+	str_length = static_cast<int>(strlen(default_message));
 	for (i = 0; i < str_length; ++i)
 		fw_config->message[i] = default_message[i];
 	fw_config->message_len = str_length;

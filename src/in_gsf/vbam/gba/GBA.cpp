@@ -296,10 +296,28 @@ static inline int CPUUpdateTicks()
 
 int CPULoadRom()
 {
+	// instead of static initialisation will instead
+	// do it all here as that reduces the impact on
+	// initial loading of this as a plug-in in wacup
 	romSize = 0x2000000;
 
-	memset(&rom[0], 0, 0x2000000);
-	memset(&workRAM[0], 0, 0x40000);
+	if (!rom)
+	{
+		rom = reinterpret_cast<uint8_t*>(calloc(romSize, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&rom[0], 0, romSize);
+	}
+
+	if (!workRAM)
+	{
+		workRAM = reinterpret_cast<uint8_t*>(calloc(0x40000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&workRAM[0], 0, 0x40000);
+	}
 
 	if (cpuIsMultiBoot)
 		mapgsf(&workRAM[0], 0x40000, romSize);
@@ -313,12 +331,59 @@ int CPULoadRom()
 		++temp;
 	}
 
-	memset(&bios[0], 0, 0x4000);
-	memset(&internalRAM[0], 0, 0x8000);
-	memset(&paletteRAM[0], 0, 0x400);
-	memset(&vram[0], 0, 0x20000);
-	memset(&oam[0], 0, 0x400);
-	memset(&ioMem[0], 0, 0x400);
+	if (!bios)
+	{
+		bios = reinterpret_cast<uint8_t*>(calloc(0x4000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&bios[0], 0, 0x4000);
+	}
+
+	if (!internalRAM)
+	{
+		internalRAM = reinterpret_cast<uint8_t*>(calloc(0x8000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&internalRAM[0], 0, 0x8000);
+	}
+
+	if (!paletteRAM)
+	{
+		paletteRAM = reinterpret_cast<uint8_t*>(calloc(0x400, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&paletteRAM[0], 0, 0x400);
+	}
+
+	if (!vram)
+	{
+		vram = reinterpret_cast<uint8_t*>(calloc(0x20000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&vram[0], 0, 0x20000);
+	} 
+
+	if (!oam)
+	{
+		oam = reinterpret_cast<uint8_t*>(calloc(0x400, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&oam[0], 0, 0x400);
+	}
+
+	if (!ioMem)
+	{
+		ioMem = reinterpret_cast<uint8_t*>(calloc(0x400, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(&ioMem[0], 0, 0x400);
+	}
 
 	return romSize;
 }

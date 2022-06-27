@@ -20,7 +20,9 @@ namespace asmjit {
 // ============================================================================
 
 void assertionFailed(const char* exp, const char* file, int line) {
+#ifdef _DEBUG
   ::fprintf(stderr, "Assertion failed: %s\n, file %s, line %d\n", exp, file, line);
+#endif
   ::abort();
 }
 

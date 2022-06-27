@@ -505,8 +505,10 @@ struct X86Context : public Context {
   //! Function variables displacement.
   int32_t _varActualDisp;
 
+#ifndef ASMJIT_DISABLE_LOGGER
   //! Temporary string builder used for logging.
   StringBuilderT<256> _stringBuilder;
+#endif
 };
 
 //! \}

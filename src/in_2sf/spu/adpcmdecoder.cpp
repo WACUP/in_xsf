@@ -63,7 +63,7 @@ int16_t AdpcmDecoder::getNextSample(uint8_t value)
 std::vector<int16_t> AdpcmDecoder::decodeFile(const std::vector<char>& data, uint32_t offset, uint32_t length)
 {
   if (!length) {
-    length = data.size() - offset;
+    length = static_cast<uint32_t>(data.size() - offset);
   }
   AdpcmDecoder adpcm(parseInt<int16_t>(data, offset), parseInt<int16_t>(data, offset + 2));
   return adpcm.decode(data, offset + 4, length - 4);
@@ -72,7 +72,7 @@ std::vector<int16_t> AdpcmDecoder::decodeFile(const std::vector<char>& data, uin
 std::vector<int16_t> AdpcmDecoder::decode(const std::vector<char>& data, uint32_t offset, uint32_t length)
 {
   if (!length) {
-    length = data.size() - offset;
+    length = static_cast<uint32_t>(data.size() - offset);
   }
   std::vector<int16_t> sample;
   sample.reserve(length << 1);

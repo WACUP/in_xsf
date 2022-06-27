@@ -3701,7 +3701,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDR_M_ROR_IMM_OFF_POSTIND(uint32_t i)
 // -----------------------------------------------------------------------------
 TEMPLATE static uint32_t FASTCALL OP_LDREX(uint32_t i)
 {
+#ifdef _DEBUG
 	fprintf(stderr, "LDREX\n");
+#endif
 	uint32_t adr = cpu->R[REG_POS(i, 16)];
 	cpu->R[REG_POS(i, 12)] = ROR(READ32(cpu->mem_if->data, adr), 8 * (adr & 3));
 	return MMU_aluMemAccessCycles<PROCNUM,32, MMU_AD_READ>(3, adr);
@@ -4288,7 +4290,9 @@ TEMPLATE static uint32_t FASTCALL OP_STR_M_ROR_IMM_OFF_POSTIND(uint32_t i)
 // -----------------------------------------------------------------------------
 TEMPLATE static uint32_t FASTCALL OP_STREX(uint32_t i)
 {
+#ifdef _DEBUG
 	fprintf(stderr, "STREX\n");
+#endif
 	uint32_t adr = cpu->R[REG_POS(i, 16)];
 	WRITE32(cpu->mem_if->data, adr, cpu->R[REG_POS(i, 0)]);
 	cpu->R[REG_POS(i, 12)] = 0;
@@ -5012,7 +5016,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMIA2(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5064,7 +5070,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMIB2(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5116,7 +5124,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMDA2(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5174,7 +5184,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMDB2(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5233,7 +5245,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMIA2_W(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5289,7 +5303,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMIB2_W(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5348,7 +5364,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMDA2_W(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5359,7 +5377,11 @@ TEMPLATE static uint32_t FASTCALL OP_LDMDA2_W(uint32_t i)
 	if (BIT15(i))
 	{
 		if (BIT_N(i, REG_POS(i, 16)))
+		{
+#ifdef _DEBUG
 			fprintf(stderr, "error1_1\n");
+#endif
+		}
 		uint32_t tmp = READ32(cpu->mem_if->data, start);
 		registres[15] = tmp & (0XFFFFFFFC | (BIT0(tmp) << 1));
 		c += MMU_memAccessCycles<PROCNUM, 32, MMU_AD_READ>(start);
@@ -5409,7 +5431,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMDB2_W(uint32_t i)
 	{
 		if (cpu->CPSR.bits.mode == USR || cpu->CPSR.bits.mode == SYS)
 		{
+#ifdef _DEBUG
 			fprintf(stderr, "ERROR1\n");
+#endif
 			return 1;
 		}
 		oldmode = armcpu_switchMode(cpu, SYS);
@@ -5420,7 +5444,11 @@ TEMPLATE static uint32_t FASTCALL OP_LDMDB2_W(uint32_t i)
 	if (BIT15(i))
 	{
 		if (BIT_N(i, REG_POS(i, 16)))
+		{
+#ifdef _DEBUG
 			fprintf(stderr, "error1_2\n");
+#endif
+		}
 		start -= 4;
 		uint32_t tmp = READ32(cpu->mem_if->data, start);
 		c += MMU_memAccessCycles<PROCNUM, 32, MMU_AD_READ>(start);
@@ -6113,7 +6141,9 @@ TEMPLATE static uint32_t FASTCALL OP_BKPT(uint32_t /*i*/)
 	return 4;
 	*/
 
+#ifdef _DEBUG
 	fprintf(stderr, "ARM OP_BKPT triggered\n");
+#endif
 	Status_Reg tmp = cpu->CPSR;
 	armcpu_switchMode(cpu, ABT); // enter abt mode
 	cpu->R[14] = cpu->instruct_adr + 4;

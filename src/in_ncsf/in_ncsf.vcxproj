@@ -123,6 +123,9 @@
   <ItemGroup>
     <ResourceCompile Include="in_ncsf.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="in_ncsf.def" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

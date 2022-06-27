@@ -21,6 +21,8 @@
 #include "convert.h"
 #include <winamp/in2.h>
 #include <winamp/wa_ipc.h>
+#define WA_UTILS_SIMPLE
+#include <loader/loader/utils.h>
 
 extern In_Module inMod;
 static const XSFFile *xSFFile = nullptr;
@@ -57,7 +59,7 @@ DWORD WINAPI playThread(void *b)
 			inMod.outMod->CanWrite();
 			if (!inMod.outMod->IsPlaying())
 			{
-				PostMessage(inMod.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
+				PostEOF();
 				return 0;
 			}
 			Sleep(10);
@@ -85,10 +87,16 @@ DWORD WINAPI playThread(void *b)
 
 void config(HWND hwndParent)
 {
+	if (xSFConfig)
+	{
 	xSFConfig->InitConfig();
 	xSFConfig->CallConfigDialog(inMod.hDllInstance, hwndParent);
+
 	if (xSFPlayer)
+		{
 		xSFConfig->CopyConfigToMemory(xSFPlayer, false);
+}
+	}
 }
 
 void about(HWND hwndParent)
@@ -155,7 +163,7 @@ void getFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 	if (xSF)
 	{
 		if (title)
-			CopyToString(xSF->GetFormattedTitle(xSFConfig->GetTitleFormat()).substr(0, GETFILEINFO_TITLE_LENGTH - 1), title);
+			CopyToString(xSF->GetFormattedTitle(XSFConfig::initTitleFormat/*/xSFConfig->GetTitleFormat()/**/).substr(0, GETFILEINFO_TITLE_LENGTH - 1), title);
 		if (length_in_ms)
 			*length_in_ms = xSF->GetLengthMS(xSFConfig->GetDefaultLength()) + xSF->GetFadeMS(xSFConfig->GetDefaultFade());
 		if (toFree)
@@ -195,7 +203,7 @@ int infoBox(const in_char *file, HWND hwndParent)
 	auto tags = xSF->GetAllTags();
 	auto keys = tags.GetKeys();
 	std::wstring info;
-	for (unsigned x = 0, numTags = keys.size(); x < numTags; ++x)
+	for (size_t x = 0, numTags = keys.size(); x < numTags; ++x)
 	{
 		if (x)
 			info += L"\n";
@@ -205,10 +213,10 @@ int infoBox(const in_char *file, HWND hwndParent)
 	return INFOBOX_EDITED;
 }
 
-int isOurFile(const in_char *)
+/*int isOurFile(const in_char *)
 {
 	return 0;
-}
+}*/
 
 int play(const in_char *fn)
 {
@@ -333,7 +341,7 @@ In_Module inMod =
 	quit,
 	getFileInfo,
 	infoBox,
-	isOurFile,
+	0/*isOurFile*/,
 	play,
 	pause,
 	unPause,
@@ -350,6 +358,8 @@ In_Module inMod =
 	nullptr, /* Filled by Winamp */
 	nullptr, /* Filled by Winamp */
 	NULL,	// api_service
+	INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | INPUT_USES_UNIFIED_ALT3 |
+	INPUT_HAS_FORMAT_CONVERSION_UNICODE | INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE,
 	GetFileExtensions,	// loading optimisation
 	IN_INIT_WACUP_END_STRUCT
 };
@@ -357,6 +367,20 @@ In_Module inMod =
 extern "C" __declspec(dllexport) In_Module *winampGetInModule2()
 {
 	return &inMod;
+}
+
+extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, HWND hwndDlg, int param)
+{
+	// TODO
+	// prompt to remove our settings with default as no (just incase)
+	/*if (MessageBox(hwndDlg, WASABI_API_LNGSTRINGW(IDS_PLUGIN_UNINSTALL),
+				   (LPCWSTR)plugin.description, MB_YESNO | MB_DEFBUTTON2) == IDYES)
+	{
+		REMOVE_INI_SECTION_W(app_nameW, 0);
+	}*/
+
+	// as we're doing too much in subclasses, etc we cannot allow for on-the-fly removal so need to do a normal reboot
+	return IN_PLUGIN_UNINSTALL_REBOOT;
 }
 
 static eq_str eqstr;
@@ -372,6 +396,13 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 		dest[0] = '0';
 		dest[1] = 0;
 		return 1;
+	}
+	else if (!_stricmp(data, "streamgenre") ||
+			 !_stricmp(data, "streamtype") ||
+			 !_stricmp(data, "streamurl") ||
+			 !_stricmp(data, "streamname"))
+	{
+		return 0;
 	}
 	else if (eqstr(data, "family"))
 	{

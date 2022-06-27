@@ -1,0 +1,13 @@
+LIBRARY	"in_snsf"
+EXPORTS
+winampGetInModule2 @1
+winampGetExtendedFileInfoW @2
+winampSetExtendedFileInfoW @3
+winampWriteExtendedFileInfo @4
+winampAddUnifiedFileInfoPane @5
+winampUseUnifiedFileInfoDlg @6
+winampGetExtendedRead_close @7
+winampGetExtendedRead_getData @8
+winampGetExtendedRead_openW @9
+winampGetExtendedRead_setTime @10
+winampUninstallPlugin @11

@@ -298,35 +298,35 @@ struct nds_dscard
 };
 
 #define DUP2(x)  x, x
-#define DUP4(x)  x, x, x, x
+//#define DUP4(x)  x, x, x, x
 #define DUP8(x)  x, x, x, x,  x, x, x, x
 #define DUP16(x) x, x, x, x,  x, x, x, x,  x, x, x, x,  x, x, x, x
 
 struct MMU_struct
 {
 	//ARM9 mem
-	uint8_t ARM9_ITCM[0x8000];
-	uint8_t ARM9_DTCM[0x4000];
+	uint8_t *ARM9_ITCM/*[0x8000]*/;
+	uint8_t *ARM9_DTCM/*[0x4000]*/;
 
 	//u8 MAIN_MEM[4*1024*1024]; // expanded from 4MB to 8MB to support debug consoles
 	//u8 MAIN_MEM[8*1024*1024]; // expanded from 8MB to 16MB to support dsi
-	uint8_t MAIN_MEM[16*1024*1024]; // expanded from 8MB to 16MB to support dsi
-	uint8_t ARM9_REG[0x1000000];
-	uint8_t ARM9_BIOS[0x8000];
-	uint8_t ARM9_VMEM[0x800];
+	uint8_t *MAIN_MEM/*[0x1000000]*/; // expanded from 8MB to 16MB to support dsi
+	uint8_t *ARM9_REG/*[0x1000000]*/;
+	uint8_t *ARM9_BIOS/*[0x8000]*/;
+	uint8_t *ARM9_VMEM/*[0x800]*/;
 
 #include "PACKED.h"
 	struct
 	{
-		uint8_t ARM9_LCD[0xA4000];
+		uint8_t *ARM9_LCD/*[0xA4000]*/;
 		// an extra 128KB for blank memory, directly after arm9_lcd, so that
 		// we can easily map things to the end of arm9_lcd to represent
 		// an unmapped state
-		uint8_t blank_memory[0x100000 - 0xA4000];
+		uint8_t *blank_memory/*[0x100000 - 0xA4000]*/;
 	};
 #include "PACKED_END.h"
 
-	uint8_t ARM9_OAM[0x800];
+	uint8_t *ARM9_OAM/*[0x800]*/;
 
 	uint8_t *ExtPal[2][4];
 	uint8_t *ObjExtPal[2][2];
@@ -338,10 +338,10 @@ struct MMU_struct
 	} texInfo;
 
 	// ARM7 mem
-	uint8_t ARM7_BIOS[0x4000];
-	uint8_t ARM7_ERAM[0x10000]; // 64KB of exclusive WRAM
-	uint8_t ARM7_REG[0x10000];
-	uint8_t ARM7_WIRAM[0x10000]; // WIFI ram
+	uint8_t *ARM7_BIOS/*[0x4000]*/;
+	uint8_t *ARM7_ERAM/*[0x10000]*/; // 64KB of exclusive WRAM
+	uint8_t *ARM7_REG/*[0x10000]*/;
+	uint8_t *ARM7_WIRAM/*[0x10000]*/; // WIFI ram
 
 	// VRAM mapping
 	uint8_t VRAM_MAP[4][32];
@@ -349,7 +349,7 @@ struct MMU_struct
 	uint8_t LCDCenable[10];
 
 	// 32KB of shared WRAM - can be switched between ARM7 & ARM9 in two blocks
-	uint8_t SWIRAM[0x8000];
+	uint8_t *SWIRAM/*[0x8000]*/;
 
 	// Card rom & ram
 	uint8_t * CART_ROM;
@@ -449,7 +449,7 @@ struct MMU_struct_new
 };
 
 extern MMU_struct MMU;
-extern MMU_struct_new MMU_new;
+extern MMU_struct_new *MMU_new;
 
 void MMU_Init();
 void MMU_DeInit();

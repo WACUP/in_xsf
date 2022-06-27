@@ -88,7 +88,7 @@ protected:
 			this->vec->resize(amt);
 	}
 public:
-	EMUFILE_MEMORY(std::vector<uint8_t> *underlying) : vec(underlying), ownvec(false), pos(0), len(underlying->size()) { }
+	EMUFILE_MEMORY(std::vector<uint8_t> *underlying) : vec(underlying), ownvec(false), pos(0), len(static_cast<int32_t>(underlying->size())) { }
 	EMUFILE_MEMORY(uint32_t preallocate) : vec(new std::vector<uint8_t>()), ownvec(true), pos(0), len(0)
 	{
 		this->vec->resize(preallocate);
@@ -132,7 +132,7 @@ public:
 				this->pos += offset;
 				break;
 			case SEEK_END:
-				this->pos = this->size() + offset;
+				this->pos = static_cast<int32_t>(this->size() + offset);
 				break;
 			default:
 				assert(false);
@@ -199,9 +199,9 @@ public:
 
 	virtual size_t size()
 	{
-		int oldpos = this->ftell();
+		const int oldpos = static_cast<int>(this->ftell());
 		this->fseek(0, SEEK_END);
-		int len = this->ftell();
+		const size_t len = this->ftell();
 		this->fseek(oldpos, SEEK_SET);
 		return len;
 	}

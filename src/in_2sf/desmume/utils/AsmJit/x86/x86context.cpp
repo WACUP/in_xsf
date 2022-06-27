@@ -5401,9 +5401,9 @@ _Done:
 template<int LoggingEnabled>
 static ASMJIT_INLINE Error X86Context_serialize(X86Context* self, X86Assembler* assembler, Node* start, Node* stop) {
   Node* node_ = start;
+#ifndef ASMJIT_DISABLE_LOGGER
   StringBuilder& sb = self->_stringBuilder;
 
-#ifndef ASMJIT_DISABLE_LOGGER
   uint32_t vdCount;
   uint32_t annotationLength;
 

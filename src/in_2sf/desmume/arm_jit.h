@@ -35,15 +35,15 @@ template<int PROCNUM> uint32_t arm_jit_compile();
 struct JIT_struct
 {
 	// only include the memory types that code can execute from
-	uintptr_t MAIN_MEM[0x800000];
-	uintptr_t SWIRAM[0x4000];
-	uintptr_t ARM9_ITCM[0x4000];
-	uintptr_t ARM9_LCDC[0x52000];
-	uintptr_t ARM9_BIOS[0x4000];
-	uintptr_t ARM7_BIOS[0x2000];
-	uintptr_t ARM7_ERAM[0x8000];
-	uintptr_t ARM7_WIRAM[0x8000];
-	uintptr_t ARM7_WRAM[0x20000];
+	uintptr_t *MAIN_MEM/*[0x800000]*/;
+	uintptr_t *SWIRAM/*[0x4000]*/;
+	uintptr_t *ARM9_ITCM/*[0x4000]*/;
+	uintptr_t *ARM9_LCDC/*[0x52000]*/;
+	uintptr_t *ARM9_BIOS/*[0x4000]*/;
+	uintptr_t *ARM7_BIOS/*[0x2000]*/;
+	uintptr_t *ARM7_ERAM/*[0x8000]*/;
+	uintptr_t *ARM7_WIRAM/*[0x8000]*/;
+	uintptr_t *ARM7_WRAM/*[0x20000]*/;
 
 	static uintptr_t *JIT_MEM[2][0x4000];
 };

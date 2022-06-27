@@ -734,7 +734,7 @@ void Channel::IncrementSample()
 					std::size_t samplesLeft = SINC_WIDTH + 1 - this->reg.totalLength;
 					while (samplesLeft)
 					{
-						std::size_t samplesToPush = std::min(samplesLeft, this->reg.length);
+						std::size_t samplesToPush = std::min(samplesLeft, static_cast<size_t>(this->reg.length));
 						this->ringBuffer.PushSamples(&this->reg.source->dataptr[this->reg.loopStart], samplesToPush);
 						samplesLeft -= samplesToPush;
 					}

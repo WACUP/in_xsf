@@ -130,7 +130,7 @@ std::uint16_t DialogTemplate::DialogGroup::GetControlCount() const
 
 std::vector<std::uint8_t> DialogTemplate::DialogGroup::GenerateControlTemplate() const
 {
-	auto data = std::vector<std::uint8_t>(getNextMultipleOf4(24 + sizeof(wchar_t) * (this->groupName.length() + 1)), 0);
+	auto data = std::vector<std::uint8_t>(getNextMultipleOf4((uint32_t)(24 + sizeof(wchar_t) * (this->groupName.length() + 1))), 0);
 
 	*reinterpret_cast<std::uint32_t *>(&data[0]) = WS_CHILD | WS_VISIBLE | BS_GROUPBOX | this->style;
 	*reinterpret_cast<std::uint32_t *>(&data[4]) = this->exstyle;
@@ -171,7 +171,7 @@ std::vector<std::uint8_t> DialogTemplate::DialogControlWithoutLabel::GenerateCon
 
 std::vector<std::uint8_t> DialogTemplate::DialogControlWithLabel::GenerateControlTemplate() const
 {
-	auto data = std::vector<std::uint8_t>(getNextMultipleOf4(24 + sizeof(wchar_t) * (this->label.length() + 1)), 0);
+	auto data = std::vector<std::uint8_t>(getNextMultipleOf4((uint32_t)(24 + sizeof(wchar_t) * (this->label.length() + 1))), 0);
 
 	*reinterpret_cast<std::uint32_t *>(&data[0]) = WS_CHILD | WS_VISIBLE | this->style;
 	*reinterpret_cast<std::uint32_t *>(&data[4]) = this->exstyle;
@@ -346,7 +346,7 @@ const DLGTEMPLATE *DialogTemplate::GenerateTemplate()
 {
 	this->templateData.clear();
 	std::uint16_t controlCount = this->GetTotalControlCount();
-	this->templateData.resize(getNextMultipleOf4(24 + sizeof(wchar_t) * (this->title.length() + 1 + (this->fontName.empty() ? 0 : this->fontName.length() + 1))), 0);
+	this->templateData.resize(getNextMultipleOf4((uint32_t)(24 + sizeof(wchar_t) * (this->title.length() + 1 + (this->fontName.empty() ? 0 : this->fontName.length() + 1)))), 0);
 
 	*reinterpret_cast<std::uint32_t *>(&this->templateData[0]) = this->style | (this->fontName.empty() ? 0 : DS_SETFONT);
 	*reinterpret_cast<std::uint32_t *>(&this->templateData[4]) = this->exstyle;

@@ -47,7 +47,7 @@ public:
 
 unsigned XSFConfig::initSampleRate = 44100;
 std::string XSFConfig::commonName = "GSF Decoder";
-std::string XSFConfig::versionNumber = "0.9e";
+std::string XSFConfig::versionNumber = "1.0.3";
 bool XSFConfig_GSF::initLowPassFiltering = true;
 std::string XSFConfig_GSF::initMutes = "000000";
 
@@ -108,7 +108,7 @@ INT_PTR CALLBACK XSFConfig_GSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM
 			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Noise"));
 			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"PCM A"));
 			SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"PCM B"));
-			for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+			for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 				SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, this->mutes[x], x);
 			break;
 		case WM_COMMAND:
@@ -122,14 +122,14 @@ void XSFConfig_GSF::ResetSpecificConfigDefaults(HWND hwndDlg)
 {
 	SendDlgItemMessage(hwndDlg, idLowPassFiltering, BM_SETCHECK, XSFConfig_GSF::initLowPassFiltering ? BST_CHECKED : BST_UNCHECKED, 0);
 	auto tmpMutes = std::bitset<6>(XSFConfig_GSF::initMutes);
-	for (int x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
+	for (size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
 		SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, tmpMutes[x], x);
 }
 
 void XSFConfig_GSF::SaveSpecificConfigDialog(HWND hwndDlg)
 {
 	this->lowPassFiltering = SendDlgItemMessage(hwndDlg, idLowPassFiltering, BM_GETCHECK, 0, 0) == BST_CHECKED;
-	for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+	for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 		this->mutes[x] = !!SendDlgItemMessage(hwndDlg, idMutes, LB_GETSEL, x, 0);
 }
 

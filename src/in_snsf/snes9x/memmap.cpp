@@ -539,7 +539,7 @@ char *CMemory::Safe(const char *s)
 		return nullptr;
 	}
 
-	int len = strlen(s);
+	int len = (int)strlen(s);
 	if (!safe || len + 1 > safe_len)
 	{
 		safe_len = len + 1;

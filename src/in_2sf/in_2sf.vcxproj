@@ -198,6 +198,7 @@
   <ItemGroup>
     <None Include="desmume\instruction_tabdef.inc" />
     <None Include="desmume\thumb_tabdef.inc" />
+    <None Include="in_2sf.def" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\in_xsf_framework\in_xsf_framework.vcxproj">

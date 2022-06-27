@@ -27,7 +27,7 @@ THE SOFTWARE.
 size_t EMUFILE_MEMORY::_fread(void *ptr, size_t bytes)
 {
 	uint32_t remain = this->len - this->pos;
-	uint32_t todo = std::min<uint32_t>(remain, bytes);
+	uint32_t todo = std::min<uint32_t>(remain, static_cast<uint32_t>(bytes));
 	if (!len)
 	{
 		this->failbit = true;

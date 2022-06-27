@@ -15,14 +15,14 @@ bool cpuIsMultiBoot = false;
 int layerSettings = 0xff00;
 int layerEnable = 0xff00;
 
-uint8_t bios[0x4000];
-uint8_t rom[0x2000000];
-uint8_t internalRAM[0x8000];
-uint8_t workRAM[0x40000];
-uint8_t paletteRAM[0x400];
-uint8_t vram[0x20000];
-uint8_t oam[0x400];
-uint8_t ioMem[0x400];
+uint8_t *bios = 0x00/*[0x4000]*/;
+uint8_t *rom = 0x00/*[0x2000000]*/;
+uint8_t *internalRAM = 0x00/*[0x8000]*/;
+uint8_t *workRAM = 0x00/*[0x40000]*/;
+uint8_t *paletteRAM = 0x00/*[0x400]*/;
+uint8_t *vram = 0x00/*[0x20000]*/;
+uint8_t *oam = 0x00/*[0x400]*/;
+uint8_t *ioMem = 0x00/*[0x400]*/;
 
 uint16_t DISPCNT = 0x0080;
 uint16_t DISPSTAT = 0x0000;

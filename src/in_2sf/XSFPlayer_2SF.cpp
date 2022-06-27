@@ -224,8 +224,9 @@ bool XSFPlayer_2SF::Load()
 	MMU_unsetRom();
 	if (!this->rom.empty())
 	{
-		NDS_SetROM(&this->rom[0], this->rom.size() - 1);
-		gameInfo.loadData(reinterpret_cast<char *>(&this->rom[0]), this->rom.size() - 1);
+		const uint32_t size = static_cast<uint32_t>(this->rom.size() - 1);
+		NDS_SetROM(&this->rom[0], size);
+		gameInfo.loadData(reinterpret_cast<char *>(&this->rom[0]), size);
 	}
 
 	CommonSettings.use_jit = true;

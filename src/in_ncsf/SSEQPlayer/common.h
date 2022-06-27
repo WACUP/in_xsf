@@ -58,7 +58,7 @@ struct PseudoFile
 	void ReadLE(std::vector<std::uint8_t> &arr)
 	{
 		std::copy_n(&(*this->data)[this->pos], arr.size(), &arr[0]);
-		this->pos += arr.size();
+		this->pos += static_cast<uint32_t>(arr.size());
 	}
 
 	std::string ReadNullTerminatedString()

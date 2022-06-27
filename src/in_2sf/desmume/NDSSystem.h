@@ -299,7 +299,7 @@ extern struct TCommonSettings
       } else {
         soloEnv[9] = 'A' + (i - 10);
       }
-      char* soloVal = getenv(soloEnv);
+      char* soloVal = 0/*/getenv(soloEnv)/**/;
       if (soloVal && soloVal[0] == '1') {
         solo = true;
         this->spu_muteChannels[i] = false;
@@ -314,7 +314,7 @@ extern struct TCommonSettings
         } else {
           muteEnv[9] = 'A' + (i - 10);
         }
-        char* muteVal = getenv(muteEnv);
+        char* muteVal = 0/*/getenv(muteEnv)/**/;
         this->spu_muteChannels[i] = muteVal && muteVal[0] == '1';
       }
     }

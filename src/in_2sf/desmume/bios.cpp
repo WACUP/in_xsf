@@ -984,7 +984,9 @@ TEMPLATE static uint32_t getSineTab()
 	// ds returns garbage according to gbatek, but we must protect ourselves
 	if (cpu->R[0] >= ARRAY_SIZE(getsinetbl))
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "Invalid SWI getSineTab: %08X\n", cpu->R[0]);
+#endif
 		return 1;
 	}
 
@@ -997,7 +999,9 @@ TEMPLATE static uint32_t getPitchTab()
 	// ds returns garbage according to gbatek, but we must protect ourselves
 	if (cpu->R[0] >= ARRAY_SIZE(getpitchtbl))
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "Invalid SWI getPitchTab: %08X\n", cpu->R[0]);
+#endif
 		return 1;
 	}
 
@@ -1010,7 +1014,9 @@ TEMPLATE static uint32_t getVolumeTab()
 	// ds returns garbage according to gbatek, but we must protect ourselves
 	if (cpu->R[0] >= ARRAY_SIZE(getvoltbl))
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "Invalid SWI getVolumeTab: %08X\n", cpu->R[0]);
+#endif
 		return 1;
 	}
 

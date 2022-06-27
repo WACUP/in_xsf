@@ -17,14 +17,14 @@ extern bool cpuIsMultiBoot;
 extern int layerSettings;
 extern int layerEnable;
 
-extern uint8_t bios[0x4000];
-extern uint8_t rom[0x2000000];
-extern uint8_t internalRAM[0x8000];
-extern uint8_t workRAM[0x40000];
-extern uint8_t paletteRAM[0x400];
-extern uint8_t vram[0x20000];
-extern uint8_t oam[0x400];
-extern uint8_t ioMem[0x400];
+extern uint8_t *bios/*[0x4000]*/;
+extern uint8_t *rom/*[0x2000000]*/;
+extern uint8_t *internalRAM/*[0x8000]*/;
+extern uint8_t *workRAM/*[0x40000]*/;
+extern uint8_t *paletteRAM/*[0x400]*/;
+extern uint8_t *vram/*[0x20000]*/;
+extern uint8_t *oam/*[0x400]*/;
+extern uint8_t *ioMem/*[0x400]*/;
 
 extern uint16_t DISPCNT;
 extern uint16_t DISPSTAT;

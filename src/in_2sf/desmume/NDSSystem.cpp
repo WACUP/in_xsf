@@ -43,8 +43,10 @@ int NDS_Init()
 	MMU_Init();
 	nds.VCount = 0;
 
+#ifdef _DEBUG
 	// got to print this somewhere..
 	fprintf(stderr, "%s\n", EMU_DESMUME_NAME_AND_VERSION());
+#endif
 
 	armcpu_new(&NDS_ARM7, 1);
 	armcpu_new(&NDS_ARM9, 0);
@@ -286,7 +288,7 @@ struct TSequenceItem_divider : public TSequenceItem
 
 	void exec()
 	{
-		MMU_new.div.busy = 0;
+		MMU_new->div.busy = 0;
 #ifdef _WIN64
 		T1WriteQuad(MMU.MMU_MEM[ARMCPU_ARM9][0x40], 0x2A0, MMU.divResult);
 		T1WriteQuad(MMU.MMU_MEM[ARMCPU_ARM9][0x40], 0x2A8, MMU.divMod);
@@ -319,7 +321,7 @@ struct TSequenceItem_sqrtunit : public TSequenceItem
 
 	void exec()
 	{
-		MMU_new.sqrt.busy = 0;
+		MMU_new->sqrt.busy = 0;
 		T1WriteLong(MMU.MMU_MEM[ARMCPU_ARM9][0x40], 0x2B4, MMU.sqrtResult);
 		MMU.sqrtRunning = false;
 	}
@@ -398,14 +400,14 @@ void Sequencer::init()
 	this->dispcnt.param = ESI_DISPCNT_HStart;
 	this->dispcnt.timestamp = 0;
 
-	this->dma_0_0.controller = &MMU_new.dma[0][0];
-	this->dma_0_1.controller = &MMU_new.dma[0][1];
-	this->dma_0_2.controller = &MMU_new.dma[0][2];
-	this->dma_0_3.controller = &MMU_new.dma[0][3];
-	this->dma_1_0.controller = &MMU_new.dma[1][0];
-	this->dma_1_1.controller = &MMU_new.dma[1][1];
-	this->dma_1_2.controller = &MMU_new.dma[1][2];
-	this->dma_1_3.controller = &MMU_new.dma[1][3];
+	this->dma_0_0.controller = &MMU_new->dma[0][0];
+	this->dma_0_1.controller = &MMU_new->dma[0][1];
+	this->dma_0_2.controller = &MMU_new->dma[0][2];
+	this->dma_0_3.controller = &MMU_new->dma[0][3];
+	this->dma_1_0.controller = &MMU_new->dma[1][0];
+	this->dma_1_1.controller = &MMU_new->dma[1][1];
+	this->dma_1_2.controller = &MMU_new->dma[1][2];
+	this->dma_1_3.controller = &MMU_new->dma[1][3];
 }
 
 static void execHardware_hblank()
@@ -847,7 +849,7 @@ void execHardware_interrupts()
 static void PrepareBiosARM7()
 {
 	NDS_ARM7.BIOS_loaded = false;
-	memset(MMU.ARM7_BIOS, 0, sizeof(MMU.ARM7_BIOS));
+	//memset(MMU.ARM7_BIOS, 0, sizeof(MMU.ARM7_BIOS));
 	if (CommonSettings.UseExtBIOS)
 	{
 		// read arm7 bios from inputfile and flag it if it succeeds
@@ -897,7 +899,7 @@ static void PrepareBiosARM7()
 
 static void PrepareBiosARM9()
 {
-	memset(MMU.ARM9_BIOS, 0, sizeof(MMU.ARM9_BIOS));
+	//memset(MMU.ARM9_BIOS, 0, sizeof(MMU.ARM9_BIOS));
 	NDS_ARM9.BIOS_loaded = false;
 	if (CommonSettings.UseExtBIOS)
 	{

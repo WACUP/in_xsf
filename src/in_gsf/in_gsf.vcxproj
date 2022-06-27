@@ -117,6 +117,9 @@
   <ItemGroup>
     <ResourceCompile Include="in_gsf.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="in_gsf.def" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -928,7 +928,11 @@ TEMPLATE static uint32_t FASTCALL OP_STMIA_THUMB(uint32_t i)
 	// ------	* If <Rn> is the lowest-numbered register specified in <registers>, the original value of <Rn> is stored.
 	// ------	* Otherwise, the stored value of <Rn> is UNPREDICTABLE.
 	if (BIT_N(i, REG_NUM(i, 8)))
+	{
+#ifdef _DEBUG
 		fprintf(stderr, "STMIA with Rb in Rlist\n");
+#endif
+	}
 
 	for (uint32_t j = 0; j < 8; ++j)
 		if (BIT_N(i, j))
@@ -939,8 +943,10 @@ TEMPLATE static uint32_t FASTCALL OP_STMIA_THUMB(uint32_t i)
 			erList = false; //Register List isnt empty
 		}
 
+#ifdef _DEBUG
 	if (erList)
 		 fprintf(stderr, "STMIA with Empty Rlist\n");
+#endif
 
 	cpu->R[REG_NUM(i, 8)] = adr;
 	return MMU_aluMemCycles<PROCNUM>(2, c);
@@ -965,8 +971,10 @@ TEMPLATE static uint32_t FASTCALL OP_LDMIA_THUMB(uint32_t i)
 			erList = false; //Register List isnt empty
 		}
 
+#ifdef _DEBUG
 	if (erList)
 		 fprintf(stderr, "LDMIA with Empty Rlist\n");
+#endif
 
 	// ARM_REF:	THUMB: Causes base register write-back, and is not optional
 	// ARM_REF:	If the base register <Rn> is specified in <registers>, the final value of <Rn> is the loaded value
@@ -983,7 +991,9 @@ TEMPLATE static uint32_t FASTCALL OP_LDMIA_THUMB(uint32_t i)
 
 TEMPLATE static uint32_t FASTCALL OP_BKPT_THUMB(uint32_t)
 {
+#ifdef _DEBUG
 	fprintf(stderr, "THUMB%c: OP_BKPT triggered\n", PROCNUM?'7':'9');
+#endif
 	Status_Reg tmp = cpu->CPSR;
 	armcpu_switchMode(cpu, ABT); // enter abt mode
 	cpu->R[14] = cpu->instruct_adr + 4;
@@ -1120,7 +1130,9 @@ TEMPLATE static uint32_t FASTCALL OP_BX_THUMB(uint32_t i)
 	//----- the instruction are UNPREDICTABLE (because the value read for R15 has bits[1:0]==0b10).
 	if (Rm == 15)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "THUMB%c: BX using PC as operand\n", PROCNUM?'7':'9');
+#endif
 		//emu_halt();
 	}
 	cpu->CPSR.bits.T = BIT0(Rm);

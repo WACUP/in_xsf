@@ -63,7 +63,7 @@ static struct
 int mapgsf(std::uint8_t *d, int l, int &s)
 {
 	if (static_cast<std::size_t>(l) > loaderwork.rom.size())
-		l = loaderwork.rom.size();
+		l = static_cast<int>(loaderwork.rom.size());
 	if (l)
 		std::copy_n(&loaderwork.rom[0], l, d);
 	s = l;

@@ -75,8 +75,9 @@ using namespace asmjit;
 #ifdef MAPPED_JIT_FUNCS
 CACHE_ALIGN JIT_struct JIT;
 
-uintptr_t *JIT_struct::JIT_MEM[2][0x4000] = { { 0 }, { 0 } };
+uintptr_t *JIT_struct::JIT_MEM[2][0x4000]/* = { { 0 }, { 0 } }*/;
 
+#if 0
 static uintptr_t *JIT_MEM[][32] =
 {
 	//arm9
@@ -122,6 +123,7 @@ static uintptr_t *JIT_MEM[][32] =
 		/* FX*/	DUP2(nullptr)
 	}
 };
+#endif
 
 static uint32_t JIT_MASK[][32] =
 {
@@ -174,7 +176,55 @@ static void init_jit_mem()
 	static bool inited = false;
 	if (inited)
 		return;
+
 	inited = true;
+
+	uintptr_t *JIT_MEM[][32] =
+	{
+		//arm9
+		{
+			/* 0X*/	DUP2(JIT.ARM9_ITCM),
+			/* 1X*/	DUP2(JIT.ARM9_ITCM), // mirror
+			/* 2X*/	DUP2(JIT.MAIN_MEM),
+			/* 3X*/	DUP2(JIT.SWIRAM),
+			/* 4X*/	DUP2(nullptr),
+			/* 5X*/	DUP2(nullptr),
+			/* 6X*/	nullptr,
+					JIT.ARM9_LCDC, // Plain ARM9-CPU Access (LCDC mode) (max 656KB)
+			/* 7X*/	DUP2(nullptr),
+			/* 8X*/	DUP2(nullptr),
+			/* 9X*/	DUP2(nullptr),
+			/* AX*/	DUP2(nullptr),
+			/* BX*/	DUP2(nullptr),
+			/* CX*/	DUP2(nullptr),
+			/* DX*/	DUP2(nullptr),
+			/* EX*/	DUP2(nullptr),
+			/* FX*/	DUP2(JIT.ARM9_BIOS)
+		},
+		//arm7
+		{
+			/* 0X*/	DUP2(JIT.ARM7_BIOS),
+			/* 1X*/	DUP2(nullptr),
+			/* 2X*/	DUP2(JIT.MAIN_MEM),
+			/* 3X*/	JIT.SWIRAM,
+					JIT.ARM7_ERAM,
+			/* 4X*/	nullptr,
+					JIT.ARM7_WIRAM,
+			/* 5X*/	DUP2(nullptr),
+			/* 6X*/	JIT.ARM7_WRAM,		// VRAM allocated as Work RAM to ARM7 (max. 256K)
+					nullptr,
+			/* 7X*/	DUP2(nullptr),
+			/* 8X*/	DUP2(nullptr),
+			/* 9X*/	DUP2(nullptr),
+			/* AX*/	DUP2(nullptr),
+			/* BX*/	DUP2(nullptr),
+			/* CX*/	DUP2(nullptr),
+			/* DX*/	DUP2(nullptr),
+			/* EX*/	DUP2(nullptr),
+			/* FX*/	DUP2(nullptr)
+		}
+	};
+
 	for (int proc = 0; proc < 2; ++proc)
 		for (int i = 0; i < 0x4000; ++i)
 			JIT.JIT_MEM[proc][i] = JIT_MEM[proc][i >> 9] + (((i << 14) & JIT_MASK[proc][i >> 9]) >> 1);
@@ -220,7 +270,9 @@ static X86Compiler c(&runtime);
 static void emit_branch(int cond, Label to);
 static void _armlog(uint8_t proc, uint32_t addr, uint32_t opcode);
 
+#ifdef _DEBUG
 static FileLogger logger(stderr);
+#endif
 
 static int PROCNUM;
 static int *PROCNUM_ptr = &PROCNUM;
@@ -1165,10 +1217,26 @@ static int OP_MVN_S_IMM_VAL(uint32_t i) { OP_MOV_S(S_IMM_VAL; rhs = ~rhs); }
 //   QADD / QDADD / QSUB / QDSUB
 // -----------------------------------------------------------------------------
 // TODO
-static int OP_QADD(uint32_t i) { fprintf(stderr, "JIT: unimplemented OP_QADD\n"); return 0; }
-static int OP_QSUB(uint32_t i) { fprintf(stderr, "JIT: unimplemented OP_QSUB\n"); return 0; }
-static int OP_QDADD(uint32_t i) { fprintf(stderr, "JIT: unimplemented OP_QDADD\n"); return 0; }
-static int OP_QDSUB(uint32_t i) { fprintf(stderr, "JIT: unimplemented OP_QDSUB\n"); return 0; }
+static int OP_QADD(uint32_t i) {
+								#ifdef _DEBUG
+								fprintf(stderr, "JIT: unimplemented OP_QADD\n");
+								#endif
+								return 0; }
+static int OP_QSUB(uint32_t i) {
+								 #ifdef _DEBUG
+								 fprintf(stderr, "JIT: unimplemented OP_QSUB\n");
+								 #endif
+								 return 0; }
+static int OP_QDADD(uint32_t i) {
+								  #ifdef _DEBUG
+								  fprintf(stderr, "JIT: unimplemented OP_QDADD\n");
+								  #endif
+								  return 0; }
+static int OP_QDSUB(uint32_t i) {
+								  #ifdef _DEBUG
+								  fprintf(stderr, "JIT: unimplemented OP_QDSUB\n");
+								  #endif
+								  return 0; }
 
 // -----------------------------------------------------------------------------
 //   MUL
@@ -1903,12 +1971,16 @@ static int OP_LDRD_STRD_POST_INDEX(uint32_t i)
 
 	if (Rd_num == 14)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "OP_LDRD_STRD_POST_INDEX: use R14!!!!\n");
+#endif
 		return 0; // TODO: exception
 	}
 	if (Rd_num & 0x1)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "OP_LDRD_STRD_POST_INDEX: ERROR!!!!\n");
+#endif
 		return 0; // TODO: exception
 	}
 	GpVar Rd = c.newGpVar(kVarTypeInt32);
@@ -1944,12 +2016,16 @@ static int OP_LDRD_STRD_OFFSET_PRE_INDEX(uint32_t i)
 
 	if (Rd_num == 14)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "OP_LDRD_STRD_OFFSET_PRE_INDEX: use R14!!!!\n");
+#endif
 		return 0; // TODO: exception
 	}
 	if (Rd_num & 0x1)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "OP_LDRD_STRD_OFFSET_PRE_INDEX: ERROR!!!!\n");
+#endif
 		return 0; // TODO: exception
 	}
 	GpVar Rd = c.newGpVar(kVarTypeInt32);
@@ -2476,13 +2552,17 @@ static int OP_MCR(uint32_t i)
 	uint32_t cpnum = REG_POS(i, 8);
 	if (cpnum != 15)
 	{
+#ifdef _DEBUG
 		// TODO - exception?
 		fprintf(stderr, "JIT: MCR P%i, 0, R%i, C%i, C%i, %i, %i (don't allocated coprocessor)\n", cpnum, REG_POS(i, 12), REG_POS(i, 16), REG_POS(i, 0), (i >> 21) & 0x7, (i >> 5) & 0x7);
+#endif
 		return 2;
 	}
 	if (REG_POS(i, 12) == 15)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "JIT: MCR Rd=R15\n");
+#endif
 		return 2;
 	}
 
@@ -2717,7 +2797,9 @@ static int OP_MRC(uint32_t i)
 	uint32_t cpnum = REG_POS(i, 8);
 	if (cpnum != 15)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "MRC P%i, 0, R%i, C%i, C%i, %i, %i (don't allocated coprocessor)\n", cpnum, REG_POS(i, 12), REG_POS(i, 16), REG_POS(i, 0), (i>>21)&0x7, (i>>5)&0x7);
+#endif
 		return 2;
 	}
 
@@ -2975,7 +3057,11 @@ static int OP_SWI(uint32_t i) { return op_swi((i >> 16) & 0x1F); }
 // -----------------------------------------------------------------------------
 //   BKPT
 // -----------------------------------------------------------------------------
-static int OP_BKPT(uint32_t i) { fprintf(stderr, "JIT: unimplemented OP_BKPT\n"); return 0; }
+static int OP_BKPT(uint32_t i) {
+								 #ifdef _DEBUG
+								 fprintf(stderr, "JIT: unimplemented OP_BKPT\n");
+								 #endif
+								 return 0; }
 
 // -----------------------------------------------------------------------------
 //   THUMB
@@ -4004,7 +4090,9 @@ template<int PROCNUM> static uint32_t compile_basicblock()
 
 	if (!JIT_MAPPED(start_adr & 0x0FFFFFFF, PROCNUM))
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "JIT: use unmapped memory address %08X\n", start_adr);
+#endif
 		execute = false;
 		return 1;
 	}
@@ -4138,7 +4226,9 @@ template<int PROCNUM> static uint32_t compile_basicblock()
 	ArmOpCompiled f = (ArmOpCompiled)(c.make());
 	if (c.getError())
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "JIT error: %s\n", ErrorUtil::asString(c.getError()));
+#endif
 		f = op_decode[PROCNUM][bb_thumb];
 	}
 #if LOG_JIT
@@ -4184,24 +4274,31 @@ void arm_jit_reset(bool enable)
 #ifdef HAVE_STATIC_CODE_BUFFER
 	scratchptr = scratchpad;
 #endif
+#ifdef _DEBUG
 	fprintf(stderr, "CPU mode: %s\n", enable ? "JIT" : "Interpreter");
+#endif
 
 	if (enable)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "JIT max block size %d instruction(s)\n", CommonSettings.jit_max_block_size);
+#endif
 #ifdef MAPPED_JIT_FUNCS
 		// these pointers are allocated by asmjit and need freeing
 #ifndef HAVE_STATIC_CODE_BUFFER
-		#define JITFREE(x)  for (size_t iii = 0; iii < ARRAY_SIZE((x)); ++iii) if ((x)[iii]) runtime.getMemMgr()->release(reinterpret_cast<void *>((x)[iii])); memset((x), 0, sizeof((x)));
-			JITFREE(JIT.MAIN_MEM);
-			JITFREE(JIT.SWIRAM);
-			JITFREE(JIT.ARM9_ITCM);
-			JITFREE(JIT.ARM9_LCDC);
-			JITFREE(JIT.ARM9_BIOS);
-			JITFREE(JIT.ARM7_BIOS);
-			JITFREE(JIT.ARM7_ERAM);
-			JITFREE(JIT.ARM7_WIRAM);
-			JITFREE(JIT.ARM7_WRAM);
+		#define JITFREE(x, y)  if ((x)) { for (size_t iii = 0; iii < (y)/*ARRAY_SIZE((x))*/; ++iii)\
+							   if ((x)[iii]) runtime.getMemMgr()->release(reinterpret_cast<void *>((x)[iii]));\
+							   memset((x), 0, (y)/*sizeof((x))*/); } \
+							   else (x) = reinterpret_cast<uintptr_t*>(calloc((y), sizeof(uintptr_t)));
+			JITFREE(JIT.MAIN_MEM, 0x800000);
+			JITFREE(JIT.SWIRAM, 0x4000);
+			JITFREE(JIT.ARM9_ITCM, 0x4000);
+			JITFREE(JIT.ARM9_LCDC, 0x52000);
+			JITFREE(JIT.ARM9_BIOS, 0x4000);
+			JITFREE(JIT.ARM7_BIOS, 0x2000);
+			JITFREE(JIT.ARM7_ERAM, 0x8000);
+			JITFREE(JIT.ARM7_WIRAM, 0x8000);
+			JITFREE(JIT.ARM7_WRAM, 0x20000);
 		#undef JITFREE
 #endif
 

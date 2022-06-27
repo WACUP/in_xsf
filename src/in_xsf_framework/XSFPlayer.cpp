@@ -57,7 +57,7 @@ bool XSFPlayer::FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWrit
 {
 	bool endFlag = false;
 	unsigned detectSilence = xSFConfig->GetDetectSilenceSec();
-	unsigned pos = 0, bufsize = buf.size() >> 2;
+	unsigned pos = 0, bufsize = static_cast<unsigned>(buf.size() >> 2);
 	auto trueBuffer = std::vector<std::uint8_t>(bufsize << (this->uses32BitSamplesClampedTo16Bit ? 3 : 2));
 	auto longBuffer = std::vector<std::uint8_t>(bufsize << 3);
 	auto bufLong = reinterpret_cast<std::int32_t *>(&longBuffer[0]);
@@ -238,7 +238,7 @@ static inline DWORD TicksDiff(DWORD prev, DWORD cur) { return cur >= prev ? cur 
 
 int XSFPlayer::Seek(unsigned seekPosition, volatile int *killswitch, std::vector<std::uint8_t> &buf, Out_Module *outMod)
 {
-	unsigned bufsize = buf.size() >> 2, seekSample = static_cast<std::uint64_t>(seekPosition) * this->sampleRate / 1000;
+	unsigned bufsize = static_cast<unsigned>(buf.size() >> 2), seekSample = static_cast<std::uint64_t>(seekPosition) * this->sampleRate / 1000;
 	DWORD prevTick = outMod ? GetTickCount() : 0;
 	if (seekSample < this->currentSample)
 	{

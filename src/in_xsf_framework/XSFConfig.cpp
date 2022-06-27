@@ -26,7 +26,7 @@ enum
 	idReplayGain,
 	idClipProtect,
 	idSampleRate,
-	idTitleFormat,
+	//idTitleFormat,
 	idResetDefaults,
 	idInfoTitle = 600,
 	idInfoArtist,
@@ -49,7 +49,7 @@ PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
 
 XSFConfig::XSFConfig() : configLoaded(false), playInfinitely(false), skipSilenceOnStartSec(0),
 	detectSilenceSec(0), defaultLength(0), defaultFade(0), volume(0.0), volumeType(VolumeType::None),
-	peakType(PeakType::None), sampleRate(0), titleFormat(""), configDialog(), configDialogProperty(),
+	peakType(PeakType::None), sampleRate(0), /*titleFormat(""),*/ configDialog(), configDialogProperty(),
 	infoDialog(), supportedSampleRates(), configIO(XSFConfigIO::Create())
 {
 }
@@ -90,7 +90,7 @@ void XSFConfig::LoadConfig()
 	this->volumeType = this->configIO->GetValue("VolumeType", XSFConfig::initVolumeType);
 	this->peakType = this->configIO->GetValue("PeakType", XSFConfig::initPeakType);
 	this->sampleRate = this->configIO->GetValue("SampleRate", XSFConfig::initSampleRate);
-	this->titleFormat = this->configIO->GetValue("TitleFormat", XSFConfig::initTitleFormat);
+	//this->titleFormat = this->configIO->GetValue("TitleFormat", XSFConfig::initTitleFormat);
 
 	this->LoadSpecificConfig();
 }
@@ -106,7 +106,7 @@ void XSFConfig::SaveConfig()
 	this->configIO->SetValue("VolumeType", this->volumeType);
 	this->configIO->SetValue("PeakType", this->peakType);
 	this->configIO->SetValue("SampleRate", this->sampleRate);
-	this->configIO->SetValue("TitleFormat", this->titleFormat);
+	//this->configIO->SetValue("TitleFormat", this->titleFormat);
 
 	this->SaveSpecificConfig();
 }
@@ -169,7 +169,7 @@ void XSFConfig::GenerateDialogs()
 	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Sample Rate").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
 	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(50, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idSampleRate).
 		IsDropDownList().WithTabStop());
-	this->configDialog.AddGroupControl(DialogGroupBuilder(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)));
+	/*this->configDialog.AddGroupControl(DialogGroupBuilder(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)));
 	this->configDialog.AddLabelControl(DialogLabelBuilder(L"NOTE: This is only used if Advanced Title Formatting is disabled in Winamp.").WithSize(150, 16).InGroup(L"Title Format").
 		WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 11)).IsLeftJustified());
 	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(150, 14).InGroup(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 4)).IsLeftJustified().
@@ -177,7 +177,7 @@ void XSFConfig::GenerateDialogs()
 	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Names between percent symbols (e.g. %game%, %title%) will be replaced with the respective value from the file's tags. Using square brackets around any "
 			L"items will cause them to only be displayed if there was a replacement done (e.g. [%disc%.] will display 01. if disc was in the tags as 01, but will display nothing if disc was not in the tags). Square "
 			L"bracket blocks can be nested.").WithSize(150, 72).InGroup(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 4)).IsLeftJustified());
-
+*/
 	this->GenerateSpecificDialogs();
 
 	this->infoDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(-104, 7)).WithID(IDOK).IsDefault().WithTabStop());
@@ -188,10 +188,10 @@ void XSFConfig::GenerateDialogs()
 	this->configDialogProperty = DialogBuilder().IsChild().IsControlWindow().WithFont(L"MS Shell Dlg", 8);
 	this->configDialogProperty.AutoSize();
 
-	this->configDialog.AddButtonControl(DialogButtonBuilder(L"Reset Defaults").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(-50, 7)).WithID(idResetDefaults).
+	this->configDialog.AddButtonControl(DialogButtonBuilder(L"Defaults").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)).WithID(idResetDefaults).
 		WithTabStop());
-	this->configDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(-104, 7)).WithID(IDOK).IsDefault().WithTabStop());
-	this->configDialog.AddButtonControl(DialogButtonBuilder(L"Cancel").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(4, 0)).WithID(IDCANCEL).WithTabStop());
+	this->configDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(4, -14)).WithID(IDOK).IsDefault().WithTabStop());
+	this->configDialog.AddButtonControl(DialogButtonBuilder(L"Cancel").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(4, 0)).WithID(IDCANCEL).WithTabStop());
 	this->configDialog.AutoSize();
 }
 
@@ -264,7 +264,7 @@ INT_PTR CALLBACK XSFConfig::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 				if (this->sampleRate == rate)
 					SendDlgItemMessage(hwndDlg, idSampleRate, CB_SETCURSEL, x, 0);
 			}
-			SetDlgItemText(hwndDlg, idTitleFormat, ConvertFuncs::StringToWString(this->titleFormat).c_str());
+			//SetDlgItemText(hwndDlg, idTitleFormat, ConvertFuncs::StringToWString(this->titleFormat).c_str());
 			break;
 		case WM_COMMAND:
 			switch (GET_WM_COMMAND_ID(wParam, lParam))
@@ -359,7 +359,7 @@ void XSFConfig::ResetConfigDefaults(HWND hwndDlg)
 	SendDlgItemMessage(hwndDlg, idClipProtect, CB_SETCURSEL, static_cast<WPARAM>(XSFConfig::initPeakType), 0);
 	auto found = std::find(this->supportedSampleRates.begin(), this->supportedSampleRates.end(), XSFConfig::initSampleRate);
 	SendDlgItemMessage(hwndDlg, idSampleRate, CB_SETCURSEL, found - this->supportedSampleRates.begin(), 0);
-	SetDlgItemText(hwndDlg, idTitleFormat, ConvertFuncs::StringToWString(XSFConfig::initTitleFormat).c_str());
+	//SetDlgItemText(hwndDlg, idTitleFormat, ConvertFuncs::StringToWString(XSFConfig::initTitleFormat).c_str());
 
 	this->ResetSpecificConfigDefaults(hwndDlg);
 }
@@ -375,7 +375,7 @@ void XSFConfig::SaveConfigDialog(HWND hwndDlg)
 	this->volumeType = static_cast<VolumeType>(SendDlgItemMessage(hwndDlg, idReplayGain, CB_GETCURSEL, 0, 0));
 	this->peakType = static_cast<PeakType>(SendDlgItemMessage(hwndDlg, idClipProtect, CB_GETCURSEL, 0, 0));
 	this->sampleRate = XSFConfig::supportedSampleRates[SendDlgItemMessage(hwndDlg, idSampleRate, CB_GETCURSEL, 0, 0)];
-	this->titleFormat = ConvertFuncs::WStringToString(this->GetTextFromWindow(GetDlgItem(hwndDlg, idTitleFormat)));
+	//this->titleFormat = ConvertFuncs::WStringToString(this->GetTextFromWindow(GetDlgItem(hwndDlg, idTitleFormat)));
 
 	this->SaveSpecificConfigDialog(hwndDlg);
 }
@@ -438,7 +438,7 @@ PeakType XSFConfig::GetPeakType() const
 	return this->peakType;
 }
 
-const std::string &XSFConfig::GetTitleFormat() const
+/*const std::string &XSFConfig::GetTitleFormat() const
 {
 	return this->titleFormat;
-}
+}*/

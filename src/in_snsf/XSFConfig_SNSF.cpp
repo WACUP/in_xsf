@@ -30,7 +30,7 @@ enum
 
 unsigned XSFConfig::initSampleRate = 44100;
 std::string XSFConfig::commonName = "SNSF Decoder";
-std::string XSFConfig::versionNumber = "0.9e";
+std::string XSFConfig::versionNumber = "1.0.2";
 //bool XSFConfig_SNSF::initSixteenBitSound = true;
 bool XSFConfig_SNSF::initReverseStereo = false;
 unsigned XSFConfig_SNSF::initResampler = 1;
@@ -106,7 +106,7 @@ INT_PTR CALLBACK XSFConfig_SNSF::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 			SendDlgItemMessage(hwndDlg, idResampler, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Sinc Resampler"));
 			SendDlgItemMessage(hwndDlg, idResampler, CB_SETCURSEL, this->resampler, 0);
 			// Mutes
-			for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+			for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 			{
 				SendDlgItemMessage(hwndDlg, idMutes, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>((L"BRRPCM " + std::to_wstring(x + 1)).c_str()));
 				SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, this->mutes[x], x);
@@ -125,7 +125,7 @@ void XSFConfig_SNSF::ResetSpecificConfigDefaults(HWND hwndDlg)
 	SendDlgItemMessage(hwndDlg, idReverseStereo, BM_SETCHECK, XSFConfig_SNSF::initReverseStereo ? BST_CHECKED : BST_UNCHECKED, 0);
 	SendDlgItemMessage(hwndDlg, idResampler, CB_SETCURSEL, XSFConfig_SNSF::initResampler, 0);
 	auto tmpMutes = std::bitset<8>(XSFConfig_SNSF::initMutes);
-	for (int x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
+	for (size_t x = 0, numMutes = tmpMutes.size(); x < numMutes; ++x)
 		SendDlgItemMessage(hwndDlg, idMutes, LB_SETSEL, tmpMutes[x], x);
 }
 
@@ -134,7 +134,7 @@ void XSFConfig_SNSF::SaveSpecificConfigDialog(HWND hwndDlg)
 	//this->sixteenBitSound = SendDlgItemMessage(hwndDlg, idSixteenBitSound, BM_GETCHECK, 0, 0) == BST_CHECKED;
 	this->reverseStereo = SendDlgItemMessage(hwndDlg, idReverseStereo, BM_GETCHECK, 0, 0) == BST_CHECKED;
 	this->resampler = static_cast<unsigned>(SendDlgItemMessage(hwndDlg, idResampler, CB_GETCURSEL, 0, 0));
-	for (int x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
+	for (size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
 		this->mutes[x] = !!SendDlgItemMessage(hwndDlg, idMutes, LB_GETSEL, x, 0);
 }
 

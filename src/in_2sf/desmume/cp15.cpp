@@ -225,7 +225,9 @@ bool armcp15_t::moveCP2ARM(uint32_t *R, uint8_t CRn, uint8_t CRm, uint8_t opcode
 {
 	if (!this->cpu)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "ERROR: cp15 don\'t allocated\n");
+#endif
 		return false;
 	}
 	if (this->cpu->CPSR.bits.mode == USR)
@@ -371,7 +373,9 @@ bool armcp15_t::moveARM2CP(uint32_t val, uint8_t CRn, uint8_t CRm, uint8_t opcod
 {
 	if (!this->cpu)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "ERROR: cp15 don\'t allocated\n");
+#endif
 		return false;
 	}
 	if (this->cpu->CPSR.bits.mode == USR)

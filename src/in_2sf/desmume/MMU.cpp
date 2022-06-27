@@ -70,11 +70,12 @@ uint32_t _MMU_MAIN_MEM_MASK16 = 0x3FFFFF & ~1;
 uint32_t _MMU_MAIN_MEM_MASK32 = 0x3FFFFF & ~3;
 
 MMU_struct MMU;
-MMU_struct_new MMU_new;
+MMU_struct_new *MMU_new = 0;
 MMU_struct_timing MMU_timing;
 
 uint8_t *MMU_struct::MMU_MEM[2][256] =
 {
+#if 0
 	//arm9
 	{
 		/* 0X*/	DUP16(MMU.ARM9_ITCM),
@@ -116,6 +117,7 @@ uint8_t *MMU_struct::MMU_MEM[2][256] =
 		/* EX*/	DUP16(MMU.UNUSED_RAM),
 		/* FX*/	DUP16(MMU.UNUSED_RAM)
 	}
+#endif
 };
 
 uint32_t MMU_struct::MMU_MASK[2][256] =
@@ -713,9 +715,18 @@ static inline void MMU_VRAMmapControl(uint8_t block, uint8_t VRAMBankCnt)
 //end vram
 //////////////////////////////////////////////////////////////
 
+bool MMU_Inited = false;
 void MMU_Init()
 {
-	memset(&MMU, 0, sizeof(MMU_struct));
+	// just do this once & hopefully reset
+	// will do everything else needed here
+	// so the large buffers can be created
+	if (!MMU_Inited)
+	{
+		MMU_Inited = true;
+		memset(&MMU, 0, sizeof(MMU_struct));
+		MMU_Reset();
+	}
 
 	MMU.CART_ROM = MMU.UNUSED_RAM;
 
@@ -723,14 +734,20 @@ void MMU_Init()
 	MMU.DTCMRegion = 0x08000000;
 	MMU.ITCMRegion = 0x00000000;
 
-	IPC_FIFOinit(ARMCPU_ARM9);
-	IPC_FIFOinit(ARMCPU_ARM7);
-	new(&MMU_new) MMU_struct_new;
+	//IPC_FIFOinit(ARMCPU_ARM9);
+	//IPC_FIFOinit(ARMCPU_ARM7);
+	/*new(&MMU_new) MMU_struct_new;/*/
+	if (!MMU_new)
+	{
+		MMU_new = new MMU_struct_new();
+	}/**/
 
 	mc_init(&MMU.fw, MC_TYPE_FLASH); /* init fw device */
 	mc_alloc(&MMU.fw, NDS_FW_SIZE_V1);
 	MMU.fw.fp = nullptr;
 	MMU.fw.isFirmware = true;
+
+	//MMU_Reset();
 }
 
 void MMU_DeInit()
@@ -740,22 +757,195 @@ void MMU_DeInit()
 
 void MMU_Reset()
 {
-	memset(MMU.ARM9_DTCM, 0, sizeof(MMU.ARM9_DTCM));
-	memset(MMU.ARM9_ITCM, 0, sizeof(MMU.ARM9_ITCM));
-	memset(MMU.ARM9_LCD, 0, sizeof(MMU.ARM9_LCD));
-	memset(MMU.ARM9_OAM, 0, sizeof(MMU.ARM9_OAM));
-	memset(MMU.ARM9_REG, 0, sizeof(MMU.ARM9_REG));
-	memset(MMU.ARM9_VMEM, 0, sizeof(MMU.ARM9_VMEM));
-	memset(MMU.MAIN_MEM, 0, sizeof(MMU.MAIN_MEM));
+	if (!MMU.ARM9_DTCM)
+	{
+		MMU.ARM9_DTCM = reinterpret_cast<uint8_t*>(calloc(0x4000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(MMU.ARM9_DTCM, 0, 0x4000/*/sizeof(MMU.ARM9_DTCM)/**/);
+	}
 
-	memset(MMU.blank_memory, 0, sizeof(MMU.blank_memory));
+	if (!MMU.ARM9_ITCM)
+	{
+		MMU.ARM9_ITCM = reinterpret_cast<uint8_t*>(calloc(0x8000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			MMU.MMU_MEM[ARMCPU_ARM9][i] = MMU.ARM9_ITCM;
+		}
+	}
+	else
+	{
+		memset(MMU.ARM9_ITCM, 0, 0x8000/*/sizeof(MMU.ARM9_ITCM)/**/);
+	}
+
+	if (!MMU.ARM9_LCD)
+	{
+		MMU.ARM9_LCD = reinterpret_cast<uint8_t*>(calloc(0xA4000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			const int index = (6 * 16) + i;
+			MMU.MMU_MEM[ARMCPU_ARM9][index] = MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.ARM9_LCD;
+		}
+	}
+	else
+	{
+		memset(MMU.ARM9_LCD, 0, 0xA4000/*/sizeof(MMU.ARM9_LCD)/**/);
+	}
+	
+	if (!MMU.ARM9_OAM)
+	{
+		MMU.ARM9_OAM = reinterpret_cast<uint8_t*>(calloc(0x800, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			const int index = (7 * 16) + i;
+			MMU.MMU_MEM[ARMCPU_ARM9][index] = MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.ARM9_OAM;
+		}
+	}
+	else
+	{
+		memset(MMU.ARM9_OAM, 0, 0x800/*/sizeof(MMU.ARM9_OAM)/**/);
+	}
+
+	if (!MMU.ARM9_REG)
+	{
+		MMU.ARM9_REG = reinterpret_cast<uint8_t*>(calloc(0x1000000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			MMU.MMU_MEM[ARMCPU_ARM9][(4 * 16) + i] = MMU.ARM9_REG;
+		}
+	}
+	else
+	{
+		memset(MMU.ARM9_REG, 0, 0x1000000/*//*sizeof(MMU.ARM9_REG)/**/);
+	}
+
+	if (!MMU.ARM9_VMEM)
+	{
+		MMU.ARM9_VMEM = reinterpret_cast<uint8_t*>(calloc(0x800, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			MMU.MMU_MEM[ARMCPU_ARM9][(5 * 16) + i] = MMU.ARM9_VMEM;
+		}
+	}
+	else
+	{
+		memset(MMU.ARM9_VMEM, 0, 0x800/*/sizeof(MMU.ARM9_VMEM)/**/);
+	}
+
+	if (!MMU.MAIN_MEM)
+	{
+		MMU.MAIN_MEM = reinterpret_cast<uint8_t*>(calloc(0x1000000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			const int index = (2 * 16) + i;
+			MMU.MMU_MEM[ARMCPU_ARM9][index] = MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.MAIN_MEM;
+		}
+	}
+	else
+	{
+		memset(MMU.MAIN_MEM, 0, 0x1000000/*/sizeof(MMU.MAIN_MEM)/**/);
+	}
+
+	if (!MMU.blank_memory)
+	{
+		MMU.blank_memory = reinterpret_cast<uint8_t*>(calloc(0x100000 - 0xA4000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(MMU.blank_memory, 0, 0x100000 - 0xA4000/*/sizeof(MMU.blank_memory)/**/);
+	}
+
+	if (!MMU.ARM9_BIOS)
+	{
+		MMU.ARM9_BIOS = reinterpret_cast<uint8_t*>(calloc(0x8000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			MMU.MMU_MEM[ARMCPU_ARM9][(15 * 16) + i] = MMU.ARM9_BIOS;
+		}
+	}
+	else
+	{
+		memset(MMU.ARM9_BIOS, 0, 0x8000/*/sizeof(MMU.ARM9_BIOS)/**/);
+	}
+
 	memset(MMU.UNUSED_RAM, 0, sizeof(MMU.UNUSED_RAM));
 	memset(MMU.MORE_UNUSED_RAM, 0, sizeof(MMU.UNUSED_RAM));
 
-	memset(MMU.ARM7_ERAM, 0, sizeof(MMU.ARM7_ERAM));
-	memset(MMU.ARM7_REG, 0, sizeof(MMU.ARM7_REG));
-	memset(MMU.ARM7_WIRAM, 0, sizeof(MMU.ARM7_WIRAM));
-	memset(MMU.SWIRAM, 0, sizeof(MMU.SWIRAM));
+	if (!MMU.ARM7_BIOS)
+	{
+		MMU.ARM7_BIOS = reinterpret_cast<uint8_t*>(calloc(0x4000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			MMU.MMU_MEM[ARMCPU_ARM7][i] = MMU.ARM7_BIOS;
+		}
+	}
+	else
+	{		
+		memset(MMU.ARM7_BIOS, 0, 0x4000/*/sizeof(MMU.ARM7_BIOS)/**/);
+	}
+
+	if (!MMU.ARM7_ERAM)
+	{
+		MMU.ARM7_ERAM = reinterpret_cast<uint8_t*>(calloc(0x10000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(MMU.ARM7_ERAM, 0, 0x10000/*/sizeof(MMU.ARM7_ERAM)/**/);
+	}
+
+	if (!MMU.ARM7_REG)
+	{
+		MMU.ARM7_REG = reinterpret_cast<uint8_t*>(calloc(0x10000, sizeof(uint8_t)));
+	}
+	else
+	{
+		memset(MMU.ARM7_REG, 0, 0x10000/*/sizeof(MMU.ARM7_REG)/**/);
+	}
+
+	if (!MMU.ARM7_WIRAM)
+	{
+		MMU.ARM7_WIRAM = reinterpret_cast<uint8_t*>(calloc(0x10000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			const int index = (4 * 16) + i;
+			if (i < 8)
+			{
+				MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.ARM7_REG;
+			}
+			else
+			{
+				MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.ARM7_WIRAM;
+			}
+		}
+	}
+	else
+	{
+		memset(MMU.ARM7_WIRAM, 0, 0x10000/*/sizeof(MMU.ARM7_REG)/**/);
+	}
+
+	if (!MMU.SWIRAM)
+	{
+		MMU.SWIRAM = reinterpret_cast<uint8_t*>(calloc(0x8000, sizeof(uint8_t)));
+		for (int i = 0; i < 16; i++)
+		{
+			const int index = (3 * 16) + i;
+			MMU.MMU_MEM[ARMCPU_ARM9][index] = MMU.SWIRAM;
+
+			if (i < 8)
+			{
+				MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.SWIRAM;
+			}
+			else
+			{
+				MMU.MMU_MEM[ARMCPU_ARM7][index] = MMU.ARM7_ERAM;
+			}
+		}
+	}
+	else
+	{
+		memset(MMU.SWIRAM, 0, 0x8000/*/sizeof(MMU.SWIRAM)/**/);
+	}
 
 	IPC_FIFOinit(ARMCPU_ARM9);
 	IPC_FIFOinit(ARMCPU_ARM7);
@@ -816,10 +1006,13 @@ void MMU_Reset()
 
 	// HACK!!!
 	// until we improve all our session tracking stuff, we need to save the backup memory filename
-	std::string bleh = MMU_new.backupDevice.getFilename();
-	BackupDevice tempBackupDevice;
-	reconstruct(&MMU_new);
-	MMU_new.backupDevice.load_rom(bleh);
+	if (MMU_new)
+	{
+		std::string bleh = MMU_new->backupDevice.getFilename();
+		BackupDevice tempBackupDevice;
+		reconstruct(MMU_new);
+		MMU_new->backupDevice.load_rom(bleh);
+	}
 
 	MMU_timing.arm7codeFetch.Reset();
 	MMU_timing.arm7dataFetch.Reset();
@@ -854,8 +1047,8 @@ void MMU_unsetRom()
 static void execsqrt()
 {
 	uint32_t ret;
-	uint8_t mode = MMU_new.sqrt.mode;
-	MMU_new.sqrt.busy = 1;
+	uint8_t mode = MMU_new->sqrt.mode;
+	MMU_new->sqrt.busy = 1;
 
 	if (mode)
 	{
@@ -882,9 +1075,9 @@ static void execdiv()
 {
 	int64_t num, den;
 	int64_t res, mod;
-	uint8_t mode = MMU_new.div.mode;
-	MMU_new.div.busy = 1;
-	MMU_new.div.div0 = 0;
+	uint8_t mode = MMU_new->div.mode;
+	MMU_new->div.busy = 1;
+	MMU_new->div.div0 = 0;
 
 	switch (mode)
 	{
@@ -913,7 +1106,7 @@ static void execdiv()
 
 		// the DIV0 flag in DIVCNT is set only if the full 64bit DIV_DENOM value is zero, even in 32bit mode
 		if (!T1ReadQuad(MMU.MMU_MEM[ARMCPU_ARM9][0x40], 0x298))
-			MMU_new.div.div0 = 1;
+			MMU_new->div.div0 = 1;
 	}
 	else
 	{
@@ -1184,8 +1377,10 @@ static inline uint16_t read_timer(int proc, int timerIndex)
 	// for unchained timers, we do not keep the timer up to date. its value will need to be calculated here
 	int32_t diff = (nds.timerCycle[proc][timerIndex] - nds_timer) & 0xFFFFFFFF;
 	assert(diff >= 0);
+#ifdef _DEBUG
 	if (diff < 0)
 		fprintf(stderr, "NEW EMULOOP BAD NEWS PLEASE REPORT: TIME READ DIFF < 0 (%d) (%d) (%d)\n", diff, timerIndex, MMU.timerMODE[proc][timerIndex]);
+#endif
 
 	int32_t units = diff / (1 << MMU.timerMODE[proc][timerIndex]);
 	int32_t ret;
@@ -1195,7 +1390,9 @@ static inline uint16_t read_timer(int proc, int timerIndex)
 	// whichever instruction setup this counter should advance nds_timer (I think?) and the division should truncate down to 65535 immediately
 	else if (units > 65536)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "NEW EMULOOP BAD NEWS PLEASE REPORT: UNITS %d:%d = %d\n", proc, timerIndex, units);
+#endif
 		ret = 0;
 	}
 	else
@@ -1277,7 +1474,7 @@ void MMU_struct_new::write_dma(int proc, int size, uint32_t _adr, uint32_t val)
 	uint32_t chan = adr / 12;
 	uint32_t regnum = (adr - chan * 12) >> 2;
 
-	MMU_new.dma[proc][chan].regs[regnum]->write(size, adr, val);
+	MMU_new->dma[proc][chan].regs[regnum]->write(size, adr, val);
 }
 
 // this could be inlined...
@@ -1287,7 +1484,7 @@ uint32_t MMU_struct_new::read_dma(int proc, int size, uint32_t _adr)
 	uint32_t chan = adr / 12;
 	uint32_t regnum = (adr - chan * 12) >> 2;
 
-	uint32_t temp = MMU_new.dma[proc][chan].regs[regnum]->read(size, adr);
+	uint32_t temp = MMU_new->dma[proc][chan].regs[regnum]->read(size, adr);
 	//fprintf(stderr, "%08lld --  read_dma: %d %d %08X = %08X\n",nds_timer,proc,size,_adr,temp);
 
 	return temp;
@@ -1463,7 +1660,9 @@ template<int PROCNUM> void DmaController::doCopy()
 	// need to figure out what to do about this
 	if (bogarted)
 	{
+#ifdef _DEBUG
 		fprintf(stderr, "YOUR GAME IS BOGARTED!!! PLEASE REPORT!!!\n");
+#endif
 		assert(false);
 		return;
 	}
@@ -1527,7 +1726,7 @@ void triggerDma(EDMAMode mode)
 		int i = X;
 		MACRODO4(0, {
 			int j = X;
-			MMU_new.dma[i][j].tryTrigger(mode);
+			MMU_new->dma[i][j].tryTrigger(mode);
 		});
 	});
 }
@@ -1612,39 +1811,55 @@ void FASTCALL _MMU_ARM9_write08(uint32_t adr, uint8_t val)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
+		if (MMU_new->is_dma(adr))
 		{
-			MMU_new.write_dma(ARMCPU_ARM9, 8, adr, val);
+			MMU_new->write_dma(ARMCPU_ARM9, 8, adr, val);
 			return;
 		}
 
 		switch (adr)
 		{
 			case REG_SQRTCNT:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit SQRTCNT WRITE\n");
+#endif
 				return;
 			case REG_SQRTCNT + 1:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit SQRTCNT1 WRITE\n");
+#endif
 				return;
 			case REG_SQRTCNT + 2:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit SQRTCNT2 WRITE\n");
+#endif
 				return;
 			case REG_SQRTCNT + 3:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit SQRTCNT3 WRITE\n");
+#endif
 				return;
 
 #if 1
 			case REG_DIVCNT:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit DIVCNT WRITE\n");
+#endif
 				return;
 			case REG_DIVCNT + 1:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit DIVCNT+1 WRITE\n");
+#endif
 				return;
 			case REG_DIVCNT + 2:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit DIVCNT+2 WRITE\n");
+#endif
 				return;
 			case REG_DIVCNT + 3:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit DIVCNT+3 WRITE\n");
+#endif
 				return;
 #endif
 
@@ -1706,9 +1921,9 @@ void FASTCALL _MMU_ARM9_write16(uint32_t adr, uint16_t val)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
+		if (MMU_new->is_dma(adr))
 		{
-			MMU_new.write_dma(ARMCPU_ARM9, 16, adr, val);
+			MMU_new->write_dma(ARMCPU_ARM9, 16, adr, val);
 			return;
 		}
 
@@ -1726,7 +1941,7 @@ void FASTCALL _MMU_ARM9_write16(uint32_t adr, uint16_t val)
 		switch (adr)
 		{
 			case REG_DIVCNT:
-				MMU_new.div.write16(val);
+				MMU_new->div.write16(val);
 				execdiv();
 				return;
 
@@ -1734,16 +1949,20 @@ void FASTCALL _MMU_ARM9_write16(uint32_t adr, uint16_t val)
 			case REG_DIVNUMER:
 			case REG_DIVNUMER + 2:
 			case REG_DIVNUMER + 4:
+#ifdef _DEBUG
 				fprintf(stderr, "DIV: 16 write NUMER %08X. PLEASE REPORT! \n", val);
+#endif
 				break;
 			case REG_DIVDENOM:
 			case REG_DIVDENOM + 2:
 			case REG_DIVDENOM + 4:
+#ifdef _DEBUG
 				fprintf(stderr, "DIV: 16 write DENOM %08X. PLEASE REPORT! \n", val);
+#endif
 				break;
 #endif
 			case REG_SQRTCNT:
-				MMU_new.sqrt.write16(val);
+				MMU_new->sqrt.write16(val);
 				execsqrt();
 				return;
 
@@ -1853,19 +2072,19 @@ void FASTCALL _MMU_ARM9_write32(uint32_t adr, uint32_t val)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
+		if (MMU_new->is_dma(adr))
 		{
-			MMU_new.write_dma(ARMCPU_ARM9, 32, adr, val);
+			MMU_new->write_dma(ARMCPU_ARM9, 32, adr, val);
 			return;
 		}
 
 		switch (adr)
 		{
 			case REG_SQRTCNT:
-				MMU_new.sqrt.write16(val & 0xFFFF);
+				MMU_new->sqrt.write16(val & 0xFFFF);
 				return;
 			case REG_DIVCNT:
-				MMU_new.div.write16(val & 0xFFFF);
+				MMU_new->div.write16(val & 0xFFFF);
 				return;
 
 			case REG_VRAMCNTA:
@@ -2000,8 +2219,8 @@ uint8_t FASTCALL _MMU_ARM9_read08(uint32_t adr)
 	{
 		//Address is an IO register
 
-		if (MMU_new.is_dma(adr))
-			return MMU_new.read_dma(ARMCPU_ARM9, 8, adr) & 0xFF;
+		if (MMU_new->is_dma(adr))
+			return MMU_new->read_dma(ARMCPU_ARM9, 8, adr) & 0xFF;
 
 		switch (adr)
 		{
@@ -2018,30 +2237,38 @@ uint8_t FASTCALL _MMU_ARM9_read08(uint32_t adr)
 				return MMU.WRAMCNT;
 
 			case REG_SQRTCNT:
-				return MMU_new.sqrt.read16() & 0xFF;
+				return MMU_new->sqrt.read16() & 0xFF;
 			case REG_SQRTCNT + 1:
-				return (MMU_new.sqrt.read16() >> 8) & 0xFF;
+				return (MMU_new->sqrt.read16() >> 8) & 0xFF;
 
 			// sqrtcnt isnt big enough for these to exist. but they'd probably return 0 so its ok
 			case REG_SQRTCNT + 2:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit SQRTCNT+2 READ\n");
+#endif
 				return 0;
 			case REG_SQRTCNT + 3:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit SQRTCNT+3 READ\n");
+#endif
 				return 0;
 
 			// Nostalgia's options menu requires that these work
 			case REG_DIVCNT:
-				return MMU_new.div.read16() & 0xFF;
+				return MMU_new->div.read16() & 0xFF;
 			case REG_DIVCNT + 1:
-				return (MMU_new.div.read16() >> 8) & 0xFF;
+				return (MMU_new->div.read16() >> 8) & 0xFF;
 
 			// divcnt isnt big enough for these to exist. but they'd probably return 0 so its ok
 			case REG_DIVCNT + 2:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit DIVCNT+2 READ\n");
+#endif
 				return 0;
 			case REG_DIVCNT + 3:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 8bit DIVCNT+3 READ\n");
+#endif
 				return 0;
 		}
 	}
@@ -2067,24 +2294,28 @@ uint16_t FASTCALL _MMU_ARM9_read16(uint32_t adr)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
-			return MMU_new.read_dma(ARMCPU_ARM9, 16, adr) & 0xFFFF;
+		if (MMU_new->is_dma(adr))
+			return MMU_new->read_dma(ARMCPU_ARM9, 16, adr) & 0xFFFF;
 
 		// Address is an IO register
 		switch (adr)
 		{
 			case REG_SQRTCNT:
-				return MMU_new.sqrt.read16();
+				return MMU_new->sqrt.read16();
 			// sqrtcnt isnt big enough for this to exist. but it'd probably return 0 so its ok
 			case REG_SQRTCNT + 2:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 16bit SQRTCNT+2 READ\n");
+#endif
 				return 0;
 
 			case REG_DIVCNT:
-				return MMU_new.div.read16();
+				return MMU_new->div.read16();
 			// divcnt isnt big enough for this to exist. but it'd probably return 0 so its ok
 			case REG_DIVCNT + 2:
+#ifdef _DEBUG
 				fprintf(stderr, "ERROR 16bit DIVCNT+2 READ\n");
+#endif
 				return 0;
 
 			case REG_IME:
@@ -2135,8 +2366,8 @@ uint32_t FASTCALL _MMU_ARM9_read32(uint32_t adr)
 	// Address is an IO register
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
-			return MMU_new.read_dma(ARMCPU_ARM9, 32, adr);
+		if (MMU_new->is_dma(adr))
+			return MMU_new->read_dma(ARMCPU_ARM9, 32, adr);
 
 		switch (adr)
 		{
@@ -2157,9 +2388,9 @@ uint32_t FASTCALL _MMU_ARM9_read32(uint32_t adr)
 			// Dolphin Island Underwater Adventures uses this amidst seemingly reasonable divs so we're going to emulate it.
 			// well, it's pretty reasonable to read them as 32bits though, isnt it?
 			case REG_DIVCNT:
-				return MMU_new.div.read16();
+				return MMU_new->div.read16();
 			case REG_SQRTCNT:
-				return MMU_new.sqrt.read16(); // I guess we'll do this also
+				return MMU_new->sqrt.read16(); // I guess we'll do this also
 
 			case REG_IME:
 				return MMU.reg_IME[ARMCPU_ARM9];
@@ -2218,9 +2449,9 @@ void FASTCALL _MMU_ARM7_write08(uint32_t adr, uint8_t val)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
+		if (MMU_new->is_dma(adr))
 		{
-			MMU_new.write_dma(ARMCPU_ARM7, 8, adr, val);
+			MMU_new->write_dma(ARMCPU_ARM7, 8, adr, val);
 			return;
 		}
 
@@ -2298,9 +2529,9 @@ void FASTCALL _MMU_ARM7_write16(uint32_t adr, uint16_t val)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
+		if (MMU_new->is_dma(adr))
 		{
-			MMU_new.write_dma(ARMCPU_ARM7, 16, adr, val);
+			MMU_new->write_dma(ARMCPU_ARM7, 16, adr, val);
 			return;
 		}
 
@@ -2310,11 +2541,15 @@ void FASTCALL _MMU_ARM7_write16(uint32_t adr, uint16_t val)
 			case REG_DISPA_VCOUNT:
 				if (nds.VCount >= 202 && nds.VCount <= 212)
 				{
+#ifdef _DEBUG
 					fprintf(stderr, "VCOUNT set to %i (previous value %i)\n", val, nds.VCount);
+#endif
 					nds.VCount = val;
 				}
+#ifdef _DEBUG
 				else
 					fprintf(stderr, "Attempt to set VCOUNT while not within 202-212 (%i), ignored\n", nds.VCount);
+#endif
 				return;
 
 			case REG_EXMEMCNT:
@@ -2379,7 +2614,9 @@ void FASTCALL _MMU_ARM7_write16(uint32_t adr, uint16_t val)
 								// our totally pathetic register handling, only the one thing we've wanted so far
 								if (MMU.powerMan_Reg[0] & PM_SYSTEM_PWR)
 								{
+#ifdef _DEBUG
 									fprintf(stderr, "SYSTEM POWERED OFF VIA ARM7 SPI POWER DEVICE\n");
+#endif
 									execute = false;
 								}
 							}
@@ -2403,11 +2640,11 @@ void FASTCALL _MMU_ARM7_write16(uint32_t adr, uint16_t val)
 						if (nds.Is_DSI())
 						{
 							// pass data to TSC
-							val = MMU_new.dsi_tsc.write16(val);
+							val = MMU_new->dsi_tsc.write16(val);
 
 							// apply reset command if appropriate
 							if (!BIT11(MMU.SPI_CNT))
-								MMU_new.dsi_tsc.reset_command();
+								MMU_new->dsi_tsc.reset_command();
 
 							break;
 						}
@@ -2599,9 +2836,9 @@ void FASTCALL _MMU_ARM7_write32(uint32_t adr, uint32_t val)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
+		if (MMU_new->is_dma(adr))
 		{
-			MMU_new.write_dma(ARMCPU_ARM7, 32, adr, val);
+			MMU_new->write_dma(ARMCPU_ARM7, 32, adr, val);
 			return;
 		}
 
@@ -2689,8 +2926,8 @@ uint8_t FASTCALL _MMU_ARM7_read08(uint32_t adr)
 
 	if ((adr >> 24) == 4)
 	{
-		if (MMU_new.is_dma(adr))
-			return MMU_new.read_dma(ARMCPU_ARM7, 8, adr) & 0xFF;
+		if (MMU_new->is_dma(adr))
+			return MMU_new->read_dma(ARMCPU_ARM7, 8, adr) & 0xFF;
 
 		// Address is an IO register
 
@@ -2736,8 +2973,8 @@ uint16_t FASTCALL _MMU_ARM7_read16(uint32_t adr)
 	{
 		// Address is an IO register
 
-		if (MMU_new.is_dma(adr))
-			return MMU_new.read_dma(ARMCPU_ARM7, 16, adr) & 0xFFFF;
+		if (MMU_new->is_dma(adr))
+			return MMU_new->read_dma(ARMCPU_ARM7, 16, adr) & 0xFFFF;
 
 		switch (adr)
 		{
@@ -2794,8 +3031,8 @@ uint32_t FASTCALL _MMU_ARM7_read32(uint32_t adr)
 	{
 		// Address is an IO register
 
-		if (MMU_new.is_dma(adr))
-			return MMU_new.read_dma(ARMCPU_ARM7, 32, adr);
+		if (MMU_new->is_dma(adr))
+			return MMU_new->read_dma(ARMCPU_ARM7, 32, adr);
 
 		switch (adr)
 		{
