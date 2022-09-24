@@ -291,14 +291,14 @@ extern struct TCommonSettings
 		NDS_FillDefaultFirmwareConfigData(&this->InternalFirmConf);
 
     bool solo = false;
-    static char* soloEnv = strdup("SOLO_2SF_n");
-    static char* muteEnv = strdup("MUTE_2SF_n");
+    /*static char* soloEnv = strdup("SOLO_2SF_n");
+    static char* muteEnv = strdup("MUTE_2SF_n");*/
 		for (int i = 0; i < 16; ++i) {
-      if (i < 10) {
+      /*if (i < 10) {
         soloEnv[9] = '0' + i;
       } else {
         soloEnv[9] = 'A' + (i - 10);
-      }
+      }*/
       char* soloVal = 0/*/getenv(soloEnv)/**/;
       if (soloVal && soloVal[0] == '1') {
         solo = true;
@@ -309,11 +309,11 @@ extern struct TCommonSettings
     }
     if (!solo) {
       for (int i = 0; i < 16; ++i) {
-        if (i < 10) {
+        /*if (i < 10) {
           muteEnv[9] = '0' + i;
         } else {
           muteEnv[9] = 'A' + (i - 10);
-        }
+        }*/
         char* muteVal = 0/*/getenv(muteEnv)/**/;
         this->spu_muteChannels[i] = muteVal && muteVal[0] == '1';
       }

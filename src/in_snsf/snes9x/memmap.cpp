@@ -185,6 +185,9 @@
 #include "apu/apu.h"
 #include "sdd1.h"
 
+#define WA_UTILS_SIMPLE
+#include <loader/loader/utils.h>
+
 // deinterleave
 
 static void S9xDeinterleaveType1(int size, uint8_t *base)
@@ -463,7 +466,7 @@ again:
 	}
 
 	// this two games fail to be detected
-	if (!strncmp(reinterpret_cast<char *>(&this->ROM[0x7fc0]), "YUYU NO QUIZ DE GO!GO!", 22) || !strncmp(reinterpret_cast<char *>(&this->ROM[0xffc0]), "BATMAN--REVENGE JOKER",  21))
+	if (SameStrNA(reinterpret_cast<char *>(&this->ROM[0x7fc0]), "YUYU NO QUIZ DE GO!GO!", 22) || SameStrNA(reinterpret_cast<char *>(&this->ROM[0xffc0]), "BATMAN--REVENGE JOKER",  21))
 	{
 		this->LoROM = true;
 		this->HiROM = interleaved = tales = false;
@@ -559,9 +562,11 @@ char *CMemory::Safe(const char *s)
 	return safe.get();
 }
 
+#include <strsafe.h>
 void CMemory::ParseSNESHeader(uint8_t *RomHeader)
 {
-	strncpy(this->ROMName, reinterpret_cast<char *>(&RomHeader[0x10]), ROM_NAME_LEN - 1);
+	StringCchCopyA(this->ROMName, ROM_NAME_LEN, reinterpret_cast<char *>(&RomHeader[0x10]));/*/
+	strncpy(this->ROMName, reinterpret_cast<char *>(&RomHeader[0x10]), ROM_NAME_LEN - 1);/**/
 
 	this->SRAMSize = RomHeader[0x28];
 	this->ROMSpeed = RomHeader[0x25];
@@ -609,11 +614,11 @@ void CMemory::InitROM()
 			this->Map_SDD1LoROMMap();
 		else if (this->ExtendedFormat != NOPE)
 			this->Map_JumboLoROMMap();
-		else if (!strncmp(this->ROMName, "WANDERERS FROM YS", 17))
+		else if (SameStrNA(this->ROMName, "WANDERERS FROM YS", 17))
 			this->Map_NoMAD1LoROMMap();
-		else if (!strncmp(this->ROMName, "SOUND NOVEL-TCOOL", 17) || !strncmp(this->ROMName, "DERBY STALLION 96", 17))
+		else if (SameStrNA(this->ROMName, "SOUND NOVEL-TCOOL", 17) || SameStrNA(this->ROMName, "DERBY STALLION 96", 17))
 			this->Map_ROM24MBSLoROMMap();
-		else if (!strncmp(this->ROMName, "THOROUGHBRED BREEDER3", 21) || !strncmp(this->ROMName, "RPG-TCOOL 2", 11))
+		else if (SameStrNA(this->ROMName, "THOROUGHBRED BREEDER3", 21) || SameStrNA(this->ROMName, "RPG-TCOOL 2", 11))
 			this->Map_SRAM512KLoROMMap();
 		else
 			this->Map_LoROMMap();
@@ -958,12 +963,12 @@ bool CMemory::match_na(const char *str)
 
 bool CMemory::match_nn(const char *str)
 {
-	return !strncmp(this->ROMName, str, strlen(str));
+	return SameStrNA(this->ROMName, str, strlen(str));
 }
 
 bool CMemory::match_id(const char *str)
 {
-	return !strncmp(this->ROMId, str, strlen(str));
+	return SameStrNA(this->ROMId, str, strlen(str));
 }
 
 void CMemory::ApplyROMFixes()

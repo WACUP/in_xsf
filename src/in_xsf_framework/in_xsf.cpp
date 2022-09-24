@@ -23,6 +23,7 @@
 #include <winamp/wa_ipc.h>
 #define WA_UTILS_SIMPLE
 #include <loader/loader/utils.h>
+#include <api/memmgr/api_memmgr.h>
 
 extern In_Module inMod;
 static const XSFFile *xSFFile = nullptr;
@@ -110,7 +111,7 @@ int init()
 	xSFConfig = XSFConfig::Create();
 	if (xSFConfig)
 	{
-		inMod.description = (char *)_wcsdup(ConvertFuncs::StringToWString(XSFConfig::CommonNameWithVersion()).c_str());
+		inMod.description = (char *)inMod.memmgr->sysDupStr((wchar_t*)ConvertFuncs::StringToWString(XSFConfig::CommonNameWithVersion()).c_str());
 
 		// changed from doing this to delaying until it's
 		// needed to minimise the impact on loading times
@@ -397,10 +398,10 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 		dest[1] = 0;
 		return 1;
 	}
-	else if (!_stricmp(data, "streamgenre") ||
-			 !_stricmp(data, "streamtype") ||
-			 !_stricmp(data, "streamurl") ||
-			 !_stricmp(data, "streamname"))
+	else if (SameStrA(data, "streamgenre") ||
+			 SameStrA(data, "streamtype") ||
+			 SameStrA(data, "streamurl") ||
+			 SameStrA(data, "streamname"))
 	{
 		return 0;
 	}
