@@ -14,6 +14,8 @@
 #include "XSFFile.h"
 #include "XSFPlayer.h"
 #include "convert.h"
+#define SKIP_SUBCLASS
+#include <loader/loader/utils.h>
 
 enum
 {
@@ -241,6 +243,7 @@ INT_PTR CALLBACK XSFConfig::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 			EndDialog(hwndDlg, IDCANCEL);
 			break;
 		case WM_INITDIALOG:
+			DarkModeSetup(hwndDlg);
 			if (this->playInfinitely)
 				SendDlgItemMessage(hwndDlg, idPlayInfinitely, BM_SETCHECK, BST_CHECKED, 0);
 			SetDlgItemText(hwndDlg, idDefaultLength, ConvertFuncs::MSToWString(this->defaultLength).c_str());
