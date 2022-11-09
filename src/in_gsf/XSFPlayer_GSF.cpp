@@ -38,7 +38,7 @@ public:
 };
 
 const char *XSFPlayer::WinampDescription = "GSF Decoder";
-const wchar_t *XSFPlayer::WinampExts = L"gsf;minigsf\0Game Boy Advance Sound Format files (*.gsf;*.minigsf)\0";
+const wchar_t *XSFPlayer::WinampExts = L"gsf;minigsf\0Game Boy Advance Sound Format files (*.gsf;*.minigsf)\0\0";
 const char *XSFPlayer::ShellDescription = "Game Boy Advance Sound Format";
 const char *XSFPlayer::SFby = "gsfby";
 

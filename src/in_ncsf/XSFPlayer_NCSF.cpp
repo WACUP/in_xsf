@@ -26,7 +26,7 @@
 #include "SSEQPlayer/consts.h"
 
 const char *XSFPlayer::WinampDescription = "NCSF Decoder";
-const wchar_t *XSFPlayer::WinampExts = L"ncsf;minincsf\0DS Nitro Composer Sound Format files (*.ncsf;*.minincsf)\0";
+const wchar_t *XSFPlayer::WinampExts = L"ncsf;minincsf\0DS Nitro Composer Sound Format files (*.ncsf;*.minincsf)\0\0";
 const char *XSFPlayer::ShellDescription = "DS Nitro Composer Sound Format";
 const char *XSFPlayer::SFby = "ncsfby";
 

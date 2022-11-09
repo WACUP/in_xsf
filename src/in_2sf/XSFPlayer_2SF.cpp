@@ -41,7 +41,7 @@ public:
 };
 
 const char *XSFPlayer::WinampDescription = "2SF Decoder";
-const wchar_t *XSFPlayer::WinampExts = L"2sf;mini2sf\0DS Sound Format files (*.2sf;*.mini2sf)\0";
+const wchar_t *XSFPlayer::WinampExts = L"2sf;mini2sf\0DS Sound Format files (*.2sf;*.mini2sf)\0\0";
 const char *XSFPlayer::ShellDescription = "DS Sound Format";
 const char *XSFPlayer::SFby = "2sfby";
 
