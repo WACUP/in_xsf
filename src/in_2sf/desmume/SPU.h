@@ -258,8 +258,8 @@ static FORCEINLINE u16 SPU_ReadWord(u32 addr) { return SPU_core->ReadWord(addr &
 static FORCEINLINE u32 SPU_ReadLong(u32 addr) { return SPU_core->ReadLong(addr & 0x0FFF); }
 void SPU_Emulate_core(void);
 void SPU_Emulate_user(bool mix = true);
-void SPU_DefaultFetchSamples(s16 *sampleBuffer, size_t sampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer);
-size_t SPU_DefaultPostProcessSamples(s16 *postProcessBuffer, size_t requestedSampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer);
+//void SPU_DefaultFetchSamples(s16 *sampleBuffer, size_t sampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer);
+//size_t SPU_DefaultPostProcessSamples(s16 *postProcessBuffer, size_t requestedSampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer);
 
 extern double DESMUME_SAMPLE_RATE;
 void SetDesmumeSampleRate(double rate);

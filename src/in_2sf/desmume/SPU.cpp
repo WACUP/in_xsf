@@ -54,12 +54,14 @@ static inline s8 read_s8(u32 addr) { return (s8)_MMU_read08<ARMCPU_ARM7,MMU_AT_D
 SPU_struct *SPU_core = 0;
 int SPU_currentCoreNum = SNDCORE_DUMMY;
 static int volume = 100;
-static SampleCache sampleCache;
+// dro change to reduce the impact on loading & memory usage when not used during a run
+static SampleCache *sampleCache = 0;
 
 static size_t buffersize = 0;
 static ESynchMode synchmode = ESynchMode_Synchronous;
 static ESynchMethod synchmethod = ESynchMethod_0;
-static ISynchronizingAudioBuffer* synchronizer = metaspu_construct(synchmethod);
+// dro change to reduce the impact on loading & memory usage when not used during a run
+static ISynchronizingAudioBuffer* synchronizer = 0/*/metaspu_construct(synchmethod)/**/;
 
 static int SNDCoreId=-1;
 static SoundInterface_struct *SNDCore=NULL;
@@ -215,7 +217,10 @@ void SPU_SetSynchMode(int mode, int method)
   if(synchmethod != (ESynchMethod)method)
   {
     synchmethod = (ESynchMethod)method;
+    if (synchronizer)
+    {
     delete synchronizer;
+    }
     //grr does this need to be locked? spu might need a lock method
     // or maybe not, maybe the platform-specific code that calls this function can deal with it.
     synchronizer = metaspu_construct(synchmethod);
@@ -349,7 +354,7 @@ void SPU_struct::KeyOn(int channel)
       {
         thischan.pcm16b = (s16)read16(thischan.addr);
         thischan.pcm16b_last = thischan.pcm16b;
-        thischan.index = read08(thischan.addr + 2) & 0x7F;;
+        thischan.index = read08(thischan.addr + 2) & 0x7F;
         thischan.lastsampcnt = 7;
         thischan.sampcnt = -3;
         thischan.loop_index = K_ADPCM_LOOPING_RECOVERY_INDEX;
@@ -1067,8 +1072,15 @@ FORCEINLINE static void ____SPU_ChanUpdate(SPU_struct* const SPU, channel_struct
       } else if (FORMAT == 3) {
         FetchPSGData(chan, &data);
       } else {
-        const SampleData& sample = sampleCache.getSample(chan->addr, chan->loopstart, chan->length, SampleData::Format(FORMAT));
+        if (!sampleCache)
+        {
+            sampleCache = new SampleCache();
+        }
+        if (sampleCache)
+        {
+          const SampleData& sample = sampleCache->getSample(chan->addr, chan->loopstart, chan->length, SampleData::Format(FORMAT));
         data = sample.sampleAt(chan->sampcnt, IInterpolator::allInterpolators[CommonSettings.spuInterpolationMode]);
+      }
       }
       SPU_Mix<CHANNELS>(SPU, chan, data);
     }
@@ -1371,13 +1383,20 @@ void SPU_Emulate_core()
     return;
   }
 
+  if (!synchronizer)
+  {
+    synchronizer = metaspu_construct(synchmethod);
+  }
+
   if (soundProcessor->FetchSamples != NULL)
   {
     soundProcessor->FetchSamples(SPU_core->outbuf, spu_core_samples, synchmode, synchronizer);
   }
   else
   {
-    SPU_DefaultFetchSamples(SPU_core->outbuf, spu_core_samples, synchmode, synchronizer);
+    // dro change
+    /*SPU_DefaultFetchSamples(SPU_core->outbuf, spu_core_samples, synchmode, synchronizer);/*/
+    synchronizer->enqueue_samples(SPU_core->outbuf, spu_core_samples);/**/
   }
 }
 
@@ -1415,19 +1434,26 @@ void SPU_Emulate_user(bool mix)
     postProcessBuffer = (s16 *)realloc(postProcessBuffer, postProcessBufferSize);
   }
 
+  if (!synchronizer)
+  {
+    synchronizer = metaspu_construct(synchmethod);
+  }
+
   if (soundProcessor->PostProcessSamples != NULL)
   {
     processedSampleCount = soundProcessor->PostProcessSamples(postProcessBuffer, freeSampleCount, synchmode, synchronizer);
   }
   else
   {
-    processedSampleCount = SPU_DefaultPostProcessSamples(postProcessBuffer, freeSampleCount, synchmode, synchronizer);
+    // dro change
+    /*processedSampleCount = SPU_DefaultPostProcessSamples(postProcessBuffer, freeSampleCount, synchmode, synchronizer);/*/
+    processedSampleCount = synchronizer->output_samples(postProcessBuffer, freeSampleCount);/**/
   }
 
   soundProcessor->UpdateAudio(postProcessBuffer, processedSampleCount);
 }
 
-void SPU_DefaultFetchSamples(s16 *sampleBuffer, size_t sampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer)
+/*void SPU_DefaultFetchSamples(s16 *sampleBuffer, size_t sampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer)
 {
   theSynchronizer->enqueue_samples(sampleBuffer, sampleCount);
 }
@@ -1435,7 +1461,7 @@ void SPU_DefaultFetchSamples(s16 *sampleBuffer, size_t sampleCount, ESynchMode s
 size_t SPU_DefaultPostProcessSamples(s16 *postProcessBuffer, size_t requestedSampleCount, ESynchMode synchMode, ISynchronizingAudioBuffer *theSynchronizer)
 {
   return theSynchronizer->output_samples(postProcessBuffer, requestedSampleCount);
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////////
 // Dummy Sound Interface

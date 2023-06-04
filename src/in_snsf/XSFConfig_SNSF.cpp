@@ -29,8 +29,8 @@ enum
 };
 
 unsigned XSFConfig::initSampleRate = 44100;
-std::string XSFConfig::commonName = "SNSF Decoder";
-std::string XSFConfig::versionNumber = "1.0.3";
+std::wstring XSFConfig::commonName = L"SNSF Decoder";
+std::wstring XSFConfig::versionNumber = L"1.0.4";
 //bool XSFConfig_SNSF::initSixteenBitSound = true;
 bool XSFConfig_SNSF::initReverseStereo = false;
 unsigned XSFConfig_SNSF::initResampler = 1;
@@ -152,8 +152,8 @@ void XSFConfig_SNSF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 
 void XSFConfig_SNSF::About(HWND parent)
 {
-	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
-		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
-		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes modified snes9x v1.53 for playback.").c_str(),
-		ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
+	AboutMessageBox(parent, (XSFConfig::CommonNameWithVersion() + L"\n\nBuild date: " +
+		TEXT(__DATE__) + L"\n\nUsing xSF Winamp plugin framework (based on the vio*sf "
+		L"plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes "
+		L"modified snes9x v1.53 for playback.").c_str(), XSFConfig::commonName.c_str());
 }

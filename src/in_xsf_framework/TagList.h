@@ -11,7 +11,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "eqstr.h"
+//#include "eqstr.h"
 #include "ltstr.h"
 
 class TagList
@@ -20,7 +20,7 @@ public:
 	typedef std::map<std::string, std::string, lt_str> Tags;
 	typedef std::vector<std::string> TagsList;
 private:
-	static eq_str eqstr;
+	//static eq_str eqstr;
 
 	Tags tags;
 	TagsList tagsOrder;

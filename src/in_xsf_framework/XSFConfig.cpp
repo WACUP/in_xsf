@@ -44,7 +44,7 @@ std::string XSFConfig::initSkipSilenceOnStartSec = "5";
 std::string XSFConfig::initDetectSilenceSec = "5";
 std::string XSFConfig::initDefaultLength = "1:55";
 std::string XSFConfig::initDefaultFade = "5";
-std::string XSFConfig::initTitleFormat = "%game%[ - [%disc%.]%track%] - %title%";
+//std::string XSFConfig::initTitleFormat = "%game%[ - [%disc%.]%track%] - %title%";
 double XSFConfig::initVolume = 1.0;
 VolumeType XSFConfig::initVolumeType = VolumeType::ReplayGainAlbum;
 PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
@@ -52,13 +52,13 @@ PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
 XSFConfig::XSFConfig() : configLoaded(false), playInfinitely(false), skipSilenceOnStartSec(0),
 	detectSilenceSec(0), defaultLength(0), defaultFade(0), volume(0.0), volumeType(VolumeType::None),
 	peakType(PeakType::None), sampleRate(0), /*titleFormat(""),*/ configDialog(), configDialogProperty(),
-	infoDialog(), supportedSampleRates(), configIO(XSFConfigIO::Create())
+	infoDialog(), supportedSampleRates(), configIO(nullptr/*/XSFConfigIO::Create()/**/)
 {
 }
 
-const std::string &XSFConfig::CommonNameWithVersion()
+const std::wstring &XSFConfig::CommonNameWithVersion()
 {
-	static const auto commonNameWithVersion = XSFConfig::commonName + " v" + XSFConfig::versionNumber;
+	static const auto commonNameWithVersion = XSFConfig::commonName + L" v" + XSFConfig::versionNumber;
 	return commonNameWithVersion;
 }
 
@@ -83,6 +83,11 @@ void XSFConfig::InitConfig()
 
 void XSFConfig::LoadConfig()
 {
+	if (!configIO)
+	{
+		configIO.reset(XSFConfigIO::Create());
+	}
+
 	this->playInfinitely = this->configIO->GetValue("PlayInfinitely", XSFConfig::initPlayInfinitely);
 	this->skipSilenceOnStartSec = ConvertFuncs::StringToMS(this->configIO->GetValue("SkipSilenceOnStartSec", XSFConfig::initSkipSilenceOnStartSec));
 	this->detectSilenceSec = ConvertFuncs::StringToMS(this->configIO->GetValue("DetectSilenceSec", XSFConfig::initDetectSilenceSec));
@@ -138,7 +143,7 @@ void XSFConfig::GenerateDialogs()
 	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 54).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoVScroll().WithBorder().
 		WithTabStop().WithID(idInfoComment).WithVerticalScrollbar().WithWantReturn().IsMultiline());
 
-	this->configDialog = DialogBuilder().WithTitle(ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber)).IsPopup().WithBorder().WithDialogFrame().WithDialogModalFrame().WithSystemMenu().WithFont(L"MS Shell Dlg", 8);
+	this->configDialog = DialogBuilder().WithTitle(XSFConfig::CommonNameWithVersion()).IsPopup().WithBorder().WithDialogFrame().WithDialogModalFrame().WithSystemMenu().WithFont(L"MS Shell Dlg", 8);
 	this->configDialog.AddGroupControl(DialogGroupBuilder(L"General").WithRelativePositionToParent(RelativePositionToParent::PositionType::FromTopLeft, Point<short>(7, 7)));
 	this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Play infinitely").WithSize(60, 10).InGroup(L"General").WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 11)).WithTabStop().
 		WithID(idPlayInfinitely));

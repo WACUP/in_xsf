@@ -46,8 +46,8 @@ public:
 };
 
 unsigned XSFConfig::initSampleRate = 44100;
-std::string XSFConfig::commonName = "GSF Decoder";
-std::string XSFConfig::versionNumber = "1.0.4";
+std::wstring XSFConfig::commonName = L"GSF Decoder";
+std::wstring XSFConfig::versionNumber = L"1.0.5";
 bool XSFConfig_GSF::initLowPassFiltering = true;
 std::string XSFConfig_GSF::initMutes = "000000";
 
@@ -145,8 +145,8 @@ void XSFConfig_GSF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 
 void XSFConfig_GSF::About(HWND parent)
 {
-	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
-		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
-		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes modified VBA-M, SVN revision 1231 for "
-		"playback.").c_str(), ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
+	AboutMessageBox(parent, (XSFConfig::CommonNameWithVersion() + L"\n\nBuild date: " +
+		TEXT(__DATE__) + L"\n\nUsing xSF Winamp plugin framework (based on the vio*sf "
+		L"plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes "
+		L"modified VBA-M, SVN revision 1231 for playback.").c_str(), XSFConfig::commonName.c_str());
 }

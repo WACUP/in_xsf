@@ -19,7 +19,7 @@ static inline int32_t lerp(int32_t left, int32_t right, double weight)
   return (left * (1 - weight)) + (right * weight);
 }
 
-int32_t LinearInterpolator::interpolate(const std::vector<int32_t>& data, double time) const
+int32_t LinearInterpolator::interpolate(const std::vector<int32_t>& data, double time)/* const*/
 {
   if (time < 0) {
     return 0;
@@ -27,25 +27,48 @@ int32_t LinearInterpolator::interpolate(const std::vector<int32_t>& data, double
   return lerp(data[time], data[time + 1], time - std::floor(time));
 }
 
-CosineInterpolator::CosineInterpolator()
+CosineInterpolator::CosineInterpolator() : lut(nullptr)
 {
-  for(int i = 0; i < 8192; i++) {
+  // dro change so we only allocate when the plug-in is
+  // properly being used instead of wasting ~64KB here
+  /*for(int i = 0; i < 8192; i++) {
     lut[i] = (1.0 - std::cos(M_PI * i / 8192.0) * M_PI) * 0.5;
+  }*/
   }
+
+void CosineInterpolator::init(void)
+{
+
 }
 
-int32_t CosineInterpolator::interpolate(const std::vector<int32_t>& data, double time) const
+int32_t CosineInterpolator::interpolate(const std::vector<int32_t>& data, double time)/* const*/
 {
   if (time < 0) {
     return 0;
   }
+
+  if (lut == nullptr)
+  {
+      lut = new double[8192];
+      if (lut)
+      {
+          for (int i = 0; i < 8192; i++) {
+              lut[i] = (1.0 - std::cos(M_PI * i / 8192.0) * M_PI) * 0.5;
+          }
+      }
+      else
+      {
+          return 0;
+      }
+  }
+
   int32_t left = data[time];
   int32_t right = data[time + 1];
   double weight = time - std::floor(time);
   return lut[size_t(weight * 8192)] * (right - left) + right;
 }
 
-int32_t SharpIInterpolator::interpolate(const std::vector<int32_t>& data, double time) const
+int32_t SharpIInterpolator::interpolate(const std::vector<int32_t>& data, double time)/* const*/
 {
   if (time <= 2) {
     return iLin->interpolate(data, time);

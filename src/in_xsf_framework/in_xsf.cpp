@@ -111,7 +111,7 @@ int init()
 	xSFConfig = XSFConfig::Create();
 	if (xSFConfig)
 	{
-		inMod.description = (char *)inMod.memmgr->sysDupStr((wchar_t*)ConvertFuncs::StringToWString(XSFConfig::CommonNameWithVersion()).c_str());
+		inMod.description = (char*)XSFConfig::CommonNameWithVersion().c_str();
 
 		// changed from doing this to delaying until it's
 		// needed to minimise the impact on loading times
@@ -164,7 +164,8 @@ void getFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 	if (xSF)
 	{
 		if (title)
-			CopyToString(xSF->GetFormattedTitle(XSFConfig::initTitleFormat/*/xSFConfig->GetTitleFormat()/**/).substr(0, GETFILEINFO_TITLE_LENGTH - 1), title);
+			CopyToString(xSF->GetFormattedTitle("%game%[ - [%disc%.]%track%] - %title%"/*XSFConfig::initTitleFormat/*/
+								   /*xSFConfig->GetTitleFormat()/**/).substr(0, GETFILEINFO_TITLE_LENGTH - 1), title);
 		if (length_in_ms)
 			*length_in_ms = xSF->GetLengthMS(xSFConfig->GetDefaultLength()) + xSF->GetFadeMS(xSFConfig->GetDefaultFade());
 		if (toFree)
@@ -384,7 +385,7 @@ extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, H
 	return IN_PLUGIN_UNINSTALL_REBOOT;
 }
 
-static eq_str eqstr;
+//static eq_str eqstr;
 
 template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, T *dest, std::size_t destlen)
 {
@@ -392,7 +393,7 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 
 	// the core can send a *.<ext> to us so for these values we
 	// don't need to hit the files & can do a default response.
-	if (eqstr(data, "type") || eqstr(data, "streammetadata"))
+	if (SameStrA(data, "type") || SameStrA(data, "streammetadata"))
 	{
 		dest[0] = '0';
 		dest[1] = 0;
@@ -405,7 +406,7 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 	{
 		return 0;
 	}
-	else if (eqstr(data, "family"))
+	else if (SameStrA(data, "family"))
 	{
 		CopyToString(const_cast<char *>(XSFPlayer::ShellDescription), dest);
 		return 1;
@@ -418,18 +419,18 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 	try
 	{
 		std::string tagToGet = data;
-		if (eqstr(data, "album"))
+		if (SameStrA(data, "album"))
 			tagToGet = "game";
-		else if (eqstr(data, "publisher"))
+		else if (SameStrA(data, "publisher"))
 			tagToGet = "copyright";
-		else if (eqstr(data, "tool"))
+		else if (SameStrA(data, "tool"))
 			tagToGet = XSFPlayer::SFby;
 		std::string tag = "";
 		if (!file.GetTagExists(tagToGet))
 		{
-			if (eqstr(tagToGet, "replaygain_track_gain"))
+			if (SameStrA(tagToGet.c_str(), "replaygain_track_gain"))
 				return 1;
-			else if (eqstr(tagToGet, "formatinformation"))
+			else if (SameStrA(tagToGet.c_str(), "formatinformation"))
 			{
 				const int fade = file.GetFadeMS(xSFConfig->GetDefaultFade()),
 						  length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + fade;
@@ -440,7 +441,7 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 				CopyToString(tag.substr(0, destlen - 1), dest);
 				return 1;
 			}
-			else if (eqstr(tagToGet, "bitrate"))
+			else if (SameStrA(tagToGet.c_str(), "bitrate"))
 			{
 				const int br = (xSFConfig->GetSampleRate() * NumChannels * BitsPerSample);
 				if (br > 0)
@@ -450,7 +451,7 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 					return 1;
 				}
 			}
-			else if (eqstr(tagToGet, "samplerate"))
+			else if (SameStrA(tagToGet.c_str(), "samplerate"))
 			{
 				tag = std::to_string(xSFConfig->GetSampleRate());
 				CopyToString(tag.substr(0, destlen - 1), dest);
@@ -458,7 +459,7 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 			}
 			return 0;
 		}
-		else if (eqstr(tagToGet, "length"))
+		else if (SameStrA(tagToGet.c_str(), "length"))
 			tag = std::to_string(file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade()));
 		else
 			tag = file.GetTagValue(tagToGet);

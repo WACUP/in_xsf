@@ -84,18 +84,18 @@ protected:
 	virtual void CopySpecificConfigToMemory(XSFPlayer *xSFPlayer, bool preLoad) = 0;
 public:
 	static bool initPlayInfinitely;
-	static std::string initSkipSilenceOnStartSec, initDetectSilenceSec, initDefaultLength, initDefaultFade, initTitleFormat;
+	static std::string initSkipSilenceOnStartSec, initDetectSilenceSec, initDefaultLength, initDefaultFade/*, initTitleFormat*/;
 	static double initVolume;
 	static VolumeType initVolumeType;
 	static PeakType initPeakType;
 	// These are not defined in XSFConfig.cpp, they should be defined in your own config's source.
 	static unsigned initSampleRate;
-	static std::string commonName;
-	static std::string versionNumber;
+	static std::wstring commonName;
+	static std::wstring versionNumber;
 	static const wchar_t wacup_plugin_id[];
 	// The Create function is not defined in XSFConfig.cpp, it should be defined in your own config's source and return a pointer to your config's class.
 	static XSFConfig *Create();
-	static const std::string &CommonNameWithVersion();
+	static const std::wstring &CommonNameWithVersion();
 
 	virtual ~XSFConfig() { }
 	void InitConfig();

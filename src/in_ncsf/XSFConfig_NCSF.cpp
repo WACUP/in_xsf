@@ -31,8 +31,8 @@ enum
 };
 
 unsigned XSFConfig::initSampleRate = 44100;
-std::string XSFConfig::commonName = "NCSF Decoder";
-std::string XSFConfig::versionNumber = "1.12.3";
+std::wstring XSFConfig::commonName = L"NCSF Decoder";
+std::wstring XSFConfig::versionNumber = L"1.12.4";
 unsigned XSFConfig_NCSF::initInterpolation = 4;
 std::string XSFConfig_NCSF::initMutes = "0000000000000000";
 
@@ -132,11 +132,11 @@ void XSFConfig_NCSF::CopySpecificConfigToMemory(XSFPlayer *xSFPlayer, bool)
 
 void XSFConfig_NCSF::About(HWND parent)
 {
-	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
-		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
-		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes code adapted from the FeOS Sound System "
-		"library by\nfincs, git revision 5204c55 on GitHub, for playback.").c_str(),
-		ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
+	AboutMessageBox(parent, (XSFConfig::CommonNameWithVersion() + L"\n\nBuild date: " +
+		TEXT(__DATE__) + L"\n\nUsing xSF Winamp plugin framework (based on the vio*sf "
+		L"plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes "
+		L"code adapted from the FeOS Sound System library by\nfincs, git revision "
+		L"5204c55 on GitHub, for playback.").c_str(), XSFConfig::commonName.c_str());
 }
 
 #ifdef _DEBUG

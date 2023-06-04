@@ -13,7 +13,7 @@
 #include <locale>
 #include <string>
 
-struct eq_str
+/*struct eq_str
 {
 	struct eq_char
 	{
@@ -35,4 +35,4 @@ struct eq_str
 	{
 		return x.length() == y.length() && std::equal(x.begin(), x.end(), y.begin(), eq_char(this->tab));
 	}
-};
+};*/

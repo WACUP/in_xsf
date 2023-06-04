@@ -48,8 +48,8 @@ public:
 };
 
 unsigned XSFConfig::initSampleRate = DESMUME_SAMPLE_RATE;
-std::string XSFConfig::commonName = "2SF Decoder";
-std::string XSFConfig::versionNumber = "1.0.4";
+std::wstring XSFConfig::commonName = L"2SF Decoder";
+std::wstring XSFConfig::versionNumber = L"1.0.6";
 unsigned XSFConfig_2SF::initInterpolation = 2;
 std::string XSFConfig_2SF::initMutes = "0000000000000000";
 
@@ -138,8 +138,9 @@ void XSFConfig_2SF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 
 void XSFConfig_2SF::About(HWND parent)
 {
-	AboutMessageBox(parent, ConvertFuncs::StringToWString(XSFConfig::commonName + " v" + XSFConfig::versionNumber +
-		"\n\nBuild date: " + __DATE__ + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf plugins) by "
-		"Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes modified " + EMU_DESMUME_NAME_AND_VERSION() +
-		" for playback.").c_str(), ConvertFuncs::StringToWString(XSFConfig::commonName).c_str());
+	AboutMessageBox(parent, (XSFConfig::CommonNameWithVersion() + L"\n\nBuild date: " +
+		TEXT(__DATE__) + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf "
+		L"plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes "
+		L"modified " + ConvertFuncs::StringToWString(EMU_DESMUME_NAME_AND_VERSION()) +
+		L" for playback.").c_str(), XSFConfig::commonName.c_str());
 }

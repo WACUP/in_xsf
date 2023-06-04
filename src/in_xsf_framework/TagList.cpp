@@ -9,13 +9,18 @@
 #include <algorithm>
 #include <string>
 #include "TagList.h"
-#include "eqstr.h"
+//#include "eqstr.h"
+#include <windows.h>
+#include <loader/loader/utils.h>
 
-eq_str TagList::eqstr;
+// TODO can this be changed to not allocate
+//		512 bytes when it's not being used?
+//eq_str TagList::eqstr;
 
 auto TagList::GetTagOrder(const std::string &name) const -> TagsList::const_iterator
 {
-	return std::find_if(this->tagsOrder.begin(), this->tagsOrder.end(), [&](const std::string &tag) { return TagList::eqstr(tag, name); });
+	//return std::find_if(this->tagsOrder.begin(), this->tagsOrder.end(), [&](const std::string &tag) { return TagList::eqstr(tag, name); });
+	return std::find_if(this->tagsOrder.begin(), this->tagsOrder.end(), [&](const std::string &tag) { return SameStrA(tag.c_str(), name.c_str()); });
 }
 
 auto TagList::GetKeys() const -> const TagsList &
