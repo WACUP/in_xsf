@@ -375,11 +375,11 @@ class DialogTemplate
 		DialogControlType controlType;
 		std::uint32_t style, exstyle;
 		Rect<short> rect;
-		short id;
 		std::unique_ptr<RelativePosition> relativePosition;
+		short id;
 
 		friend class DialogTemplate;
-		DialogControl() : controlType(DialogControlType::None), style(0), exstyle(0), rect(), id(-1), relativePosition() { }
+		DialogControl() : controlType(DialogControlType::None), style(0), exstyle(0), rect(), relativePosition(), id(-1) { }
 		DialogControl(const DialogControl &control) : controlType(control.controlType), style(control.style), exstyle(control.exstyle), rect(control.rect), id(control.id),
 			relativePosition(control.relativePosition ? control.relativePosition->Clone() : nullptr) { }
 		DialogControl &operator=(const DialogControl &control)

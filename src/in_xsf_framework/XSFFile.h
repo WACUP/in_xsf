@@ -32,11 +32,12 @@ enum class PeakType
 class XSFFile
 {
 protected:
-	std::uint8_t xSFType;
-	bool hasFile;
 	std::vector<std::uint8_t> rawData, reservedSection, programSection;
 	TagList tags;
 	std::string fileName;
+	std::uint8_t xSFType;
+	bool hasFile;
+
 	void ReadXSF(const std::string &filename, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize, bool readTagsOnly = false);
 #ifdef _WIN32
 	void ReadXSF(const std::wstring &filename, std::uint32_t programSizeOffset, std::uint32_t programHeaderSize, bool readTagsOnly = false);

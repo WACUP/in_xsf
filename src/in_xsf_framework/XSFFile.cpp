@@ -61,7 +61,7 @@ static inline std::string TrimWhitespace(const std::string &orig)
 	return LeftTrimWhitespace(RightTrimWhitespace(orig));
 }
 
-XSFFile::XSFFile() : xSFType(0), hasFile(false), rawData(), reservedSection(), programSection(), tags(), fileName("")
+XSFFile::XSFFile() : rawData(), reservedSection(), programSection(), tags(), fileName(""), xSFType(0), hasFile(false)
 {
 }
 

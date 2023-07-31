@@ -61,12 +61,12 @@ public:
 class XSFConfig
 {
 protected:
-	bool configLoaded, playInfinitely;
 	unsigned long skipSilenceOnStartSec, detectSilenceSec, defaultLength, defaultFade;
 	double volume;
 	VolumeType volumeType;
 	PeakType peakType;
 	unsigned sampleRate;
+	bool configLoaded, playInfinitely;
 	//std::string titleFormat;
 	DialogTemplate configDialog, configDialogProperty, infoDialog;
 	std::vector<unsigned> supportedSampleRates;

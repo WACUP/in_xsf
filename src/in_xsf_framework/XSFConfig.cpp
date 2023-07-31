@@ -49,10 +49,12 @@ double XSFConfig::initVolume = 1.0;
 VolumeType XSFConfig::initVolumeType = VolumeType::ReplayGainAlbum;
 PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
 
-XSFConfig::XSFConfig() : configLoaded(false), playInfinitely(false), skipSilenceOnStartSec(0),
-	detectSilenceSec(0), defaultLength(0), defaultFade(0), volume(0.0), volumeType(VolumeType::None),
-	peakType(PeakType::None), sampleRate(0), /*titleFormat(""),*/ configDialog(), configDialogProperty(),
-	infoDialog(), supportedSampleRates(), configIO(nullptr/*/XSFConfigIO::Create()/**/)
+XSFConfig::XSFConfig() : skipSilenceOnStartSec(0), detectSilenceSec(0), defaultLength(0),
+						 defaultFade(0), volume(0.0), volumeType(VolumeType::None),
+						 peakType(PeakType::None), sampleRate(0), configLoaded(false),
+						 playInfinitely(false), /*titleFormat(""),*/ configDialog(),
+						 configDialogProperty(), infoDialog(), supportedSampleRates(),
+						 configIO(nullptr/*/XSFConfigIO::Create()/**/)
 {
 }
 
