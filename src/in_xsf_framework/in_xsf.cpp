@@ -32,7 +32,7 @@ static XSFPlayer *xSFPlayer = nullptr;
 XSFConfig *xSFConfig = nullptr;
 static bool paused;
 static int seek_needed;
-static double decode_pos_ms;
+static int decode_pos_ms;
 static HANDLE thread_handle = INVALID_HANDLE_VALUE;
 static bool killThread = false;
 
@@ -44,14 +44,15 @@ DWORD WINAPI playThread(void *b)
 	bool done = false;
 	while (!*static_cast<bool *>(b))
 	{
+		const auto buffer_size = (576 * NumChannels * (BitsPerSample / 8));
 		if (seek_needed != -1)
 		{
 			decode_pos_ms = seek_needed - (seek_needed % 1000);
 			seek_needed = -1;
 			if (xSFPlayer)
 			{
-				auto dummyBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
-				xSFPlayer->Seek(static_cast<unsigned>(decode_pos_ms), nullptr, dummyBuffer, inMod.outMod);
+				auto dummyBuffer = std::vector<std::uint8_t>(buffer_size);
+				xSFPlayer->Seek(decode_pos_ms, nullptr, dummyBuffer, inMod.outMod);
 			}
 		}
 
@@ -65,15 +66,15 @@ DWORD WINAPI playThread(void *b)
 			}
 			Sleep(10);
 		}
-		else if (static_cast<unsigned>(inMod.outMod->CanWrite()) >= ((576 * NumChannels * (BitsPerSample / 8)) << (inMod.dsp_isactive() ? 1 : 0)))
+		else if (static_cast<unsigned>(inMod.outMod->CanWrite()) >= (buffer_size << (inMod.dsp_isactive() ? 1 : 0)))
 		{
-			auto sampleBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
+			auto sampleBuffer = std::vector<std::uint8_t>(buffer_size);
 			unsigned samplesWritten = 0;
 			done = (xSFPlayer ? xSFPlayer->FillBuffer(sampleBuffer, samplesWritten) : true);
 			if (samplesWritten)
 			{
-				inMod.SAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, static_cast<int>(decode_pos_ms));
-				inMod.VSAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, static_cast<int>(decode_pos_ms));
+				inMod.SAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
+				inMod.VSAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
 				if (inMod.dsp_isactive())
 					samplesWritten = inMod.dsp_dosamples(reinterpret_cast<short *>(&sampleBuffer[0]), samplesWritten, BitsPerSample, NumChannels, xSFPlayer->GetSampleRate());
 				decode_pos_ms += samplesWritten * 1000.0 / xSFPlayer->GetSampleRate();
@@ -233,7 +234,7 @@ int play(const in_char *fn)
 		xSFFile = tmpxSFPlayer->GetXSFFile();
 		paused = false;
 		seek_needed = -1;
-		decode_pos_ms = 0.0;
+		decode_pos_ms = 0;
 
 		int maxlatency = inMod.outMod->Open(tmpxSFPlayer->GetSampleRate(), NumChannels, BitsPerSample, -1, -1);
 		if (maxlatency < 0)
@@ -393,10 +394,12 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 
 	// the core can send a *.<ext> to us so for these values we
 	// don't need to hit the files & can do a default response.
-	if (SameStrA(data, "type") || SameStrA(data, "streammetadata"))
+	if (SameStrA(data, "type") ||
+		SameStrA(data, "lossless") ||
+		SameStrA(data, "streammetadata"))
 	{
-		dest[0] = '0';
-		dest[1] = 0;
+		dest[0] = L'0';
+		dest[1] = L'\0';
 		return 1;
 	}
 	else if (SameStrA(data, "streamgenre") ||
@@ -515,8 +518,15 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 	{
 		if (!nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
 		{
+			if (FilePathExists(fn))
+			{
 			auto file = XSFFile(fn);
 			return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
+		}
+			else
+			{
+				return 0;
+			}
 		}
 		return 1;
 	}
@@ -637,18 +647,20 @@ extern "C" __declspec(dllexport) std::size_t winampGetExtendedRead_getData(std::
 	XSFPlayer *tmpxSFPlayer = reinterpret_cast<XSFPlayer *>(handle);
 	if (!tmpxSFPlayer)
 		return 0;
+
+	const auto buffer_size = (576 * NumChannels * (BitsPerSample / 8));
 	if (extendedSeekNeeded != -1)
 	{
-		auto dummyBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
+		auto dummyBuffer = std::vector<std::uint8_t>(buffer_size);
 		if (tmpxSFPlayer->Seek(static_cast<unsigned>(extendedSeekNeeded), killswitch, dummyBuffer, nullptr))
 			return 0;
 		extendedSeekNeeded = -1;
 	}
 	unsigned copied = 0;
 	bool done = false;
-	while (copied + (576 * NumChannels * (BitsPerSample / 8)) < len && !done)
+	while (copied + buffer_size < len && !done)
 	{
-		auto sampleBuffer = std::vector<std::uint8_t>(576 * NumChannels * (BitsPerSample / 8));
+		auto sampleBuffer = std::vector<std::uint8_t>(buffer_size);
 		unsigned samplesWritten = 0;
 		done = tmpxSFPlayer->FillBuffer(sampleBuffer, samplesWritten);
 		std::copy_n(&sampleBuffer[0], samplesWritten * NumChannels * (BitsPerSample / 8), &dest[copied]);
