@@ -151,7 +151,7 @@ void triggerDma(EDMAMode mode);
 class DivController
 {
 public:
-	DivController() : mode(0), busy(0) { }
+	DivController() : mode(0), busy(0), div0(0) { }
 	void exec();
 	uint8_t mode, busy, div0;
 	uint16_t read16() { return this->mode | (this->busy << 15) | (this->div0 << 14); }
@@ -210,9 +210,8 @@ public:
 	void tryTrigger(EDMAMode mode);
 
 	DmaController() :
-		enable(0), irq(0), repeatMode(0), _startmode(0),
-		wordcount(0), startmode(EDMAMode_Immediate),
-		bitWidth(EDMABitWidth_16),
+		enable(0), irq(0), repeatMode(0), _startmode(0), userEnable(0),
+		wordcount(0), startmode(EDMAMode_Immediate), bitWidth(EDMABitWidth_16),
 		sar(EDMASourceUpdate_Increment), dar(EDMADestinationUpdate_Increment),
 		// if saddr isnt cleared then rings of fate will trigger copy protection
 		// by inspecting dma3 saddr when it boots
@@ -223,6 +222,8 @@ public:
 		paused(false),
 		triggered(false),
 		nextEvent(0),
+		procnum(0),
+		chan(0),
 		sad(&saddr_user),
 		dad(&daddr_user)
 	{
@@ -240,7 +241,7 @@ public:
 		// we pass in a pointer to the controller here so we can alert it if anything changes
 		DmaController *controller;
 		uint32_t *const ptr;
-		AddressRegister(uint32_t *_ptr) : ptr(_ptr) { }
+		AddressRegister(uint32_t *_ptr) : controller(0), ptr(_ptr) { }
 		virtual ~AddressRegister() { }
 		virtual uint32_t read32()
 		{
@@ -257,7 +258,7 @@ public:
 	public:
 		// we pass in a pointer to the controller here so we can alert it if anything changes
 		DmaController *controller;
-		ControlRegister() { }
+		ControlRegister() : controller(0) { }
 		virtual ~ControlRegister() { }
 		virtual uint32_t read32()
 		{

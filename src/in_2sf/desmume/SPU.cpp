@@ -52,7 +52,8 @@ static inline s8 read_s8(u32 addr) { return (s8)_MMU_read08<ARMCPU_ARM7,MMU_AT_D
 #define COSINE_INTERPOLATION_RESOLUTION 8192
 
 SPU_struct *SPU_core = 0;
-int SPU_currentCoreNum = SNDCORE_DUMMY;
+// dro change as this isn't used
+//int SPU_currentCoreNum = SNDCORE_DUMMY;
 static int volume = 100;
 // dro change to reduce the impact on loading & memory usage when not used during a run
 static SampleCache *sampleCache = 0;
@@ -106,9 +107,10 @@ void SetDesmumeSampleRate(double rate) {
   DESMUME_SAMPLE_RATE = rate;
   sampleLength = DESMUME_SAMPLE_RATE / 32728.498;
   samples_per_hline = (DESMUME_SAMPLE_RATE / 59.8261f) / 263.0f;
-  for (int i = 0; i < 16; i++) {
+  // dro change doesn't actually do anything afaict
+  /*for (int i = 0; i < 16; i++) {
     channel_struct *chan = &SPU_core->channels[i];
-  }
+  }*/
 }
 
 static double samples = 0;
@@ -140,7 +142,8 @@ int SPU_ChangeSoundCore(int coreid, int buffersize)
   if (coreid == SNDCORE_DEFAULT)
     coreid = 0; // Assume we want the first one
 
-  SPU_currentCoreNum = coreid;
+  // dro change as this isn't used
+  //SPU_currentCoreNum = coreid;
 
   // Go through core list and find the id
   for (i = 0; SNDCoreList[i] != NULL; i++)
@@ -277,6 +280,7 @@ SPU_struct::SPU_struct(int buffersize)
   : bufpos(0)
   , buflength(0)
   , sndbuf(0)
+  , lastdata(0)
   , outbuf(0)
     , bufsize(buffersize)
 {
@@ -294,10 +298,29 @@ SPU_struct::~SPU_struct()
 void SPU_DeInit(void)
 {
   if(SNDCore)
+  {
     SNDCore->DeInit();
   SNDCore = 0;
+  }
 
-  delete SPU_core; SPU_core=0;
+  if (SPU_core)
+  {
+    delete SPU_core;
+    SPU_core = 0;
+  }
+
+  if (sampleCache)
+  {
+    sampleCache->clear();
+    delete sampleCache;
+    sampleCache = 0;
+  }
+
+  if (synchronizer)
+  {
+    delete synchronizer;
+    synchronizer = 0;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -611,6 +634,7 @@ SPUFifo::SPUFifo()
 void SPUFifo::reset()
 {
   head = tail = size = 0;
+  memset(&buffer, 0, sizeof(buffer));
 }
 
 void SPUFifo::enqueue(s16 val)
@@ -1430,8 +1454,18 @@ void SPU_Emulate_user(bool mix)
   // we can store all the sound data.
   if (postProcessBufferSize < freeSampleCount * 2 * sizeof(s16))
   {
+    s16* oldPostProcessBuffer = postProcessBuffer;
     postProcessBufferSize = freeSampleCount * 2 * sizeof(s16);
     postProcessBuffer = (s16 *)realloc(postProcessBuffer, postProcessBufferSize);
+    if (!postProcessBuffer)
+    {
+      free(oldPostProcessBuffer);
+      postProcessBuffer = (s16*)calloc(1, postProcessBufferSize);
+    }
+    else
+    {
+      memset(postProcessBuffer, 0, postProcessBufferSize);
+    }
   }
 
   if (!synchronizer)

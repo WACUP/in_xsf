@@ -525,7 +525,7 @@ void BackupDevice::loadfile()
 	if (this->filename.empty())
 		return; // No sense crashing if no filename supplied
 
-	auto inf = std::unique_ptr<EMUFILE_FILE>(new EMUFILE_FILE(filename.c_str(), "rb"));
+	auto inf = std::unique_ptr<EMUFILE_FILE>(new EMUFILE_FILE(filename/*.c_str()*/, "rb"));
 	if (inf->fail())
 	{
 #ifdef _DEBUG

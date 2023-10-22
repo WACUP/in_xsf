@@ -206,7 +206,11 @@ struct RomBanner
 
 struct GameInfo
 {
-	GameInfo() : romdata() { }
+	GameInfo() : crc(0), header(), romdata(), romsize(0), allocatedSize(0), mask(0), isHomebrew(false)
+	{
+		memset(&ROMserial, 0, sizeof(ROMserial));
+		memset(&ROMname, 0, sizeof(ROMname));
+	}
 
 	void loadData(char *buf, int size)
 	{
@@ -283,7 +287,7 @@ template<bool FORCE> void NDS_exec(int32_t nb = 560190 << 1);
 extern struct TCommonSettings
 {
 	TCommonSettings() : UseExtBIOS(false), SWIFromBIOS(false), PatchSWI3(false), UseExtFirmware(false), BootFromFirmware(false), ConsoleType(NDS_CONSOLE_TYPE_FAT), rigorous_timing(false), advanced_timing(true),
-		spuInterpolationMode(SPUInterpolation_Linear), manualBackupType(0), spu_captureMuted(false), spu_advanced(false)
+		use_jit(false), jit_max_block_size(0), spuInterpolationMode(SPUInterpolation_Linear), manualBackupType(0), spu_captureMuted(false), spu_advanced(false)
 	{
 		strcpy(this->ARM9BIOS, "biosnds9.bin");
 		strcpy(this->ARM7BIOS, "biosnds7.bin");

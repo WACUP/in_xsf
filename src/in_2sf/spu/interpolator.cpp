@@ -36,10 +36,10 @@ CosineInterpolator::CosineInterpolator() : lut(nullptr)
   }*/
   }
 
-void CosineInterpolator::init(void)
+/*void CosineInterpolator::init(void)
 {
 
-}
+}*/
 
 int32_t CosineInterpolator::interpolate(const std::vector<int32_t>& data, double time)/* const*/
 {

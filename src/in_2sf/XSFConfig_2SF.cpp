@@ -49,7 +49,7 @@ public:
 
 unsigned XSFConfig::initSampleRate = DESMUME_SAMPLE_RATE;
 std::wstring XSFConfig::commonName = L"2SF Decoder";
-std::wstring XSFConfig::versionNumber = L"1.0.7";
+std::wstring XSFConfig::versionNumber = L"1.0.8";
 unsigned XSFConfig_2SF::initInterpolation = 2;
 std::string XSFConfig_2SF::initMutes = "0000000000000000";
 

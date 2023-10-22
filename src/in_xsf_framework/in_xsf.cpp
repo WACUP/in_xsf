@@ -73,16 +73,23 @@ DWORD WINAPI playThread(void *b)
 			done = (xSFPlayer ? xSFPlayer->FillBuffer(sampleBuffer, samplesWritten) : true);
 			if (samplesWritten)
 			{
+				const int sampleRate = (xSFPlayer ? xSFPlayer->GetSampleRate() : 0);
+				if (!sampleRate)
+				{
+					done = true;
+					continue;
+				}
+
 				inMod.SAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
 				inMod.VSAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
 				if (inMod.dsp_isactive())
-					samplesWritten = inMod.dsp_dosamples(reinterpret_cast<short *>(&sampleBuffer[0]), samplesWritten, BitsPerSample, NumChannels, xSFPlayer->GetSampleRate());
-				decode_pos_ms += samplesWritten * 1000.0 / xSFPlayer->GetSampleRate();
+					samplesWritten = inMod.dsp_dosamples(reinterpret_cast<short *>(&sampleBuffer[0]), samplesWritten, BitsPerSample, NumChannels, sampleRate);
+				decode_pos_ms += samplesWritten * 1000.0 / sampleRate;
 				inMod.outMod->Write(reinterpret_cast<char *>(&sampleBuffer[0]), samplesWritten * NumChannels * (BitsPerSample / 8));
 			}
 		}
 		else
-			Sleep(20);
+			Sleep(10);
 	}
 	return 0;
 }
@@ -279,7 +286,7 @@ void stop()
 		killThread = true;
 		if (WaitForSingleObject(thread_handle, 2000) == WAIT_TIMEOUT)
 		{
-			MessageBoxW(inMod.hMainWindow, L"error asking thread to die!", L"error killing decode thread", 0);
+			//MessageBoxW(inMod.hMainWindow, L"error asking thread to die!", L"error killing decode thread", 0);
 			TerminateThread(thread_handle, 0);
 		}
 		CloseHandle(thread_handle);

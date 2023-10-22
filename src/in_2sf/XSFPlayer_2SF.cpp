@@ -272,9 +272,10 @@ void XSFPlayer_2SF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned off
 			{
 				std::copy_n(&sndifwork.buf[sndifwork.used], bytes, &buf[offset]);
 				sndifwork.used += bytes;
-				offset += bytes;
+				// dro change these aren't needed afaict
+				/*offset += bytes;
 				remainbytes -= bytes;
-				bytes = 0;
+				bytes = 0;*/
 				break;
 			}
 			else

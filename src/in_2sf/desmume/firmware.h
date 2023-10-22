@@ -44,7 +44,11 @@ private:
 	uint32_t decrypt(const uint8_t *in, std::unique_ptr<uint8_t[]> &out);
 	uint32_t decompress(const uint8_t *in, std::unique_ptr<uint8_t[]> &out);
 public:
-	CFIRMWARE(): size9(0), size7(0), ARM9bootAddr(0), ARM7bootAddr(0), patched(0) { }
+	CFIRMWARE(): size9(0), size7(0), header(), ARM9bootAddr(0), ARM7bootAddr(0), patched(0)
+	{
+		memset(&keyBuf, 0, sizeof(keyBuf));
+		memset(&keyCode, 0, sizeof(keyCode));
+	}
 
 	bool load();
 

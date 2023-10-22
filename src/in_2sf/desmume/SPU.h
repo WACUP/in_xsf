@@ -72,7 +72,9 @@ struct SoundInterface_struct
 
 extern SoundInterface_struct SNDDummy;
 extern SoundInterface_struct SNDFile;
-extern int SPU_currentCoreNum;
+
+// dro change as this isn't used
+//extern int SPU_currentCoreNum;
 
 struct channel_struct
 {
@@ -191,7 +193,7 @@ public:
 		   u16 len;
 		   struct Runtime {
 			   Runtime()
-				   : running(0), curdad(0), maxdad(0)
+				   : running(0), curdad(0), maxdad(0), sampcnt(0)
 			   {}
 			   u8 running;
 			   u32 curdad;

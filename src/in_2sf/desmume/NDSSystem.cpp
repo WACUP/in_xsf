@@ -156,7 +156,7 @@ enum ESI_DISPCNT
 	ESI_DISPCNT_HStart, ESI_DISPCNT_HStartIRQ, ESI_DISPCNT_HDraw, ESI_DISPCNT_HBlank
 };
 
-uint64_t nds_timer;
+uint64_t nds_timer = 0;
 static uint64_t nds_arm9_timer, nds_arm7_timer;
 
 struct TSequenceItem

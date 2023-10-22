@@ -24,11 +24,12 @@ class CosineInterpolator : public IInterpolator
 {
 public:
   CosineInterpolator();
+  ~CosineInterpolator() { if (lut) delete lut; lut = 0; }
 
   virtual int32_t interpolate(const std::vector<int32_t>& data, double time)/* const*/;
 
 private:
-  void init(void);
+  //void init(void);
 
   double *lut/*[8192]*/;
 };

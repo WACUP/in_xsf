@@ -30,7 +30,7 @@ enum
 
 unsigned XSFConfig::initSampleRate = 44100;
 std::wstring XSFConfig::commonName = L"SNSF Decoder";
-std::wstring XSFConfig::versionNumber = L"1.0.5";
+std::wstring XSFConfig::versionNumber = L"1.0.6";
 //bool XSFConfig_SNSF::initSixteenBitSound = true;
 bool XSFConfig_SNSF::initReverseStereo = false;
 unsigned XSFConfig_SNSF::initResampler = 1;
