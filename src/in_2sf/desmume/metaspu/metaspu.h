@@ -36,7 +36,7 @@ public:
 	virtual void enqueue_samples(s16* buf, int samples_provided) = 0;
 
 	//returns the number of samples actually supplied, which may not match the number requested
-	virtual int output_samples(s16* buf, int samples_requested) = 0;
+	virtual int output_samples(s16* buf, size_t samples_requested) = 0;
 };
 
 enum ESynchMode

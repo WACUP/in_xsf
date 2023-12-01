@@ -110,7 +110,7 @@ void fw_reset_com(memory_chip_t *mc)
 			fwrite(&mc->data[0], mc->size, 1, mc->fp);
 		}
 
-		if (mc->isFirmware&&CommonSettings.UseExtFirmware)
+		if (mc->isFirmware&&CommonSettings->UseExtFirmware)
 		{
 			// copy User Settings 1 to User Settings 0 area
 			memcpy(&mc->data[0x3FE00], &mc->data[0x3FF00], 0x100);
@@ -290,11 +290,11 @@ void BackupDevice::reset()
 	this->loadfile();
 
 	// if the user has requested a manual choice for backup type, and we havent imported a raw save file, then apply it now
-	if (this->state == DETECTING && CommonSettings.manualBackupType != MC_TYPE_AUTODETECT)
+	if (this->state == DETECTING && CommonSettings->manualBackupType != MC_TYPE_AUTODETECT)
 	{
 		this->state = RUNNING;
-		int savetype = save_types[CommonSettings.manualBackupType].media_type;
-		int savesize = save_types[CommonSettings.manualBackupType].size;
+		int savetype = save_types[CommonSettings->manualBackupType].media_type;
+		int savesize = save_types[CommonSettings->manualBackupType].size;
 		this->ensure(savesize); // expand properly if necessary
 		this->resize(savesize); // truncate if necessary
 		this->addr_size = this->addr_size_for_old_save_type(savetype);
@@ -602,14 +602,14 @@ void BackupDevice::loadfile()
 void BackupDevice::raw_applyUserSettings(uint32_t &size, bool manual)
 {
 	// respect the user's choice of backup memory type
-	if (CommonSettings.manualBackupType == MC_TYPE_AUTODETECT && !manual)
+	if (CommonSettings->manualBackupType == MC_TYPE_AUTODETECT && !manual)
 	{
 		this->addr_size = this->addr_size_for_old_save_size(size);
 		this->resize(size);
 	}
 	else
 	{
-		uint32_t type = CommonSettings.manualBackupType;
+		uint32_t type = CommonSettings->manualBackupType;
 		int savetype = save_types[type].media_type;
 		int savesize = save_types[type].size;
 		this->addr_size = this->addr_size_for_old_save_type(savetype);

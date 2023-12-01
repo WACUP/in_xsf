@@ -24,6 +24,7 @@
 #define WA_UTILS_SIMPLE
 #include <loader/loader/utils.h>
 #include <api/memmgr/api_memmgr.h>
+#include <agave/config/api_config.h>
 
 extern In_Module inMod;
 static const XSFFile *xSFFile = nullptr;
@@ -84,7 +85,7 @@ DWORD WINAPI playThread(void *b)
 				inMod.VSAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
 				if (inMod.dsp_isactive())
 					samplesWritten = inMod.dsp_dosamples(reinterpret_cast<short *>(&sampleBuffer[0]), samplesWritten, BitsPerSample, NumChannels, sampleRate);
-				decode_pos_ms += samplesWritten * 1000.0 / sampleRate;
+				decode_pos_ms += static_cast<int>(samplesWritten * 1000.0 / sampleRate);
 				inMod.outMod->Write(reinterpret_cast<char *>(&sampleBuffer[0]), samplesWritten * NumChannels * (BitsPerSample / 8));
 			}
 		}
@@ -243,7 +244,7 @@ int play(const in_char *fn)
 		seek_needed = -1;
 		decode_pos_ms = 0;
 
-		int maxlatency = inMod.outMod->Open(tmpxSFPlayer->GetSampleRate(), NumChannels, BitsPerSample, -1, -1);
+		int maxlatency = (inMod.outMod->Open ? inMod.outMod->Open(tmpxSFPlayer->GetSampleRate(), NumChannels, BitsPerSample, -1, -1) : -1);
 		if (maxlatency < 0)
 			return 1;
 		inMod.SetInfo((tmpxSFPlayer->GetSampleRate() * NumChannels * BitsPerSample) / 1000, tmpxSFPlayer->GetSampleRate() / 1000, NumChannels, 1);
@@ -253,7 +254,9 @@ int play(const in_char *fn)
 
 		xSFPlayer = tmpxSFPlayer.release();
 		killThread = false;
-		thread_handle = CreateThread(nullptr, 0, playThread, &killThread, 0, nullptr);
+		thread_handle = StartThread(playThread, &killThread, static_cast<int>(inMod.
+									config->GetInt(playbackConfigGroupGUID, L"priority",
+									THREAD_PRIORITY_HIGHEST)), 0, nullptr);
 		return 0;
 	}
 	catch (const std::exception &)
@@ -331,8 +334,9 @@ void GetFileExtensions(void)
 	static bool loaded_extensions;
 	if (!loaded_extensions)
 	{
-		inMod.FileExtensions = (char *)XSFPlayer::WinampExts;
 		loaded_extensions = true;
+
+		inMod.FileExtensions = (char *)XSFPlayer::WinampExts;
 	}
 }
 
@@ -383,8 +387,7 @@ extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, H
 {
 	// TODO
 	// prompt to remove our settings with default as no (just incase)
-	/*if (MessageBox(hwndDlg, WASABI_API_LNGSTRINGW(IDS_PLUGIN_UNINSTALL),
-				   (LPCWSTR)plugin.description, MB_YESNO | MB_DEFBUTTON2) == IDYES)
+	/*if (plugin.language->UninstallSettingsPrompt(reinterpret_cast<const wchar_t*>(plugin.description)))
 	{
 		REMOVE_INI_SECTION_W(app_nameW, 0);
 	}*/

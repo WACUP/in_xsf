@@ -73,8 +73,8 @@ std::string XSFConfigIO_Winamp::GetValueString(const std::string &name, const st
 	do
 	{
 		value.resize(value.size() * 2);
-		result = GetPrivateProfileStringW(XSFConfig::commonName.c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(defaultValue).c_str(), &value[0], value.size(), GetPaths()->winamp_ini_file);
-	} while (result + 1 == value.size());
+		result = GetPrivateProfileStringW(XSFConfig::commonName.c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(defaultValue).c_str(), &value[0], static_cast<DWORD>(value.size()), GetPaths()->winamp_ini_file);
+	} while (result + 1 == static_cast<DWORD>(value.size()));
 
 	if (!result)
 		throw std::runtime_error("Unable to get value from INI file.");

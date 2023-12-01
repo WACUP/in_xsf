@@ -32,7 +32,7 @@
 
 // ===============================================================
 
-TCommonSettings CommonSettings;
+TCommonSettings *CommonSettings = 0;
 
 GameInfo gameInfo;
 NDSSystem nds;
@@ -40,6 +40,11 @@ static std::unique_ptr<CFIRMWARE> firmware;
 
 int NDS_Init()
 {
+	if (!CommonSettings)
+	{
+		CommonSettings = new TCommonSettings();
+	}
+
 	MMU_Init();
 	nds.VCount = 0;
 
@@ -802,7 +807,7 @@ template<bool FORCE> void NDS_exec(int32_t)
 			int32_t s32next = (next - nds_timer) & 0xFFFFFFFF;
 
 #ifdef HAVE_JIT
-			auto arm9arm7 = CommonSettings.use_jit ? armInnerLoop<true, true, true>(nds_timer_base, s32next, arm9, arm7) : armInnerLoop<true, true, false>(nds_timer_base, s32next, arm9, arm7);
+			auto arm9arm7 = CommonSettings->use_jit ? armInnerLoop<true, true, true>(nds_timer_base, s32next, arm9, arm7) : armInnerLoop<true, true, false>(nds_timer_base, s32next, arm9, arm7);
 #else
 			auto arm9arm7 = armInnerLoop<true, true>(nds_timer_base, s32next, arm9, arm7);
 #endif
@@ -850,22 +855,22 @@ static void PrepareBiosARM7()
 {
 	NDS_ARM7.BIOS_loaded = false;
 	//memset(MMU.ARM7_BIOS, 0, sizeof(MMU.ARM7_BIOS));
-	if (CommonSettings.UseExtBIOS)
+	if (CommonSettings->UseExtBIOS)
 	{
 		// read arm7 bios from inputfile and flag it if it succeeds
-		FILE *arm7inf = fopen(CommonSettings.ARM7BIOS, "rb");
+		FILE *arm7inf = fopen(CommonSettings->ARM7BIOS, "rb");
 		if (fread(MMU.ARM7_BIOS, 1, 16384, arm7inf) == 16384)
 			NDS_ARM7.BIOS_loaded = true;
 		fclose(arm7inf);
 	}
 
 	// choose to use SWI emulation or routines from bios
-	if (CommonSettings.SWIFromBIOS && NDS_ARM7.BIOS_loaded)
+	if (CommonSettings->SWIFromBIOS && NDS_ARM7.BIOS_loaded)
 	{
 		NDS_ARM7.swi_tab = 0;
 
 		// if we used routines from bios, apply patches
-		if (CommonSettings.PatchSWI3)
+		if (CommonSettings->PatchSWI3)
 			_MMU_write16<ARMCPU_ARM7>(0x00002F08, 0x4770);
 	}
 	else
@@ -901,22 +906,22 @@ static void PrepareBiosARM9()
 {
 	//memset(MMU.ARM9_BIOS, 0, sizeof(MMU.ARM9_BIOS));
 	NDS_ARM9.BIOS_loaded = false;
-	if (CommonSettings.UseExtBIOS)
+	if (CommonSettings->UseExtBIOS)
 	{
 		// read arm9 bios from inputfile and flag it if it succeeds
-		FILE *arm9inf = fopen(CommonSettings.ARM9BIOS, "rb");
+		FILE *arm9inf = fopen(CommonSettings->ARM9BIOS, "rb");
 		if (fread(MMU.ARM9_BIOS, 1, 4096, arm9inf) == 4096)
 			NDS_ARM9.BIOS_loaded = true;
 		fclose(arm9inf);
 	}
 
 	// choose to use SWI emulation or routines from bios
-	if (CommonSettings.SWIFromBIOS && NDS_ARM9.BIOS_loaded)
+	if (CommonSettings->SWIFromBIOS && NDS_ARM9.BIOS_loaded)
 	{
 		NDS_ARM9.swi_tab = 0;
 
 		// if we used routines from bios, apply patches
-		if (CommonSettings.PatchSWI3)
+		if (CommonSettings->PatchSWI3)
 			_MMU_write16<ARMCPU_ARM9>(0xFFFF07CC, 0x4770);
 	}
 	else
@@ -1026,7 +1031,7 @@ void NDS_Reset()
 	MMU_Reset();
 
 #ifdef HAVE_JIT
-	arm_jit_reset(CommonSettings.use_jit);
+	arm_jit_reset(CommonSettings->use_jit);
 #endif
 
 	PrepareBiosARM7();
@@ -1042,7 +1047,7 @@ void NDS_Reset()
 	firmware.reset(new CFIRMWARE());
 	fw_success = firmware->load();
 
-	if (NDS_ARM7.BIOS_loaded && NDS_ARM9.BIOS_loaded && CommonSettings.BootFromFirmware && fw_success)
+	if (NDS_ARM7.BIOS_loaded && NDS_ARM9.BIOS_loaded && CommonSettings->BootFromFirmware && fw_success)
 	{
 		// Copy secure area to memory if needed.
 		// could we get a comment about what's going on here?
@@ -1172,7 +1177,7 @@ void NDS_Reset()
 	// Write the header checksum to memory (the firmware needs it to see the cart)
 	_MMU_write16<ARMCPU_ARM9>(0x027FF808, T1ReadWord(MMU.CART_ROM, 0x15E));
 
-	if (firmware->patched && CommonSettings.UseExtBIOS && CommonSettings.BootFromFirmware && fw_success)
+	if (firmware->patched && CommonSettings->UseExtBIOS && CommonSettings->BootFromFirmware && fw_success)
 	{
 		// HACK! for flashme
 		_MMU_write32<ARMCPU_ARM9>(0x27FFE24, firmware->ARM9bootAddr);

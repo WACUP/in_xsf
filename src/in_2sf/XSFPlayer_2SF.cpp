@@ -69,9 +69,9 @@ static struct
 
 static void SNDIFDeInit() { }
 
-static int SNDIFInit(int buffersize)
+static int SNDIFInit(size_t buffersize)
 {
-	std::uint32_t bufferbytes = buffersize * sizeof(std::int16_t);
+	std::uint32_t bufferbytes = static_cast<std::uint32_t>(buffersize * sizeof(std::int16_t));
 	SNDIFDeInit();
 	sndifwork.buf.resize(bufferbytes + 3);
 	sndifwork.bufferbytes = bufferbytes;
@@ -89,9 +89,9 @@ static std::uint32_t SNDIFGetAudioSpace()
 	return sndifwork.bufferbytes >> 2; // bytes to samples
 }
 
-static void SNDIFUpdateAudio(std::int16_t *buffer, std::uint32_t num_samples)
+static void SNDIFUpdateAudio(std::int16_t *buffer, size_t num_samples)
 {
-	std::uint32_t num_bytes = num_samples << 2;
+	std::uint32_t num_bytes = static_cast<std::uint32_t>(num_samples << 2);
 	if (num_bytes > sndifwork.bufferbytes)
 		num_bytes = sndifwork.bufferbytes;
 	std::copy_n(reinterpret_cast<std::uint8_t *>(buffer), num_bytes, &sndifwork.buf[0]);
@@ -216,7 +216,7 @@ bool XSFPlayer_2SF::Load()
 	if (NDS_Init())
 		return false;
 
-	static const int BUFFERSIZE = DESMUME_SAMPLE_RATE / 59.837; // truncates to 737, the traditional value, for 44100
+	static const size_t BUFFERSIZE = DESMUME_SAMPLE_RATE / 59.837; // truncates to 737, the traditional value, for 44100
 	SPU_ChangeSoundCore(SNDIFID_2SF, BUFFERSIZE);
 
 	execute = false;
@@ -229,8 +229,8 @@ bool XSFPlayer_2SF::Load()
 		gameInfo.loadData(reinterpret_cast<char *>(&this->rom[0]), size);
 	}
 
-	CommonSettings.use_jit = true;
-	CommonSettings.jit_max_block_size = 100;
+	CommonSettings->use_jit = true;
+	CommonSettings->jit_max_block_size = 100;
 	NDS_Reset();
 
 	execute = true;
@@ -243,9 +243,9 @@ bool XSFPlayer_2SF::Load()
 	}
 
 	sndifwork.xfs_load = true;
-	CommonSettings.rigorous_timing = true;
-	CommonSettings.spu_advanced = true;
-	CommonSettings.advanced_timing = true;
+	CommonSettings->rigorous_timing = true;
+	CommonSettings->spu_advanced = true;
+	CommonSettings->advanced_timing = true;
 
 	return XSFPlayer::Load();
 }

@@ -4,14 +4,14 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-static LinearInterpolator* iLin = new LinearInterpolator;
+/*static*/ LinearInterpolator* iLin = nullptr/*/new LinearInterpolator/**/;
 
 // Keep in the same order as SPUInterpolationMode
 IInterpolator* IInterpolator::allInterpolators[4] = {
   nullptr,
-  iLin,
-  new CosineInterpolator,
-  new SharpIInterpolator
+  nullptr/*/iLin/**/,
+  nullptr/*/new CosineInterpolator/**/,
+  nullptr/*/new SharpIInterpolator/**/
 };
 
 static inline int32_t lerp(int32_t left, int32_t right, double weight)

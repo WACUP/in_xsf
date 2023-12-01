@@ -49,7 +49,7 @@ public:
 
 unsigned XSFConfig::initSampleRate = DESMUME_SAMPLE_RATE;
 std::wstring XSFConfig::commonName = L"2SF Decoder";
-std::wstring XSFConfig::versionNumber = L"1.0.8";
+std::wstring XSFConfig::versionNumber = L"1.0.9";
 unsigned XSFConfig_2SF::initInterpolation = 2;
 std::string XSFConfig_2SF::initMutes = "0000000000000000";
 
@@ -130,9 +130,9 @@ void XSFConfig_2SF::CopySpecificConfigToMemory(XSFPlayer *, bool preLoad)
 {
 	if (!preLoad)
 	{
-		CommonSettings.spuInterpolationMode = static_cast<SPUInterpolationMode>(this->interpolation);
+		CommonSettings->spuInterpolationMode = static_cast<SPUInterpolationMode>(this->interpolation);
 		for (std::size_t x = 0, numMutes = this->mutes.size(); x < numMutes; ++x)
-			CommonSettings.spu_muteChannels[x] = this->mutes[x];
+			CommonSettings->spu_muteChannels[x] = this->mutes[x];
 	}
 }
 

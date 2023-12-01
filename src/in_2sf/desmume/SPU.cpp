@@ -51,6 +51,8 @@ static inline s8 read_s8(u32 addr) { return (s8)_MMU_read08<ARMCPU_ARM7,MMU_AT_D
 #define K_ADPCM_LOOPING_RECOVERY_INDEX 99999
 #define COSINE_INTERPOLATION_RESOLUTION 8192
 
+extern LinearInterpolator* iLin;
+
 SPU_struct *SPU_core = 0;
 // dro change as this isn't used
 //int SPU_currentCoreNum = SNDCORE_DUMMY;
@@ -128,7 +130,7 @@ static FORCEINLINE T MinMax(T val, T min, T max)
 
 //--------------external spu interface---------------
 
-int SPU_ChangeSoundCore(int coreid, int buffersize)
+int SPU_ChangeSoundCore(int coreid, size_t buffersize)
 {
   int i;
 
@@ -194,7 +196,7 @@ void SPU_ReInit(bool fakeBoot)
     SPU_WriteWord(0x04000504, 0x0200);
 }
 
-int SPU_Init(int coreid, int buffersize)
+int SPU_Init(int coreid, size_t buffersize)
 {
   SPU_core = new SPU_struct((int)ceil(samples_per_hline));
   SPU_Reset();
@@ -1099,11 +1101,21 @@ FORCEINLINE static void ____SPU_ChanUpdate(SPU_struct* const SPU, channel_struct
         if (!sampleCache)
         {
             sampleCache = new SampleCache();
+
+          if (!iLin)
+          {
+              iLin = new LinearInterpolator;
         }
+
+          IInterpolator::allInterpolators[1] = iLin;
+          IInterpolator::allInterpolators[2] = new CosineInterpolator;
+          IInterpolator::allInterpolators[3] = new SharpIInterpolator;
+        }
+
         if (sampleCache)
         {
           const SampleData& sample = sampleCache->getSample(chan->addr, chan->loopstart, chan->length, SampleData::Format(FORMAT));
-        data = sample.sampleAt(chan->sampcnt, IInterpolator::allInterpolators[CommonSettings.spuInterpolationMode]);
+          data = sample.sampleAt(chan->sampcnt, IInterpolator::allInterpolators[CommonSettings->spuInterpolationMode]);
       }
       }
       SPU_Mix<CHANNELS>(SPU, chan, data);
@@ -1194,10 +1206,10 @@ static void SPU_MixAudio_Advanced(bool actuallyMix, SPU_struct *SPU, int length)
         //output to mixer unless we are bypassed.
         //dont output to mixer if the user muted us
         bool outputToMix = true;
-        if (CommonSettings.spu_muteChannels[i]) outputToMix = false;
+        if (CommonSettings->spu_muteChannels[i]) outputToMix = false;
         if (bypass) outputToMix = false;
         bool outputToCap = outputToMix;
-        if (CommonSettings.spu_captureMuted && !bypass) outputToCap = true;
+        if (CommonSettings->spu_captureMuted && !bypass) outputToCap = true;
 
         //channels 1 and 3 should probably always generate their audio
         //internally at least, just in case they get used by the spu output
@@ -1501,9 +1513,9 @@ size_t SPU_DefaultPostProcessSamples(s16 *postProcessBuffer, size_t requestedSam
 // Dummy Sound Interface
 //////////////////////////////////////////////////////////////////////////////
 
-int SNDDummyInit(int buffersize);
+int SNDDummyInit(size_t buffersize);
 void SNDDummyDeInit();
-void SNDDummyUpdateAudio(s16 *buffer, u32 num_samples);
+void SNDDummyUpdateAudio(s16 *buffer, size_t num_samples);
 u32 SNDDummyGetAudioSpace();
 void SNDDummyMuteAudio();
 void SNDDummyUnMuteAudio();
@@ -1527,9 +1539,9 @@ SoundInterface_struct SNDDummy = {
   SNDDummyPostProcessSamples
 };
 
-int SNDDummyInit(int buffersize) { return 0; }
+int SNDDummyInit(size_t buffersize) { return 0; }
 void SNDDummyDeInit() {}
-void SNDDummyUpdateAudio(s16 *buffer, u32 num_samples) { }
+void SNDDummyUpdateAudio(s16 *buffer, size_t num_samples) { }
 u32 SNDDummyGetAudioSpace() { return DESMUME_SAMPLE_RATE/60 + 5; }
 void SNDDummyMuteAudio() {}
 void SNDDummyUnMuteAudio() {}

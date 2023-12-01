@@ -267,7 +267,7 @@ INT_PTR CALLBACK XSFConfig::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 			SendDlgItemMessage(hwndDlg, idClipProtect, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Track"));
 			SendDlgItemMessage(hwndDlg, idClipProtect, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"Album"));
 			SendDlgItemMessage(hwndDlg, idClipProtect, CB_SETCURSEL, static_cast<WPARAM>(this->peakType), 0);
-			for (unsigned x = 0, rates = this->supportedSampleRates.size(); x < rates; ++x)
+			for (size_t x = 0, rates = this->supportedSampleRates.size(); x < rates; ++x)
 			{
 				unsigned rate = this->supportedSampleRates[x];
 				SendDlgItemMessage(hwndDlg, idSampleRate, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(std::to_wstring(rate).c_str()));

@@ -22,7 +22,7 @@ static inline uint32_t DWNUM(uint32_t i) { return i >> 2; }
 
 bool CFIRMWARE::getKeyBuf()
 {
-	FILE *file = fopen(CommonSettings.ARM7BIOS, "rb");
+	FILE *file = fopen(CommonSettings->ARM7BIOS, "rb");
 	if (!file)
 		return false;
 
@@ -311,12 +311,12 @@ uint32_t CFIRMWARE::decompress(const uint8_t *in, std::unique_ptr<uint8_t[]> &ou
 // ================================================================================
 bool CFIRMWARE::load()
 {
-	if (!CommonSettings.UseExtFirmware)
+	if (!CommonSettings->UseExtFirmware)
 		return false;
-	if (!strlen(CommonSettings.Firmware))
+	if (!strlen(CommonSettings->Firmware))
 		return false;
 
-	FILE *fp = fopen(CommonSettings.Firmware, "rb");
+	FILE *fp = fopen(CommonSettings->Firmware, "rb");
 	if (!fp)
 		return false;
 	fseek(fp, 0, SEEK_END);

@@ -284,7 +284,7 @@ void execHardware_doAllDma(EDMAMode modeNum);
 
 template<bool FORCE> void NDS_exec(int32_t nb = 560190 << 1);
 
-extern struct TCommonSettings
+struct TCommonSettings
 {
 	TCommonSettings() : UseExtBIOS(false), SWIFromBIOS(false), PatchSWI3(false), UseExtFirmware(false), BootFromFirmware(false), ConsoleType(NDS_CONSOLE_TYPE_FAT), rigorous_timing(false), advanced_timing(true),
 		use_jit(false), jit_max_block_size(0), spuInterpolationMode(SPUInterpolation_Linear), manualBackupType(0), spu_captureMuted(false), spu_advanced(false)
@@ -360,4 +360,5 @@ extern struct TCommonSettings
 	bool spu_muteChannels[16];
 	bool spu_captureMuted;
 	bool spu_advanced;
-} CommonSettings;
+}/*/CommonSettings/**/;
+extern TCommonSettings *CommonSettings;

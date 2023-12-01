@@ -58,9 +58,9 @@ struct SoundInterface_struct
 {
    int id;
    const char *Name;
-   int (*Init)(int buffersize);
+   int (*Init)(size_t buffersize);
    void (*DeInit)();
-   void (*UpdateAudio)(s16 *buffer, u32 num_samples);
+   void (*UpdateAudio)(s16 *buffer, size_t num_samples);
    u32 (*GetAudioSpace)();
    void (*MuteAudio)();
    void (*UnMuteAudio)();
@@ -225,11 +225,11 @@ public:
 extern SPU_struct *SPU_core;
 extern int spu_core_samples;
 
-int SPU_ChangeSoundCore(int coreid, int buffersize);
+int SPU_ChangeSoundCore(int coreid, size_t buffersize);
 SoundInterface_struct *SPU_SoundCore();
 
 void SPU_ReInit(bool fakeBoot = false);
-int SPU_Init(int coreid, int buffersize);
+int SPU_Init(int coreid, size_t buffersize);
 void SPU_Pause(int pause);
 void SPU_SetVolume(int volume);
 void SPU_SetSynchMode(int mode, int method);

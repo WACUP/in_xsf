@@ -39,7 +39,7 @@ public:
     }
   }
 
-	virtual int output_samples(s16* buf, int samples_requested) {
+	virtual int output_samples(s16* buf, size_t samples_requested) {
     int samples = ((samples_requested < buffer.size()) ? samples_requested : buffer.size()) & ~1;
     for (int offset = 0, i = 0; i < samples; i++) {
       uint32_t sample = buffer.front();
