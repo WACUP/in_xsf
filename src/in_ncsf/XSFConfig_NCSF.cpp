@@ -31,8 +31,8 @@ enum
 };
 
 unsigned XSFConfig::initSampleRate = 44100;
-std::wstring XSFConfig::commonName = L"NCSF Decoder";
-std::wstring XSFConfig::versionNumber = L"1.12.6";
+const std::wstring XSFConfig::commonName = L"NCSF Decoder";
+const std::wstring XSFConfig::versionNumber = L"1.12.6";
 unsigned XSFConfig_NCSF::initInterpolation = 4;
 std::string XSFConfig_NCSF::initMutes = "0000000000000000";
 
@@ -46,17 +46,8 @@ XSFConfig_NCSF::XSFConfig_NCSF() : XSFConfig(), interpolation(0), mutes()
 	, soundViewData()
 #endif
 {
-	this->supportedSampleRates.push_back(8000);
-	this->supportedSampleRates.push_back(11025);
-	this->supportedSampleRates.push_back(16000);
-	this->supportedSampleRates.push_back(22050);
-	this->supportedSampleRates.push_back(32000);
-	this->supportedSampleRates.push_back(44100);
-	this->supportedSampleRates.push_back(48000);
-	this->supportedSampleRates.push_back(88200);
-	this->supportedSampleRates.push_back(96000);
-	this->supportedSampleRates.push_back(176400);
-	this->supportedSampleRates.push_back(192000);
+	this->supportedSampleRates.insert(this->supportedSampleRates.end(), { 8000, 11025, 16000, 22050, 32000, 44100,
+																		  48000, 88200, 96000, 176400, 192000 });
 }
 
 void XSFConfig_NCSF::LoadSpecificConfig()
@@ -142,7 +133,7 @@ void XSFConfig_NCSF::About(HWND parent)
 #ifdef _DEBUG
 INT_PTR CALLBACK XSFConfig_NCSF::SoundViewDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	auto data = reinterpret_cast<SoundViewData *>(GetWindowLongW(hwndDlg, DWLP_USER));
+	auto data = reinterpret_cast<SoundViewData *>(GetWindowLonPtrW(hwndDlg, DWLP_USER));
 	if (!data && uMsg != WM_INITDIALOG)
 		return false;
 

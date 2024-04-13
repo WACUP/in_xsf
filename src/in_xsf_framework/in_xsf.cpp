@@ -99,13 +99,13 @@ void config(HWND hwndParent)
 {
 	if (xSFConfig)
 	{
-	xSFConfig->InitConfig();
-	xSFConfig->CallConfigDialog(inMod.hDllInstance, hwndParent);
+		xSFConfig->InitConfig();
+		xSFConfig->CallConfigDialog(inMod.hDllInstance, hwndParent);
 
-	if (xSFPlayer)
+		if (xSFPlayer)
 		{
-		xSFConfig->CopyConfigToMemory(xSFPlayer, false);
-}
+			xSFConfig->CopyConfigToMemory(xSFPlayer, false);
+		}
 	}
 }
 
@@ -368,7 +368,7 @@ In_Module inMod =
 	setPan,
 	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, /* Vis stuff, filled by Winamp */
 	nullptr, nullptr, /* DSP stuff, filled by Winamp */
-	nullptr,
+	IN_INIT_WACUP_EQSET_EMPTY
 	nullptr, /* Filled by Winamp */
 	nullptr, /* Filled by Winamp */
 	NULL,	// api_service
@@ -530,9 +530,9 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 		{
 			if (FilePathExists(fn))
 			{
-			auto file = XSFFile(fn);
-			return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
-		}
+				auto file = XSFFile(fn);
+				return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);
+			}
 			else
 			{
 				return 0;

@@ -34,7 +34,7 @@ CosineInterpolator::CosineInterpolator() : lut(nullptr)
   /*for(int i = 0; i < 8192; i++) {
     lut[i] = (1.0 - std::cos(M_PI * i / 8192.0) * M_PI) * 0.5;
   }*/
-  }
+}
 
 /*void CosineInterpolator::init(void)
 {

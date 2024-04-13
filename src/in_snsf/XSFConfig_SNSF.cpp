@@ -29,8 +29,8 @@ enum
 };
 
 unsigned XSFConfig::initSampleRate = 44100;
-std::wstring XSFConfig::commonName = L"SNSF Decoder";
-std::wstring XSFConfig::versionNumber = L"1.0.6";
+const std::wstring XSFConfig::commonName = L"SNSF Decoder";
+const std::wstring XSFConfig::versionNumber = L"1.0.6";
 //bool XSFConfig_SNSF::initSixteenBitSound = true;
 bool XSFConfig_SNSF::initReverseStereo = false;
 unsigned XSFConfig_SNSF::initResampler = 1;
@@ -43,17 +43,8 @@ XSFConfig *XSFConfig::Create()
 
 XSFConfig_SNSF::XSFConfig_SNSF() : XSFConfig(), /*sixteenBitSound(false), */reverseStereo(false), mutes(), resampler(0)
 {
-	this->supportedSampleRates.push_back(8000);
-	this->supportedSampleRates.push_back(11025);
-	this->supportedSampleRates.push_back(16000);
-	this->supportedSampleRates.push_back(22050);
-	this->supportedSampleRates.push_back(32000);
-	this->supportedSampleRates.push_back(44100);
-	this->supportedSampleRates.push_back(48000);
-	this->supportedSampleRates.push_back(88200);
-	this->supportedSampleRates.push_back(96000);
-	this->supportedSampleRates.push_back(176400);
-	this->supportedSampleRates.push_back(192000);
+	this->supportedSampleRates.insert(this->supportedSampleRates.end(), { 8000, 11025, 16000, 22050, 32000, 44100,
+																		  48000, 88200, 96000, 176400, 192000 });
 }
 
 void XSFConfig_SNSF::LoadSpecificConfig()

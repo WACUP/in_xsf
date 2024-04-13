@@ -90,8 +90,8 @@ public:
 	static PeakType initPeakType;
 	// These are not defined in XSFConfig.cpp, they should be defined in your own config's source.
 	static unsigned initSampleRate;
-	static std::wstring commonName;
-	static std::wstring versionNumber;
+	static const std::wstring commonName;
+	static const std::wstring versionNumber;
 	static const wchar_t wacup_plugin_id[];
 	// The Create function is not defined in XSFConfig.cpp, it should be defined in your own config's source and return a pointer to your config's class.
 	static XSFConfig *Create();

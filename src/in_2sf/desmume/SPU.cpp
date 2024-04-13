@@ -224,7 +224,7 @@ void SPU_SetSynchMode(int mode, int method)
     synchmethod = (ESynchMethod)method;
     if (synchronizer)
     {
-    delete synchronizer;
+      delete synchronizer;
     }
     //grr does this need to be locked? spu might need a lock method
     // or maybe not, maybe the platform-specific code that calls this function can deal with it.
@@ -284,7 +284,7 @@ SPU_struct::SPU_struct(int buffersize)
   , sndbuf(0)
   , lastdata(0)
   , outbuf(0)
-    , bufsize(buffersize)
+  , bufsize(buffersize)
 {
   sndbuf = new s32[buffersize*2];
   outbuf = new s16[buffersize*2];
@@ -302,7 +302,7 @@ void SPU_DeInit(void)
   if(SNDCore)
   {
     SNDCore->DeInit();
-  SNDCore = 0;
+    SNDCore = 0;
   }
 
   if (SPU_core)
@@ -1100,12 +1100,12 @@ FORCEINLINE static void ____SPU_ChanUpdate(SPU_struct* const SPU, channel_struct
       } else {
         if (!sampleCache)
         {
-            sampleCache = new SampleCache();
+          sampleCache = new SampleCache();
 
           if (!iLin)
           {
               iLin = new LinearInterpolator;
-        }
+          }
 
           IInterpolator::allInterpolators[1] = iLin;
           IInterpolator::allInterpolators[2] = new CosineInterpolator;
@@ -1116,7 +1116,7 @@ FORCEINLINE static void ____SPU_ChanUpdate(SPU_struct* const SPU, channel_struct
         {
           const SampleData& sample = sampleCache->getSample(chan->addr, chan->loopstart, chan->length, SampleData::Format(FORMAT));
           data = sample.sampleAt(chan->sampcnt, IInterpolator::allInterpolators[CommonSettings->spuInterpolationMode]);
-      }
+        }
       }
       SPU_Mix<CHANNELS>(SPU, chan, data);
     }

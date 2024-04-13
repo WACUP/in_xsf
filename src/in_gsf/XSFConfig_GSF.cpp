@@ -46,8 +46,8 @@ public:
 };
 
 unsigned XSFConfig::initSampleRate = 44100;
-std::wstring XSFConfig::commonName = L"GSF Decoder";
-std::wstring XSFConfig::versionNumber = L"1.0.7";
+const std::wstring XSFConfig::commonName = L"GSF Decoder";
+const std::wstring XSFConfig::versionNumber = L"1.0.7";
 bool XSFConfig_GSF::initLowPassFiltering = true;
 std::string XSFConfig_GSF::initMutes = "000000";
 
@@ -58,17 +58,8 @@ XSFConfig *XSFConfig::Create()
 
 XSFConfig_GSF::XSFConfig_GSF() : XSFConfig(), lowPassFiltering(false), mutes()
 {
-	this->supportedSampleRates.push_back(8000);
-	this->supportedSampleRates.push_back(11025);
-	this->supportedSampleRates.push_back(16000);
-	this->supportedSampleRates.push_back(22050);
-	this->supportedSampleRates.push_back(32000);
-	this->supportedSampleRates.push_back(44100);
-	this->supportedSampleRates.push_back(48000);
-	this->supportedSampleRates.push_back(88200);
-	this->supportedSampleRates.push_back(96000);
-	this->supportedSampleRates.push_back(176400);
-	this->supportedSampleRates.push_back(192000);
+	this->supportedSampleRates.insert(this->supportedSampleRates.end(), { 8000, 11025, 16000, 22050, 32000, 44100,
+																		  48000, 88200, 96000, 176400, 192000 });
 }
 
 void XSFConfig_GSF::LoadSpecificConfig()
