@@ -526,7 +526,8 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 {
 	try
 	{
-		if (!nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
+		const bool reset = SameStrA(data, "reset");
+		if (!reset && !nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
 		{
 			if (FilePathExists(fn))
 			{
@@ -538,7 +539,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 				return 0;
 			}
 		}
-		return 1;
+		return !reset;
 	}
 	catch (const std::exception &)
 	{
