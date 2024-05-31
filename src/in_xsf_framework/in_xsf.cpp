@@ -82,7 +82,7 @@ DWORD WINAPI playThread(void *b)
 				}
 
 				inMod.SAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
-				inMod.VSAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);
+				/*inMod.VSAAddPCMData(reinterpret_cast<char *>(&sampleBuffer[0]), NumChannels, BitsPerSample, decode_pos_ms);*/
 				if (inMod.dsp_isactive())
 					samplesWritten = inMod.dsp_dosamples(reinterpret_cast<short *>(&sampleBuffer[0]), samplesWritten, BitsPerSample, NumChannels, sampleRate);
 				decode_pos_ms += static_cast<int>(samplesWritten * 1000.0 / sampleRate);
@@ -366,7 +366,7 @@ In_Module inMod =
 	setOutputTime,
 	setVolume,
 	setPan,
-	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, /* Vis stuff, filled by Winamp */
+	IN_INIT_VIS_RELATED_CALLS,
 	nullptr, nullptr, /* DSP stuff, filled by Winamp */
 	IN_INIT_WACUP_EQSET_EMPTY
 	nullptr, /* Filled by Winamp */

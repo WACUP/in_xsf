@@ -224,9 +224,18 @@ bool XSFPlayer_2SF::Load()
 	MMU_unsetRom();
 	if (!this->rom.empty())
 	{
+		// based on a few crash reports it's necessary to check that we're
+		// not going to attempt to allocate more memory than we're allowed
 		const uint32_t size = static_cast<uint32_t>(this->rom.size() - 1);
-		NDS_SetROM(&this->rom[0], size);
-		gameInfo.loadData(reinterpret_cast<char *>(&this->rom[0]), size);
+		if (size < (SIZE_MAX / 4))
+		{
+			NDS_SetROM(&this->rom[0], size);
+			gameInfo.loadData(reinterpret_cast<char*>(&this->rom[0]), size);
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	CommonSettings->use_jit = true;
