@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 #include <vector>
 #include <cstdint>
 #include "XSFCommon.h"
@@ -57,13 +58,14 @@ bool XSFPlayer::FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWrit
 {
 	bool endFlag = false;
 	unsigned detectSilence = xSFConfig->GetDetectSilenceSec();
-	unsigned pos = 0, bufsize = static_cast<unsigned>(buf.size() >> 2);
+	unsigned pos = 0;
+	auto bufsize = (buf.size() >> 2);
 	auto trueBuffer = std::vector<std::uint8_t>(bufsize << (this->uses32BitSamplesClampedTo16Bit ? 3 : 2));
 	auto longBuffer = std::vector<std::uint8_t>(bufsize << 3);
 	auto bufLong = reinterpret_cast<std::int32_t *>(&longBuffer[0]);
 	while (pos < bufsize)
 	{
-		unsigned remain = bufsize - pos, offset = pos;
+		unsigned remain = static_cast<unsigned>(bufsize - pos), offset = pos;
 		this->GenerateSamples(trueBuffer, pos << (this->uses32BitSamplesClampedTo16Bit ? 2 : 1), remain);
 		if (this->uses32BitSamplesClampedTo16Bit)
 		{
@@ -167,8 +169,8 @@ bool XSFPlayer::FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWrit
 			double s1 = bufLong[2 * ofs] * scale, s2 = bufLong[2 * ofs + 1] * scale;
 			if (!this->uses32BitSamplesClampedTo16Bit)
 			{
-				clamp(s1, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
-				clamp(s2, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
+				s1 = std::clamp<double>(s1, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
+				s2 = std::clamp<double>(s2, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
 			}
 			bufLong[2 * ofs] = static_cast<std::int32_t>(s1);
 			bufLong[2 * ofs + 1] = static_cast<std::int32_t>(s2);
@@ -181,8 +183,8 @@ bool XSFPlayer::FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWrit
 		for (unsigned ofs = 0; ofs < bufsize; ++ofs)
 		{
 			std::int32_t s1 = bufLong[2 * ofs], s2 = bufLong[2 * ofs + 1];
-			clamp(s1, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
-			clamp(s2, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
+			s1 = std::clamp<std::int32_t>(s1, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
+			s2 = std::clamp<std::int32_t>(s2, std::numeric_limits<std::int16_t>::min(), std::numeric_limits<std::int16_t>::max());
 			bufShort[2 * ofs] = static_cast<std::int16_t>(s1);
 			bufShort[2 * ofs + 1] = static_cast<std::int16_t>(s2);
 		}
@@ -211,8 +213,8 @@ bool XSFPlayer::FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWrit
 		}
 	}
 
-	this->currentSample += bufsize;
-	samplesWritten = bufsize;
+	this->currentSample += static_cast<unsigned>(bufsize);
+	samplesWritten = static_cast<unsigned>(bufsize);
 	return endFlag;
 }
 
@@ -238,7 +240,7 @@ static inline DWORD TicksDiff(DWORD prev, DWORD cur) { return cur >= prev ? cur 
 
 int XSFPlayer::Seek(unsigned seekPosition, volatile int *killswitch, std::vector<std::uint8_t> &buf, Out_Module *outMod)
 {
-	unsigned bufsize = static_cast<unsigned>(buf.size() >> 2), seekSample = static_cast<std::uint64_t>(seekPosition) * this->sampleRate / 1000;
+	const unsigned bufsize = static_cast<unsigned>(buf.size() >> 2), seekSample = static_cast<std::uint64_t>(seekPosition) * this->sampleRate / 1000;
 	DWORD prevTick = outMod ? GetTickCount() : 0;
 	if (seekSample < this->currentSample)
 	{
@@ -260,7 +262,7 @@ int XSFPlayer::Seek(unsigned seekPosition, volatile int *killswitch, std::vector
 				outMod->Flush(cur);
 			}
 		}
-		this->GenerateSamples(buf, 0, bufsize);
+		this->GenerateSamples(buf, 0, bufsize, false);
 		this->currentSample += bufsize;
 	}
 	if (seekSample - this->currentSample > 0)

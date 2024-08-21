@@ -47,7 +47,7 @@ public:
 
 unsigned XSFConfig::initSampleRate = 44100;
 const std::wstring XSFConfig::commonName = L"GSF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.7";
+const std::wstring XSFConfig::versionNumber = L"1.0.9";
 bool XSFConfig_GSF::initLowPassFiltering = true;
 std::string XSFConfig_GSF::initMutes = "000000";
 

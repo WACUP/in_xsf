@@ -29,7 +29,7 @@ struct PseudoFile
 	{
 	}
 
-	template<typename T> T ReadLE()
+	template<typename T> typename std::enable_if_t<std::is_integral_v<T>, T> ReadLE()
 	{
 		T finalVal = 0;
 		for (std::size_t i = 0; i < sizeof(T); ++i)
@@ -37,7 +37,7 @@ struct PseudoFile
 		return finalVal;
 	}
 
-	template<typename T, std::size_t N> void ReadLE(T (&arr)[N])
+	template<typename T, std::size_t N> typename std::enable_if_t<std::is_integral_v<T>> ReadLE(T (&arr)[N])
 	{
 		for (std::size_t i = 0; i < N; ++i)
 			arr[i] = this->ReadLE<T>();
@@ -49,10 +49,10 @@ struct PseudoFile
 		this->pos += N;
 	}
 
-	template<typename T> void ReadLE(std::vector<T> &arr)
+	template<typename T> typename std::enable_if_t<std::is_integral_v<T>> ReadLE(std::vector<T> &arr)
 	{
-		for (std::size_t i = 0, len = arr.size(); i < len; ++i)
-			arr[i] = this->ReadLE<T>();
+		for (auto &item : arr)
+			item = this->ReadLE<T>();
 	}
 
 	void ReadLE(std::vector<std::uint8_t> &arr)
@@ -83,7 +83,7 @@ struct PseudoFile
  * as little-endian formating.
  */
 
-template<typename T> inline T ReadLE(const std::uint8_t *arr)
+template<typename T> inline typename std::enable_if_t<std::is_integral_v<T>, T> ReadLE(const std::uint8_t *arr)
 {
 	T finalVal = 0;
 	for (std::size_t i = 0; i < sizeof(T); ++i)
@@ -97,7 +97,7 @@ template<typename T> inline T ReadLE(const std::uint8_t *arr)
  * integers are in the format of 0x00, 16-bit integers are in the format of
  * 0x0000, and so on.
  */
-template<typename T> inline std::string NumToHexString(const T &num)
+template<typename T> inline typename std::enable_if_t<std::is_integral_v<T>, std::string> NumToHexString(const T &num)
 {
 	std::string hex;
 	std::uint8_t len = sizeof(T) * 2;
@@ -123,22 +123,21 @@ inline constexpr int REC_GROUP = 5;
 inline constexpr int REC_PLAYER2 = 6;
 inline constexpr int REC_STRM = 7;
 
-// Comes from https://stackoverflow.com/a/14589519
-template<typename T> inline constexpr auto ToIntegral(const T &e)
-{
-	return static_cast<std::underlying_type_t<T>>(e);
-}
-
 template<std::size_t N> inline bool VerifyHeader(std::int8_t (&arr)[N], const std::string &header)
 {
 	std::string arrHeader = std::string(&arr[0], &arr[N]);
 	return arrHeader == header;
 }
 
+inline std::int32_t muldiv7(std::int32_t val, std::uint8_t mul)
+{
+	return mul == 127 ? val : ((val * mul) >> 7);
+}
+
 /*
  * The remaining functions in this file come from the FeOS Sound System source code.
  */
-inline int Cnv_Attack(int attk)
+inline std::uint8_t Cnv_Attack(int attk)
 {
 	static const std::uint8_t lut[] =
 	{
@@ -151,7 +150,7 @@ inline int Cnv_Attack(int attk)
 	return attk >= 0x6D ? lut[0x7F - attk] : 0xFF - attk;
 }
 
-inline int Cnv_Fall(int fall)
+inline std::uint16_t Cnv_Fall(int fall)
 {
 	if (fall & 0x80) // Supposedly invalid value...
 		fall = 0; // Use apparently correct default
@@ -165,7 +164,7 @@ inline int Cnv_Fall(int fall)
 		return (0x1E00 / (0x7E - fall)) & 0xFFFF;
 }
 
-inline int Cnv_Scale(int scale)
+inline std::int16_t Cnv_Scale(int scale)
 {
 	static const std::int16_t lut[] =
 	{
@@ -192,7 +191,7 @@ inline int Cnv_Scale(int scale)
 	return lut[scale];
 }
 
-inline int Cnv_Sust(int sust)
+inline std::int16_t Cnv_Sust(int sust)
 {
 	static const std::int16_t lut[] =
 	{
@@ -238,17 +237,17 @@ inline int Cnv_Sine(int arg)
 	return -lut[4 * lut_size - arg];
 }
 
-inline int read8(const std::uint8_t **ppData)
+inline std::uint8_t read8(const std::uint8_t **ppData)
 {
 	auto pData = *ppData;
-	int x = *pData;
+	std::uint8_t x = *pData;
 	*ppData = pData + 1;
 	return x;
 }
 
-inline int read16(const std::uint8_t **ppData)
+inline std::uint16_t read16(const std::uint8_t **ppData)
 {
-	int x = read8(ppData);
+	std::uint16_t x = read8(ppData);
 	x |= read8(ppData) << 8;
 	return x;
 }

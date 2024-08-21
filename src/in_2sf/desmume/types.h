@@ -48,7 +48,13 @@ using s8 = int8_t;
 # define HAVE_LIBAGG
 # define ENABLE_SSE
 # define ENABLE_SSE2
-# define HAVE_JIT
+// TODO - this doesn't work for all files under the x64
+//		  builds. so for now it's simpler to disable it
+//		  & reduce the compiled size until the crashing
+//		  can be resolved either with a patch or from a
+//		  potential move to a newer desmume revision...
+/*/#define HAVE_JIT/*/
+#undef HAVE_JIT/**/
 #endif
 
 #ifdef __GNUC__

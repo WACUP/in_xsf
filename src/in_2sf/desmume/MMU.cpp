@@ -71,7 +71,7 @@ uint32_t _MMU_MAIN_MEM_MASK32 = 0x3FFFFF & ~3;
 
 MMU_struct MMU;
 MMU_struct_new *MMU_new = 0;
-MMU_struct_timing MMU_timing;
+MMU_struct_timing *MMU_timing = 0;
 
 uint8_t *MMU_struct::MMU_MEM[2][256] =
 {
@@ -1014,12 +1014,20 @@ void MMU_Reset()
 		MMU_new->backupDevice.load_rom(bleh);
 	}
 
-	MMU_timing.arm7codeFetch.Reset();
-	MMU_timing.arm7dataFetch.Reset();
-	MMU_timing.arm9codeFetch.Reset();
-	MMU_timing.arm9dataFetch.Reset();
-	MMU_timing.arm9codeCache.Reset();
-	MMU_timing.arm9dataCache.Reset();
+	if (!MMU_timing)
+	{
+		MMU_timing = new MMU_struct_timing();
+	}
+
+	if (MMU_timing)
+	{
+		MMU_timing->arm7codeFetch.Reset();
+		MMU_timing->arm7dataFetch.Reset();
+		MMU_timing->arm9codeFetch.Reset();
+		MMU_timing->arm9dataFetch.Reset();
+		MMU_timing->arm9codeCache.Reset();
+		MMU_timing->arm9dataCache.Reset();
+	}
 }
 
 void SetupMMU(bool debugConsole, bool dsi)

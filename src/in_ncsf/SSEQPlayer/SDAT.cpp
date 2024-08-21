@@ -81,7 +81,9 @@ SDAT::SDAT(PseudoFile &file, std::uint32_t sseqToLoad) : sseq(), sbnk(), player(
 			if (newSBNK->info.waveArc[i] != 0xFFFF)
 			{
 				std::uint16_t waveArc = newSBNK->info.waveArc[i];
-				fileID = infoSection.WAVEARCrecord.entries[waveArc].fileID;
+				// without this change to ensure it's only a 16-bit value it'll try to
+				// access an out of range record due to the upper bits not being clear
+				fileID = (infoSection.WAVEARCrecord.entries[waveArc].fileID & 0xFFFF);
 				name = "SWAR" + NumToHexString(fileID).substr(2);
 				if (SYMBOffset)
 					name = NumToHexString(waveArc).substr(2) + " - " + symbSection.WAVEARCrecord.entries[waveArc];

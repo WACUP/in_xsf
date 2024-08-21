@@ -220,7 +220,7 @@ template<> inline FetchAccessUnit<1, MMU_AT_CODE> &MMU_struct_timing::armCodeFet
 template<> inline FetchAccessUnit<0, MMU_AT_DATA> &MMU_struct_timing::armDataFetch<0>() { return this->arm9dataFetch; }
 template<> inline FetchAccessUnit<1, MMU_AT_DATA> &MMU_struct_timing::armDataFetch<1>() { return this->arm7dataFetch; }
 
-extern MMU_struct_timing MMU_timing;
+extern MMU_struct_timing *MMU_timing;
 
 // calculates the time a single memory access takes,
 // in units of cycles of the current processor.
@@ -247,9 +247,9 @@ template<int PROCNUM, MMU_ACCESS_TYPE AT, int READSIZE, MMU_ACCESS_DIRECTION DIR
 #ifdef ENABLE_CACHE_CONTROLLER_EMULATION
 		bool cached = false;
 		if (AT == MMU_AT_CODE)
-			cached = MMU_timing.arm9codeCache.Cached<DIRECTION>(addr);
+			cached = MMU_timing->arm9codeCache.Cached<DIRECTION>(addr);
 		if (AT == MMU_AT_DATA)
-			cached = MMU_timing.arm9dataCache.Cached<DIRECTION>(addr);
+			cached = MMU_timing->arm9dataCache.Cached<DIRECTION>(addr);
 		if (cached)
 			return MC;
 		uint32_t c;
@@ -302,9 +302,9 @@ template<int PROCNUM, MMU_ACCESS_TYPE AT, int READSIZE, MMU_ACCESS_DIRECTION DIR
 template<int PROCNUM, int READSIZE, MMU_ACCESS_DIRECTION DIRECTION, bool TIMING> inline uint32_t MMU_memAccessCycles(uint32_t addr)
 {
 	if (TIMING)
-		return MMU_timing.armDataFetch<PROCNUM>().template Fetch<READSIZE, DIRECTION, true>(addr & (~((READSIZE >> 3) - 1)));
+		return MMU_timing->armDataFetch<PROCNUM>().template Fetch<READSIZE, DIRECTION, true>(addr & (~((READSIZE >> 3) - 1)));
 	else
-		return MMU_timing.armDataFetch<PROCNUM>().template Fetch<READSIZE, DIRECTION, false>(addr & (~((READSIZE >> 3) - 1)));
+		return MMU_timing->armDataFetch<PROCNUM>().template Fetch<READSIZE, DIRECTION, false>(addr & (~((READSIZE >> 3) - 1)));
 }
 
 template<int PROCNUM, int READSIZE, MMU_ACCESS_DIRECTION DIRECTION> inline uint32_t MMU_memAccessCycles(uint32_t addr)
@@ -321,9 +321,9 @@ template<int PROCNUM, int READSIZE, MMU_ACCESS_DIRECTION DIRECTION> inline uint3
 template<int PROCNUM, int READSIZE> inline uint32_t MMU_codeFetchCycles(uint32_t addr)
 {
 	if (USE_TIMING())
-		return MMU_timing.armCodeFetch<PROCNUM>().template Fetch<READSIZE, MMU_AD_READ, true>(addr & (~((READSIZE >> 3) - 1)));
+		return MMU_timing->armCodeFetch<PROCNUM>().template Fetch<READSIZE, MMU_AD_READ, true>(addr & (~((READSIZE >> 3) - 1)));
 	else
-		return MMU_timing.armCodeFetch<PROCNUM>().template Fetch<READSIZE, MMU_AD_READ, false>(addr & (~((READSIZE >> 3) - 1)));
+		return MMU_timing->armCodeFetch<PROCNUM>().template Fetch<READSIZE, MMU_AD_READ, false>(addr & (~((READSIZE >> 3) - 1)));
 }
 
 // calculates the cycle contribution of ALU + MEM stages (= EXECUTE)

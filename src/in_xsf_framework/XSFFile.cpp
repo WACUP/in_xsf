@@ -201,9 +201,8 @@ void XSFFile::ReadXSF(std::ifstream &xSF, std::uint32_t programSizeOffset, std::
 				xSF.read(&rawtags[0], lengthOfTags);
 				std::string name, value;
 				bool onName = true;
-				for (unsigned x = 0; x < lengthOfTags; ++x)
+				for (auto curr : rawtags)
 				{
-					char curr = rawtags[x];
 					if (curr == 0x0A)
 					{
 						if (!name.empty() && !value.empty())
@@ -336,24 +335,24 @@ double XSFFile::GetVolume(VolumeType preferredVolumeType, PeakType preferredPeak
 	bool hadReplayGain = false;
 	if (preferredVolumeType == VolumeType::ReplayGainAlbum && !replaygain_album_gain.empty())
 	{
-		gain = convertTo<double>(replaygain_album_gain);
+		gain = ConvertFuncs::To<double>(replaygain_album_gain);
 		hadReplayGain = true;
 	}
 	if (!hadReplayGain && preferredVolumeType != VolumeType::Volume && !replaygain_track_gain.empty())
 	{
-		gain = convertTo<double>(replaygain_track_gain);
+		gain = ConvertFuncs::To<double>(replaygain_track_gain);
 		hadReplayGain = true;
 	}
 	if (hadReplayGain)
 	{
 		double vol = std::pow(10.0, gain / 20.0), peak = 1.0;
 		if (preferredPeakType == PeakType::ReplayGainAlbum && !replaygain_album_peak.empty())
-			peak = convertTo<double>(replaygain_album_peak);
+			peak = ConvertFuncs::To<double>(replaygain_album_peak);
 		else if (preferredPeakType != PeakType::None && !replaygain_track_peak.empty())
-			peak = convertTo<double>(replaygain_track_peak);
+			peak = ConvertFuncs::To<double>(replaygain_track_peak);
 		return !fEqual(peak, 1.0) ? std::min(vol, 1.0 / peak) : vol;
 	}
-	return volume.empty() ? 1.0 : convertTo<double>(volume);
+	return volume.empty() ? 1.0 : ConvertFuncs::To<double>(volume);
 }
 
 std::string XSFFile::FormattedTitleOptionalBlock(const std::string &block, bool &hadReplacement, unsigned level) const
@@ -492,10 +491,10 @@ void XSFFile::SaveFile() const
 	if (!allTags.empty())
 	{
 		xSF.write("[TAG]", 5);
-		std::for_each(allTags.begin(), allTags.end(), [&](const std::string &tag)
+		for (const auto &tag : allTags)
 		{
 			xSF.write(tag.c_str(), tag.length());
 			xSF.write("\n", 1);
-		});
+		}
 	}
 }

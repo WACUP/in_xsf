@@ -54,20 +54,35 @@
     <ClCompile Include="snes9x\apu\apu.cpp">
       <Filter>Source Files\snes9x\apu</Filter>
     </ClCompile>
-    <ClCompile Include="snes9x\apu\SNES_SPC.cpp">
-      <Filter>Source Files\snes9x\apu</Filter>
-    </ClCompile>
-    <ClCompile Include="snes9x\apu\SNES_SPC_misc.cpp">
-      <Filter>Source Files\snes9x\apu</Filter>
-    </ClCompile>
-    <ClCompile Include="snes9x\apu\SPC_DSP.cpp">
-      <Filter>Source Files\snes9x\apu</Filter>
-    </ClCompile>
     <ClCompile Include="XSFConfig_SNSF.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="snes9x\sdd1.cpp">
       <Filter>Source Files\snes9x</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\dsp\sdsp.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\dsp\SPC_DSP.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\smp\algorithms.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\smp\core.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\smp\iplrom.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\smp\memory.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\smp\smp.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
+    </ClCompile>
+    <ClCompile Include="snes9x\apu\bapu\smp\timing.cpp">
+      <Filter>Source Files\snes9x\apu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

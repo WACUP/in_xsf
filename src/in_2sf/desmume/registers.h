@@ -16,7 +16,8 @@
 	along with the this software.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#ifndef REGISTERS_H
+#define REGISTERS_H
 
 #define REG_REGION_MASK                         0x0FFFEF80
 #define REG_BASE_DISPx                          0x04000000
@@ -145,7 +146,7 @@
 #define REG_ENCSEED0L                           0x040001B0
 #define REG_ENCSEED1L                           0x040001B4
 #define REG_ENCSEED0H                           0x040001B8
-#define REG_ENCSEED1H                           0x040001BC
+#define REG_ENCSEED1H                           0x040001BA
 #define REG_SPICNT                              0x040001C0
 #define REG_SPIDATA                             0x040001C2
 
@@ -178,7 +179,7 @@
 #define REG_SQRTRESULT                          0x040002B4
 #define REG_SQRTPARAM                           0x040002B8
 
-// Other
+// Other 
 #define REG_POSTFLG                             0x04000300
 #define REG_HALTCNT                             0x04000301
 #define REG_POWCNT1                             0x04000304
@@ -300,9 +301,6 @@
 #define eng_3D_TOON_TABLE      0x04000380
 #define eng_3D_GXFIFO          0x04000400
 
-//DSI
-#define REG_DSIMODE 0x04004000
-
 // 3d commands
 #define cmd_3D_MTX_MODE        0x04000440
 #define cmd_3D_MTX_PUSH        0x04000444
@@ -349,6 +347,9 @@
 #define eng_3D_VEC_RESULT      0x04000630
 #define eng_3D_CLIPMTX_RESULT  0x04000640
 #define eng_3D_VECMTX_RESULT   0x04000680
+
+//DSI
+#define REG_DSIMODE 0x04004000
 
 #define IPCFIFOCNT_SENDEMPTY 0x0001
 #define IPCFIFOCNT_SENDFULL 0x0002
@@ -426,3 +427,14 @@
 #define EXMEMCNT_MASK_SLOT2_ROM_1ST_TIME (3<<2)
 #define EXMEMCNT_MASK_SLOT2_ROM_2ND_TIME (1<<4)
 #define EXMEMCNT_MASK_SLOT2_CLOCKRATE (3<<5)
+
+#define SPI_DEVICE_POWERMAN 0
+#define SPI_DEVICE_FIRMWARE 1
+#define SPI_DEVICE_TOUCHSCREEN 2
+
+#define SPI_BAUDRATE_4MHZ 0
+#define SPI_BAUDRATE_2MHZ 1
+#define SPI_BAUDRATE_1MHZ 2
+#define SPI_BAUDRATE_512KHZ 3
+
+#endif

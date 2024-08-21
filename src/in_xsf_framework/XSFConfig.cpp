@@ -381,7 +381,7 @@ void XSFConfig::SaveConfigDialog(HWND hwndDlg)
 	this->defaultFade = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDefaultFade)));
 	this->skipSilenceOnStartSec = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idSkipSilenceOnStartSec)));
 	this->detectSilenceSec = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDetectSilenceSec)));
-	this->volume = convertTo<double>(this->GetTextFromWindow(GetDlgItem(hwndDlg, idVolume)));
+	this->volume = ConvertFuncs::To<double>(this->GetTextFromWindow(GetDlgItem(hwndDlg, idVolume)));
 	this->volumeType = static_cast<VolumeType>(SendDlgItemMessage(hwndDlg, idReplayGain, CB_GETCURSEL, 0, 0));
 	this->peakType = static_cast<PeakType>(SendDlgItemMessage(hwndDlg, idClipProtect, CB_GETCURSEL, 0, 0));
 	this->sampleRate = XSFConfig::supportedSampleRates[SendDlgItemMessage(hwndDlg, idSampleRate, CB_GETCURSEL, 0, 0)];

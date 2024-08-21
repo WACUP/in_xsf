@@ -75,7 +75,7 @@ bool XSFPlayer_NCSF::RecursiveLoadNCSF(XSFFile *xSFToLoad, int level)
 	if (level <= 10 && xSFToLoad->GetTagExists("_lib"))
 	{
 #ifdef _WIN32
-		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue("_lib")).wstring(), 8, 12);
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(ConvertFuncs::StringToWString(xSFToLoad->GetFilename())).parent_path() / xSFToLoad->GetTagValue("_lib")).wstring(), 8, 12);
 #else
 		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue("_lib")).string(), 8, 12);
 #endif
@@ -96,7 +96,7 @@ bool XSFPlayer_NCSF::RecursiveLoadNCSF(XSFFile *xSFToLoad, int level)
 		{
 			found = true;
 #ifdef _WIN32
-			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue(libTag)).wstring(), 8, 12);
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(ConvertFuncs::StringToWString(xSFToLoad->GetFilename())).parent_path() / xSFToLoad->GetTagValue(libTag)).wstring(), 8, 12);
 #else
 			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue(libTag)).string(), 8, 12);
 #endif
@@ -190,15 +190,11 @@ bool XSFPlayer_NCSF::Load()
 	return XSFPlayer::Load();
 }
 
-static inline std::int32_t muldiv7(std::int32_t val, std::uint8_t mul)
-{
-	return mul == 127 ? val : ((val * mul) >> 7);
-}
-
-void XSFPlayer_NCSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples)
+void XSFPlayer_NCSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf)
 {
 	unsigned long mute = this->mutes.to_ulong();
 
+	const size_t buf_size = buf.size();
 	for (unsigned smpl = 0; smpl < samples; ++smpl)
 	{
 		this->secondsIntoPlayback += this->secondsPerSample;
@@ -218,24 +214,38 @@ void XSFPlayer_NCSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned of
 				if (mute & BIT(i))
 					continue;
 
-				std::uint8_t datashift = chn.reg.volumeDiv;
-				if (datashift == 3)
-					datashift = 4;
-				sample = muldiv7(sample, chn.reg.volumeMul) >> datashift;
+				if (use_buf)
+				{
+					std::uint8_t datashift = chn.reg.volumeDiv;
+					if (datashift == 3)
+						datashift = 4;
+					sample = muldiv7(sample, chn.reg.volumeMul) >> datashift;
 
-				leftChannel += muldiv7(sample, 127 - chn.reg.panning);
-				rightChannel += muldiv7(sample, chn.reg.panning);
+					leftChannel += muldiv7(sample, 127 - chn.reg.panning);
+					rightChannel += muldiv7(sample, chn.reg.panning);
+				}
 			}
 		}
 
-		buf[offset++] = leftChannel & 0xFF;
-		buf[offset++] = (leftChannel >> 8) & 0xFF;
-		buf[offset++] = (leftChannel >> 16) & 0xFF;
-		buf[offset++] = (leftChannel >> 24) & 0xFF;
-		buf[offset++] = rightChannel & 0xFF;
-		buf[offset++] = (rightChannel >> 8) & 0xFF;
-		buf[offset++] = (rightChannel >> 16) & 0xFF;
-		buf[offset++] = (rightChannel >> 24) & 0xFF;
+		if (use_buf)
+		{
+			// just make sure it's not going to go over
+			// as before all of this it could crash on
+			// seeking due to not checking the buf_size
+			if (offset >= buf_size)
+			{
+				offset = 0;
+			}
+
+			buf[offset++] = leftChannel & 0xFF;
+			buf[offset++] = (leftChannel >> 8) & 0xFF;
+			buf[offset++] = (leftChannel >> 16) & 0xFF;
+			buf[offset++] = (leftChannel >> 24) & 0xFF;
+			buf[offset++] = rightChannel & 0xFF;
+			buf[offset++] = (rightChannel >> 8) & 0xFF;
+			buf[offset++] = (rightChannel >> 16) & 0xFF;
+			buf[offset++] = (rightChannel >> 24) & 0xFF;
+		}
 
 		if (this->secondsIntoPlayback > this->secondsUntilNextClock)
 		{

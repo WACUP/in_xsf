@@ -33,7 +33,7 @@ public:
 #endif
 	~XSFPlayer_GSF() { this->Terminate(); }
 	bool Load();
-	void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples);
+	void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf);
 	void Terminate();
 };
 
@@ -159,7 +159,7 @@ static bool RecursiveLoadGSF(XSFFile *xSF, int level)
 	if (level <= 10 && xSF->GetTagExists("_lib"))
 	{
 #ifdef _WIN32
-		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue("_lib")).wstring(), 8, 12);
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(ConvertFuncs::StringToWString(xSF->GetFilename())).parent_path() / xSF->GetTagValue("_lib")).wstring(), 8, 12);
 #else
 		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue("_lib")).string(), 8, 12);
 #endif
@@ -180,7 +180,7 @@ static bool RecursiveLoadGSF(XSFFile *xSF, int level)
 		{
 			found = true;
 #ifdef _WIN32
-			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue(libTag)).wstring(), 8, 12);
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(ConvertFuncs::StringToWString(xSF->GetFilename())).parent_path() / xSF->GetTagValue(libTag)).wstring(), 8, 12);
 #else
 			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSF->GetFilename()).parent_path() / xSF->GetTagValue(libTag)).string(), 8, 12);
 #endif
@@ -232,7 +232,7 @@ bool XSFPlayer_GSF::Load()
 	return XSFPlayer::Load();
 }
 
-void XSFPlayer_GSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples)
+void XSFPlayer_GSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf)
 {
 	unsigned bytes = samples << 2;
 	while (bytes)
@@ -248,7 +248,12 @@ void XSFPlayer_GSF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned off
 		unsigned len = remainbytes;
 		if (len > bytes)
 			len = bytes;
-		std::copy_n(&buffer.buf[buffer.cur], len, &buf[offset]);
+
+		if (use_buf)
+		{
+			std::copy_n(&buffer.buf[buffer.cur], len, &buf[offset]);
+		}
+
 		bytes -= len;
 		offset += len;
 		buffer.cur += len;

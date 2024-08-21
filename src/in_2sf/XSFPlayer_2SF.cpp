@@ -36,7 +36,7 @@ public:
 #endif
 	~XSFPlayer_2SF() { this->Terminate(); }
 	bool Load();
-	void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples);
+	void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf);
 	void Terminate();
 };
 
@@ -152,7 +152,7 @@ bool XSFPlayer_2SF::RecursiveLoad2SF(XSFFile *xSFToLoad, int level)
 	if (level <= 10 && xSFToLoad->GetTagExists("_lib"))
 	{
 #ifdef _WIN32
-		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue("_lib")).wstring(), 4, 8);
+		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(ConvertFuncs::StringToWString(xSFToLoad->GetFilename())).parent_path() / xSFToLoad->GetTagValue("_lib")).wstring(), 4, 8);
 #else
 		auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue("_lib")).string(), 4, 8);
 #endif
@@ -173,7 +173,7 @@ bool XSFPlayer_2SF::RecursiveLoad2SF(XSFFile *xSFToLoad, int level)
 		{
 			found = true;
 #ifdef _WIN32
-			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue(libTag)).wstring(), 4, 8);
+			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(ConvertFuncs::StringToWString(xSFToLoad->GetFilename())).parent_path() / xSFToLoad->GetTagValue(libTag)).wstring(), 4, 8);
 #else
 			auto libxSF = std::make_unique<XSFFile>((std::filesystem::path(xSFToLoad->GetFilename()).parent_path() / xSFToLoad->GetTagValue(libTag)).string(), 4, 8);
 #endif
@@ -259,7 +259,7 @@ bool XSFPlayer_2SF::Load()
 	return XSFPlayer::Load();
 }
 
-void XSFPlayer_2SF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples)
+void XSFPlayer_2SF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf)
 {
 	static const double HBASE_CYCLES = 33509300.322234;
 	static const int HLINE_CYCLES = 6 * (99 + 256);
@@ -279,7 +279,11 @@ void XSFPlayer_2SF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned off
 		{
 			if (remainbytes > bytes)
 			{
-				std::copy_n(&sndifwork.buf[sndifwork.used], bytes, &buf[offset]);
+				if (use_buf)
+				{
+					std::copy_n(&sndifwork.buf[sndifwork.used], bytes, &buf[offset]);
+				}
+
 				sndifwork.used += bytes;
 				// dro change these aren't needed afaict
 				/*offset += bytes;
@@ -289,7 +293,11 @@ void XSFPlayer_2SF::GenerateSamples(std::vector<std::uint8_t> &buf, unsigned off
 			}
 			else
 			{
-				std::copy_n(&sndifwork.buf[sndifwork.used], remainbytes, &buf[offset]);
+				if (use_buf)
+				{
+					std::copy_n(&sndifwork.buf[sndifwork.used], remainbytes, &buf[offset]);
+				}
+
 				sndifwork.used += remainbytes;
 				offset += remainbytes;
 				bytes -= remainbytes;

@@ -21,8 +21,8 @@
 class XSFPlayer
 {
 protected:
-	static const std::uint32_t CHECK_SILENCE_BIAS = 0x8000000;
-	static const std::uint32_t CHECK_SILENCE_LEVEL = 7;
+	static constexpr std::uint32_t CHECK_SILENCE_BIAS = 0x8000000;
+	static constexpr std::uint32_t CHECK_SILENCE_LEVEL = 7;
 
 	std::unique_ptr<XSFFile> xSF;
 	unsigned sampleRate, detectedSilenceSample, detectedSilenceSec, skipSilenceOnStartSec, lengthSample, fadeSample, currentSample;
@@ -54,7 +54,7 @@ public:
 	void IgnoreVolume() { this->ignoreVolume = true; }
 	virtual bool Load();
 	bool FillBuffer(std::vector<std::uint8_t> &buf, unsigned &samplesWritten);
-	virtual void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples) = 0;
+	virtual void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf = true) = 0;
 	void SeekTop();
 #ifdef WINAMP_PLUGIN
 	int Seek(unsigned seekPosition, volatile int *killswitch, std::vector<std::uint8_t> &buf, Out_Module *outMod);
