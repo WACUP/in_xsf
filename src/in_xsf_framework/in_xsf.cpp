@@ -244,12 +244,15 @@ int play(const in_char *fn)
 		seek_needed = -1;
 		decode_pos_ms = 0;
 
-		int maxlatency = (inMod.outMod->Open ? inMod.outMod->Open(tmpxSFPlayer->GetSampleRate(), NumChannels, BitsPerSample, -1, -1) : -1);
+		const int sampleRate = tmpxSFPlayer->GetSampleRate();
+		int maxlatency = (inMod.outMod->Open && sampleRate && NumChannels ?
+						  inMod.outMod->Open(sampleRate, NumChannels,
+											  BitsPerSample, -1, -1) : -1);
 		if (maxlatency < 0)
 			return 1;
-		inMod.SetInfo((tmpxSFPlayer->GetSampleRate() * NumChannels * BitsPerSample) / 1000, tmpxSFPlayer->GetSampleRate() / 1000, NumChannels, 1);
-		inMod.SAVSAInit(maxlatency, tmpxSFPlayer->GetSampleRate());
-		inMod.VSASetInfo(tmpxSFPlayer->GetSampleRate(), NumChannels);
+		inMod.SetInfo((sampleRate * NumChannels * BitsPerSample) / 1000, sampleRate / 1000, NumChannels, 1);
+		inMod.SAVSAInit(maxlatency, sampleRate);
+		inMod.VSASetInfo(sampleRate, NumChannels);
 		inMod.outMod->SetVolume(-666);
 
 		xSFPlayer = tmpxSFPlayer.release();
@@ -268,13 +271,19 @@ int play(const in_char *fn)
 void pause()
 {
 	paused = true;
-	inMod.outMod->Pause(1);
+	if (inMod.outMod)
+	{
+		inMod.outMod->Pause(1);
+	}
 }
 
 void unPause()
 {
 	paused = false;
-	inMod.outMod->Pause(0);
+	if (inMod.outMod)
+	{
+		inMod.outMod->Pause(0);
+	}
 }
 
 int isPaused()
@@ -295,8 +304,14 @@ void stop()
 		CloseHandle(thread_handle);
 		thread_handle = INVALID_HANDLE_VALUE;
 	}
-	inMod.outMod->Close();
-	inMod.SAVSADeInit();
+	if (inMod.outMod)
+	{
+		if (inMod.outMod->Close)
+		{
+			inMod.outMod->Close();
+		}
+		inMod.SAVSADeInit();
+	}
 	delete xSFPlayer;
 	xSFPlayer = nullptr;
 	xSFFile = nullptr;
@@ -311,7 +326,7 @@ int getLength()
 
 int getOutputTime()
 {
-	return inMod.outMod->GetOutputTime();
+	return (inMod.outMod ? inMod.outMod->GetOutputTime() : 0);
 }
 
 void setOutputTime(int time_in_ms)
@@ -321,12 +336,18 @@ void setOutputTime(int time_in_ms)
 
 void setVolume(int volume)
 {
-	inMod.outMod->SetVolume(volume);
+	if (inMod.outMod)
+	{
+		inMod.outMod->SetVolume(volume);
+	}
 }
 
 void setPan(int pan)
 {
-	inMod.outMod->SetPan(pan);
+	if (inMod.outMod)
+	{
+		inMod.outMod->SetPan(pan);
+	}
 }
 
 void GetFileExtensions(void)
@@ -529,7 +550,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 		const bool reset = SameStrA(data, "reset");
 		if (!reset && !nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
 		{
-			if (FilePathExists(fn))
+			if (FilePathExists(fn, NULL))
 			{
 				auto file = XSFFile(fn);
 				return wrapperWinampGetExtendedFileInfo(file, data, dest, destlen);

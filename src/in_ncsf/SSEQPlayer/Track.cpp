@@ -700,7 +700,6 @@ void Track::Run()
 
 				case SSEQCommand::SweepPitch:
 					this->sweepPitch = this->overriding.val<std::int16_t>(pData, read16);
-					this->state.set(ConvertFuncs::ToIntegral(TrackState::PortamentoBit));
 					// Update here?
 					break;
 

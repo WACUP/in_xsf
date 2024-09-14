@@ -23,7 +23,7 @@ struct INFOEntry
 
 struct INFOEntrySEQ : INFOEntry
 {
-	std::uint32_t fileID;
+	std::uint16_t fileID;
 	std::uint16_t bank;
 	std::uint8_t vol;
 	std::uint8_t ply;
@@ -35,7 +35,7 @@ struct INFOEntrySEQ : INFOEntry
 
 struct INFOEntryBANK : INFOEntry
 {
-	std::uint32_t fileID;
+	std::uint16_t fileID;
 	std::uint16_t waveArc[4];
 
 	INFOEntryBANK();
@@ -45,7 +45,7 @@ struct INFOEntryBANK : INFOEntry
 
 struct INFOEntryWAVEARC : INFOEntry
 {
-	std::uint32_t fileID;
+	std::uint16_t fileID;
 
 	INFOEntryWAVEARC();
 

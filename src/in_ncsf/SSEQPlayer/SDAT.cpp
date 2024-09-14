@@ -53,7 +53,7 @@ SDAT::SDAT(PseudoFile &file, std::uint32_t sseqToLoad) : sseq(), sbnk(), player(
 	// Read SSEQ
 	if (infoSection.SEQrecord.entries.count(sseqToLoad))
 	{
-		std::uint32_t fileID = infoSection.SEQrecord.entries[sseqToLoad].fileID;
+		std::uint16_t fileID = infoSection.SEQrecord.entries[sseqToLoad].fileID;
 		std::string name = "SSEQ" + NumToHexString(fileID).substr(2);
 		if (SYMBOffset)
 			name = NumToHexString(sseqToLoad).substr(6) + " - " + symbSection.SEQrecord.entries[sseqToLoad];

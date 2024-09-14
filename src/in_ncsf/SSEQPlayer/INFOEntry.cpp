@@ -17,7 +17,8 @@ INFOEntrySEQ::INFOEntrySEQ() : fileID(0), bank(0), vol(0), ply(0)
 
 void INFOEntrySEQ::Read(PseudoFile &file)
 {
-	this->fileID = file.ReadLE<std::uint32_t>();
+	this->fileID = file.ReadLE<std::uint16_t>();
+	file.ReadLE<std::uint16_t>(); // unknown
 	this->bank = file.ReadLE<std::uint16_t>();
 	this->vol = file.ReadLE<std::uint8_t>();
 	if (!this->vol)
@@ -34,7 +35,8 @@ INFOEntryBANK::INFOEntryBANK() : fileID(0)
 
 void INFOEntryBANK::Read(PseudoFile &file)
 {
-	this->fileID = file.ReadLE<std::uint32_t>();
+	this->fileID = file.ReadLE<std::uint16_t>();
+	file.ReadLE<std::uint16_t>(); // unknown
 	file.ReadLE(this->waveArc);
 }
 
@@ -44,7 +46,8 @@ INFOEntryWAVEARC::INFOEntryWAVEARC() : fileID(0)
 
 void INFOEntryWAVEARC::Read(PseudoFile &file)
 {
-	this->fileID = file.ReadLE<std::uint32_t>();
+	this->fileID = file.ReadLE<std::uint16_t>();
+	file.ReadLE<std::uint16_t>(); // unknown
 }
 
 INFOEntryPLAYER::INFOEntryPLAYER() : channelMask(0)
