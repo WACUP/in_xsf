@@ -23,6 +23,7 @@
 #include <winamp/wa_ipc.h>
 #define WA_UTILS_SIMPLE
 #include <loader/loader/utils.h>
+#include <loader/loader/runtime_helper.h>
 #include <api/memmgr/api_memmgr.h>
 #include <agave/config/api_config.h>
 
@@ -715,3 +716,5 @@ extern "C" __declspec(dllexport) void winampGetExtendedRead_close(std::intptr_t 
 	if (tmpxSFPlayer)
 		delete tmpxSFPlayer;
 }
+
+RUNTIME_HELPER_HANDLER
