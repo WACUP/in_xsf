@@ -56,7 +56,8 @@ INFOEntryPLAYER::INFOEntryPLAYER() : channelMask(0)
 
 void INFOEntryPLAYER::Read(PseudoFile &file)
 {
-	file.ReadLE<std::uint16_t>(); // maxSeqs
-	this->channelMask = file.ReadLE<std::uint16_t>();
+	file.ReadLE<std::uint8_t>(); // maxSeqs
+	this->channelMask = file.ReadLE<std::uint8_t>();
+	file.ReadLE<std::uint8_t>(); // padding
 	file.ReadLE<std::uint32_t>(); // heapSize
 }
