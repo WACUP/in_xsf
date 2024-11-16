@@ -327,6 +327,7 @@ BEGIN
             VALUE "FileDescription", "Input Plug-in"
             VALUE "FileVersion", "1.13.3.0"
             VALUE "InternalName", "in_ncsf.dll"
+            VALUE "LegalCopyright", "WACUP modifications by Darren Owen aka DrO (2021-2024)"
             VALUE "OriginalFilename", "in_ncsf.dll"
             VALUE "ProductName", "NCSF Decoder"
             VALUE "ProductVersion", "1.13.3.0"

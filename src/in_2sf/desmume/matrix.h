@@ -23,7 +23,7 @@
 #include "types.h"
 #include "mem.h"
 
-#ifdef __SSE2__
+#if (defined(_MSC_VER) && _MSC_VER >= 1400) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1))
 #include <emmintrin.h>
 #endif
 
@@ -32,7 +32,7 @@
 // this isnt as fast as it could be if we used a visual c++ intrinsic, but those appear not to be universally available
 inline uint32_t u32floor(float f)
 {
-#ifdef __SSE2__
+#if (defined(_MSC_VER) && _MSC_VER >= 1400) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1))
 	return static_cast<uint32_t>(_mm_cvtt_ss2si(_mm_set_ss(f)));
 #else
 	return static_cast<uint32_t>(f);
@@ -40,7 +40,7 @@ inline uint32_t u32floor(float f)
 }
 inline uint32_t u32floor(double d)
 {
-#ifdef __SSE2__
+#if (defined(_MSC_VER) && _MSC_VER >= 1400) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1))
 	return static_cast<uint32_t>(_mm_cvttsd_si32(_mm_set_sd(d)));
 #else
 	return static_cast<uint32_t>(d);
@@ -51,7 +51,7 @@ inline uint32_t u32floor(double d)
 // be sure that the results are the same thing as floorf!
 inline int32_t s32floor(float f)
 {
-#ifdef __SSE2__
+#if (defined(_MSC_VER) && _MSC_VER >= 1400) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1))
 	return _mm_cvtss_si32(_mm_add_ss(_mm_set_ss(-0.5f),_mm_add_ss(_mm_set_ss(f), _mm_set_ss(f)))) >> 1;
 #else
 	return static_cast<int32_t>(floorf(f));
