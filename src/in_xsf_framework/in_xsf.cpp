@@ -460,45 +460,54 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 			tagToGet = "copyright";
 		else if (SameStrA(data, "tool"))
 			tagToGet = XSFPlayer::SFby;
-		std::string tag = "";
+		std::string info = "";
+		LPCSTR tag = tagToGet.c_str();
 		if (!file.GetTagExists(tagToGet))
 		{
-			if (SameStrA(tagToGet.c_str(), "replaygain_track_gain"))
+			if (SameStrA(tag, "replaygain_track_gain"))
 				return 1;
-			else if (SameStrA(tagToGet.c_str(), "formatinformation"))
+			else if (SameStrA(tag, "formatinformation"))
 			{
 				const int fade = file.GetFadeMS(xSFConfig->GetDefaultFade()),
 						  length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + fade;
-				tag = "Length: " + std::to_string(((length > 0) ? (length / 1000) : 0)) + " seconds\n"
-					  "Fade: " + std::to_string((fade > 0) ? (fade / 1000) : 0) + " seconds\n"
-					  "Data: " + file.GetTagValue("_lib") + "\nRipped by: " +
-					  file.GetTagValue(XSFPlayer::SFby) + "\nTagger: " + file.GetTagValue("tagger");
-				CopyToString(tag.substr(0, destlen - 1), dest);
+				info = "Length: " + std::to_string(((length > 0) ? (length / 1000) : 0)) + " seconds\n"
+					   "Fade: " + std::to_string((fade > 0) ? (fade / 1000) : 0) + " seconds\n"
+					   "Data: " + file.GetTagValue("_lib") + "\nRipped by: " +
+					   file.GetTagValue(XSFPlayer::SFby) + "\nTagger: " + file.GetTagValue("tagger");
+				CopyToString(info.substr(0, destlen - 1), dest);
 				return 1;
 			}
-			else if (SameStrA(tagToGet.c_str(), "bitrate"))
+			else if (SameStrA(tag, "bitrate"))
 			{
 				const int br = (xSFConfig->GetSampleRate() * NumChannels * BitsPerSample);
 				if (br > 0)
 				{
-					tag = std::to_string((br / 1000));
-					CopyToString(tag.substr(0, destlen - 1), dest);
+					info = std::to_string((br / 1000));
+					CopyToString(info.substr(0, destlen - 1), dest);
 					return 1;
 				}
 			}
-			else if (SameStrA(tagToGet.c_str(), "samplerate"))
+			else if (SameStrA(tag, "samplerate"))
 			{
-				tag = std::to_string(xSFConfig->GetSampleRate());
-				CopyToString(tag.substr(0, destlen - 1), dest);
+				info = std::to_string(xSFConfig->GetSampleRate());
+				CopyToString(info.substr(0, destlen - 1), dest);
 				return 1;
+			}
+			else if (SameStrA(tag, "bitdepth"))
+			{
+				// TODO is this correct though as it's been
+				//      hard-coded to be 16-bit it should
+				dest[0] = L'1';
+				dest[1] = L'6';
+				dest[2] = 0;
 			}
 			return 0;
 		}
-		else if (SameStrA(tagToGet.c_str(), "length"))
-			tag = std::to_string(file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade()));
+		else if (SameStrA(tag, "length"))
+			info = std::to_string(file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade()));
 		else
-			tag = file.GetTagValue(tagToGet);
-		CopyToString(tag.substr(0, destlen - 1), dest);
+			info = file.GetTagValue(tagToGet);
+		CopyToString(info.substr(0, destlen - 1), dest);
 		return 1;
 	}
 	catch (const std::exception &)
