@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <bitset>
 #include <string>
 #include "windowsh_wrapper.h"
 #include "XSFConfig.h"

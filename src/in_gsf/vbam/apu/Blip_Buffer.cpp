@@ -215,13 +215,13 @@ void blip_eq_t::generate(float *out, int count) const
 {
 	// lower cutoff freq for narrow kernels with their wider transition band
 	// (8 points->1.49, 16 points->1.15)
-	double oversample = blip_res * 2.25 / count + 0.85;
+	double oversample = (double)blip_res * 2.25 / count + 0.85;
 	double half_rate = this->sample_rate * 0.5;
 	if (this->cutoff_freq)
 		oversample = half_rate / this->cutoff_freq;
 	double cutoff = this->rolloff_freq * oversample / half_rate;
 
-	gen_sinc(out, count, blip_res * oversample, this->treble, cutoff);
+	gen_sinc(out, count, (double)blip_res * oversample, this->treble, cutoff);
 
 	// apply (half of) hamming window
 	double to_fraction = M_PI / (count - 1);

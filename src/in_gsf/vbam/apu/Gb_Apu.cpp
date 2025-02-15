@@ -57,7 +57,7 @@ void Gb_Apu::set_output(Blip_Buffer *center, Blip_Buffer *left, Blip_Buffer *rig
 
 void Gb_Apu::synth_volume(int iv)
 {
-	double v = this->volume_ * 0.60 / osc_count / 15 /*steps*/ / 8 /*master vol range*/ * iv;
+	double v = this->volume_ * 0.60 / (double)osc_count / 15 /*steps*/ / 8 /*master vol range*/ * iv;
 	this->good_synth.volume(v);
 	this->med_synth[0].volume(v);
 	this->med_synth[1].volume(v * 1.4);

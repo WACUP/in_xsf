@@ -71,7 +71,7 @@ public:
 	}
 	unsigned long GetLengthMS(unsigned long defaultLength) const;
 	unsigned long GetFadeMS(unsigned long defaultFade) const;
-	double GetVolume(VolumeType preferredVolumeType, PeakType preferredPeakType) const;
+	float GetVolume(VolumeType preferredVolumeType, PeakType preferredPeakType) const;
 	std::string GetFormattedTitle(const std::string &format) const;
 	std::string GetFilename() const;
 	std::string GetFilenameWithoutPath() const;

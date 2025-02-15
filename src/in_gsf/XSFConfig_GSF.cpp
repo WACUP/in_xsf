@@ -5,7 +5,6 @@
  * Partially based on the vio*sf framework
  */
 
-#include <bitset>
 #include <sstream>
 #include <string>
 #include "windowsh_wrapper.h"
@@ -47,7 +46,7 @@ public:
 
 unsigned XSFConfig::initSampleRate = 44100;
 const std::wstring XSFConfig::commonName = L"GSF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.9";
+const std::wstring XSFConfig::versionNumber = L"1.0.10";
 bool XSFConfig_GSF::initLowPassFiltering = true;
 std::string XSFConfig_GSF::initMutes = "000000";
 

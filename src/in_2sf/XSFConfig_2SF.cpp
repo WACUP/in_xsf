@@ -5,7 +5,6 @@
  * Partially based on the vio*sf framework
  */
 
-#include <bitset>
 #include <sstream>
 #include <string>
 #include <cstddef>
@@ -32,7 +31,7 @@ protected:
 	static std::string initMutes;
 
 	friend class XSFConfig;
-	unsigned interpolation;
+	unsigned short interpolation;
 	std::bitset<16> mutes;
 
 	XSFConfig_2SF();
@@ -49,7 +48,7 @@ public:
 
 unsigned XSFConfig::initSampleRate = DESMUME_SAMPLE_RATE;
 const std::wstring XSFConfig::commonName = L"2SF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.12";
+const std::wstring XSFConfig::versionNumber = L"1.0.14";
 unsigned XSFConfig_2SF::initInterpolation = 2;
 std::string XSFConfig_2SF::initMutes = "0000000000000000";
 

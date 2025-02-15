@@ -260,7 +260,7 @@ void XSFPlayer_NCSF::Terminate()
 	this->player.Stop(true);
 }
 
-void XSFPlayer_NCSF::SetInterpolation(unsigned interpolation)
+void XSFPlayer_NCSF::SetInterpolation(unsigned short interpolation)
 {
 	this->player.interpolation = static_cast<Interpolation>(interpolation);
 }

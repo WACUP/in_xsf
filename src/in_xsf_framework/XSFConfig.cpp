@@ -45,16 +45,15 @@ std::string XSFConfig::initDetectSilenceSec = "5";
 std::string XSFConfig::initDefaultLength = "1:55";
 std::string XSFConfig::initDefaultFade = "5";
 //std::string XSFConfig::initTitleFormat = "%game%[ - [%disc%.]%track%] - %title%";
-double XSFConfig::initVolume = 1.0;
+float XSFConfig::initVolume = 1.0f;
 VolumeType XSFConfig::initVolumeType = VolumeType::ReplayGainAlbum;
 PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
 
-XSFConfig::XSFConfig() : skipSilenceOnStartSec(0), detectSilenceSec(0), defaultLength(0),
-						 defaultFade(0), volume(0.0), volumeType(VolumeType::None),
-						 peakType(PeakType::None), sampleRate(0), configLoaded(false),
-						 playInfinitely(false), /*titleFormat(""),*/ configDialog(),
-						 configDialogProperty(), infoDialog(), supportedSampleRates(),
-						 configIO(nullptr/*/XSFConfigIO::Create()/**/)
+XSFConfig::XSFConfig() : skipSilenceOnStartSec(0), detectSilenceSec(0), defaultLength(0), defaultFade(0),
+						 sampleRate(0), volume(0.0f), volumeType(VolumeType::None), peakType(PeakType::None),
+						 /*titleFormat(""),*/ configDialog(), configDialogProperty(), infoDialog(),
+						 supportedSampleRates(), configIO(nullptr/*/XSFConfigIO::Create()/**/),
+						 configLoaded(false), playInfinitely(false)
 {
 }
 
@@ -381,7 +380,7 @@ void XSFConfig::SaveConfigDialog(HWND hwndDlg)
 	this->defaultFade = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDefaultFade)));
 	this->skipSilenceOnStartSec = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idSkipSilenceOnStartSec)));
 	this->detectSilenceSec = ConvertFuncs::StringToMS(this->GetTextFromWindow(GetDlgItem(hwndDlg, idDetectSilenceSec)));
-	this->volume = ConvertFuncs::To<double>(this->GetTextFromWindow(GetDlgItem(hwndDlg, idVolume)));
+	this->volume = ConvertFuncs::To<float>(this->GetTextFromWindow(GetDlgItem(hwndDlg, idVolume)));
 	this->volumeType = static_cast<VolumeType>(SendDlgItemMessage(hwndDlg, idReplayGain, CB_GETCURSEL, 0, 0));
 	this->peakType = static_cast<PeakType>(SendDlgItemMessage(hwndDlg, idClipProtect, CB_GETCURSEL, 0, 0));
 	this->sampleRate = XSFConfig::supportedSampleRates[SendDlgItemMessage(hwndDlg, idSampleRate, CB_GETCURSEL, 0, 0)];

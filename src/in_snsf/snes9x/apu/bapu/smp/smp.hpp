@@ -123,9 +123,11 @@ namespace SNES
 		void op_step();
 		void op_writestack(uint8_t data);
 		uint8_t op_readstack();
-		uint64_t cycle_table_cpu[256];
+
+		// dro change as this isn't used & saves memory
+		/*uint64_t cycle_table_cpu[256];
 		unsigned cycle_table_dsp[256];
-		uint64_t cycle_step_cpu;
+		uint64_t cycle_step_cpu;*/
 
 		uint8_t op_adc(uint8_t x, uint8_t y);
 		uint16_t op_addw(uint16_t x, uint16_t y);

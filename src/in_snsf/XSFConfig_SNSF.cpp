@@ -9,7 +9,6 @@
  * snes9x.
  */
 
-#include <bitset>
 #include <sstream>
 #include <string>
 #include <cstdint>
@@ -30,7 +29,7 @@ enum
 
 unsigned XSFConfig::initSampleRate = 44100;
 const std::wstring XSFConfig::commonName = L"SNSF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.8";
+const std::wstring XSFConfig::versionNumber = L"1.0.10";
 //bool XSFConfig_SNSF::initSixteenBitSound = true;
 bool XSFConfig_SNSF::initReverseStereo = false;
 unsigned XSFConfig_SNSF::initResampler = 1;

@@ -324,35 +324,35 @@ unsigned long XSFFile::GetFadeMS(unsigned long defaultFade) const
 	return fade;
 }
 
-double XSFFile::GetVolume(VolumeType preferredVolumeType, PeakType preferredPeakType) const
+float XSFFile::GetVolume(VolumeType preferredVolumeType, PeakType preferredPeakType) const
 {
 	if (preferredVolumeType == VolumeType::None)
-		return 1.0;
+		return 1.0f;
 	std::string replaygain_album_gain = this->GetTagValue("replaygain_album_gain"), replaygain_album_peak = this->GetTagValue("replaygain_album_peak");
 	std::string replaygain_track_gain = this->GetTagValue("replaygain_track_gain"), replaygain_track_peak = this->GetTagValue("replaygain_track_peak");
 	std::string volume = this->GetTagValue("volume");
-	double gain = 0.0;
+	float gain = 0.0f;
 	bool hadReplayGain = false;
 	if (preferredVolumeType == VolumeType::ReplayGainAlbum && !replaygain_album_gain.empty())
 	{
-		gain = ConvertFuncs::To<double>(replaygain_album_gain);
+		gain = ConvertFuncs::To<float>(replaygain_album_gain);
 		hadReplayGain = true;
 	}
 	if (!hadReplayGain && preferredVolumeType != VolumeType::Volume && !replaygain_track_gain.empty())
 	{
-		gain = ConvertFuncs::To<double>(replaygain_track_gain);
+		gain = ConvertFuncs::To<float>(replaygain_track_gain);
 		hadReplayGain = true;
 	}
 	if (hadReplayGain)
 	{
-		double vol = std::pow(10.0, gain / 20.0), peak = 1.0;
+		float vol = std::pow(10.0f, gain / 20.0f), peak = 1.0f;
 		if (preferredPeakType == PeakType::ReplayGainAlbum && !replaygain_album_peak.empty())
-			peak = ConvertFuncs::To<double>(replaygain_album_peak);
+			peak = ConvertFuncs::To<float>(replaygain_album_peak);
 		else if (preferredPeakType != PeakType::None && !replaygain_track_peak.empty())
-			peak = ConvertFuncs::To<double>(replaygain_track_peak);
-		return !fEqual(peak, 1.0) ? std::min(vol, 1.0 / peak) : vol;
+			peak = ConvertFuncs::To<float>(replaygain_track_peak);
+		return !fEqual(peak, 1.0f) ? std::min(vol, 1.0f / peak) : vol;
 	}
-	return volume.empty() ? 1.0 : ConvertFuncs::To<double>(volume);
+	return volume.empty() ? 1.0f : ConvertFuncs::To<float>(volume);
 }
 
 std::string XSFFile::FormattedTitleOptionalBlock(const std::string &block, bool &hadReplacement, unsigned level) const

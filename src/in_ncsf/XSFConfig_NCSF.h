@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <bitset>
 #include <string>
 #ifdef _DEBUG
 # include <algorithm>
@@ -46,7 +45,7 @@ protected:
 
 	friend class XSFConfig;
 	friend struct SoundViewData;
-	unsigned interpolation;
+	unsigned short interpolation;
 	std::bitset<16> mutes;
 
 	XSFConfig_NCSF();

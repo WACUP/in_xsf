@@ -18,6 +18,14 @@ namespace SNES
 		this->timer1.target = 0;
 		this->timer2.target = 0;
 
+		// only allocate this when we need to otherwise
+		// we are just creating a 64KB buffer not to be
+		// used which is a small waste for most setups.
+		if (!this->apuram)
+		{
+			this->apuram.reset(new uint8_t[64 * 1024]);
+		}
+
 		this->reset();
 	}
 
@@ -53,9 +61,9 @@ namespace SNES
 		this->timer0.stage3_ticks = this->timer1.stage3_ticks = this->timer2.stage3_ticks = 0;
 	}
 
-	SMP::SMP()
+	SMP::SMP() : opcode_number(0), opcode_cycle(0), rd(0), wr(0),
+				 dp(0), sp(0), ya(0), bit(0), regs(0), status(0)
 	{
-		this->apuram.reset(new uint8_t[64 * 1024]);
 	}
 
 	SMP::~SMP()

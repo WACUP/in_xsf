@@ -5,7 +5,6 @@
  * Partially based on the vio*sf framework
  */
 
-#include <bitset>
 #include <sstream>
 #include <string>
 #include <cstddef>
@@ -32,7 +31,7 @@ enum
 
 unsigned XSFConfig::initSampleRate = 44100;
 const std::wstring XSFConfig::commonName = L"NCSF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.13.3";
+const std::wstring XSFConfig::versionNumber = L"1.13.4";
 unsigned XSFConfig_NCSF::initInterpolation = 4;
 std::string XSFConfig_NCSF::initMutes = "0000000000000000";
 
@@ -41,7 +40,7 @@ XSFConfig *XSFConfig::Create()
 	return new XSFConfig_NCSF();
 }
 
-XSFConfig_NCSF::XSFConfig_NCSF() : XSFConfig(), interpolation(0), mutes()
+XSFConfig_NCSF::XSFConfig_NCSF() : XSFConfig(), interpolation(0)
 #ifdef _DEBUG
 	, soundViewData()
 #endif

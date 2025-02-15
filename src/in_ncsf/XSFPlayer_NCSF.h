@@ -45,7 +45,7 @@ public:
 	void GenerateSamples(std::vector<std::uint8_t> &buf, unsigned offset, unsigned samples, bool use_buf) override;
 	void Terminate() override;
 
-	void SetInterpolation(unsigned interpolation);
+	void SetInterpolation(unsigned short interpolation);
 	void SetMutes(const std::bitset<16> &newMutes);
 #ifdef _DEBUG
 	const Channel &GetChannel(std::size_t chanNum) const;

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <bitset>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -63,15 +64,15 @@ class XSFConfig
 {
 protected:
 	unsigned long skipSilenceOnStartSec, detectSilenceSec, defaultLength, defaultFade;
-	double volume;
+	unsigned sampleRate;
+	float volume;
 	VolumeType volumeType;
 	PeakType peakType;
-	unsigned sampleRate;
-	bool configLoaded, playInfinitely;
 	//std::string titleFormat;
 	DialogTemplate configDialog, configDialogProperty, infoDialog;
 	std::vector<unsigned> supportedSampleRates;
 	std::unique_ptr<XSFConfigIO> configIO;
+	bool configLoaded, playInfinitely;
 
 	XSFConfig();
 	std::wstring GetTextFromWindow(HWND hwnd);
@@ -86,7 +87,7 @@ protected:
 public:
 	static bool initPlayInfinitely;
 	static std::string initSkipSilenceOnStartSec, initDetectSilenceSec, initDefaultLength, initDefaultFade/*, initTitleFormat*/;
-	static double initVolume;
+	static float initVolume;
 	static VolumeType initVolumeType;
 	static PeakType initPeakType;
 	// These are not defined in XSFConfig.cpp, they should be defined in your own config's source.
