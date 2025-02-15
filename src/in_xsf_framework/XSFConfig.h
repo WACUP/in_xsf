@@ -69,10 +69,10 @@ protected:
 	VolumeType volumeType;
 	PeakType peakType;
 	//std::string titleFormat;
-	DialogTemplate configDialog, configDialogProperty, infoDialog;
+	DialogTemplate configDialog, configDialogProperty/*, infoDialog*/;
 	std::vector<unsigned> supportedSampleRates;
 	std::unique_ptr<XSFConfigIO> configIO;
-	bool configLoaded, playInfinitely;
+	bool configLoaded, playInfinitely, dialogsGenerated;
 
 	XSFConfig();
 	std::wstring GetTextFromWindow(HWND hwnd);
@@ -80,7 +80,7 @@ protected:
 	virtual void GenerateSpecificDialogs() = 0;
 	virtual void SaveSpecificConfig() = 0;
 	virtual INT_PTR CALLBACK ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	virtual INT_PTR CALLBACK InfoDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	/*virtual INT_PTR CALLBACK InfoDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);*/
 	virtual void ResetSpecificConfigDefaults(HWND hwndDlg) = 0;
 	virtual void SaveSpecificConfigDialog(HWND hwndDlg) = 0;
 	virtual void CopySpecificConfigToMemory(XSFPlayer *xSFPlayer, bool preLoad) = 0;
@@ -105,9 +105,9 @@ public:
 	void SaveConfig();
 	void GenerateDialogs();
 	static INT_PTR CALLBACK ConfigDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	static INT_PTR CALLBACK InfoDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	/*static INT_PTR CALLBACK InfoDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);*/
 	void CallConfigDialog(HINSTANCE hInstance, HWND hwndParent);
-	void CallInfoDialog(HINSTANCE hInstance, HWND hwndParent);
+	/*void CallInfoDialog(HINSTANCE hInstance, HWND hwndParent);*/
 	void ResetConfigDefaults(HWND hwndDlg);
 	void SaveConfigDialog(HWND hwndDlg);
 	void CopyConfigToMemory(XSFPlayer *xSFPlayer, bool preLoad);

@@ -51,9 +51,9 @@ PeakType XSFConfig::initPeakType = PeakType::ReplayGainTrack;
 
 XSFConfig::XSFConfig() : skipSilenceOnStartSec(0), detectSilenceSec(0), defaultLength(0), defaultFade(0),
 						 sampleRate(0), volume(0.0f), volumeType(VolumeType::None), peakType(PeakType::None),
-						 /*titleFormat(""),*/ configDialog(), configDialogProperty(), infoDialog(),
+						 /*titleFormat(""),*/ configDialog(), configDialogProperty(), /*infoDialog(),*/
 						 supportedSampleRates(), configIO(nullptr/*/XSFConfigIO::Create()/**/),
-						 configLoaded(false), playInfinitely(false)
+						 configLoaded(false), playInfinitely(false), dialogsGenerated(false)
 {
 }
 
@@ -78,7 +78,7 @@ void XSFConfig::InitConfig()
 		configLoaded = true;
 
 		LoadConfig();
-		GenerateDialogs();
+		//GenerateDialogs();
 	}
 }
 
@@ -121,86 +121,91 @@ void XSFConfig::SaveConfig()
 
 void XSFConfig::GenerateDialogs()
 {
-	this->infoDialog = DialogBuilder().IsPopup().WithBorder().WithDialogFrame().WithDialogModalFrame().WithSystemMenu().WithFont(L"MS Shell Dlg", 8);
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Title:").WithSize(50, 8).WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(7, 10)).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
-		WithTabStop().WithID(idInfoTitle));
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Artist:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
-		WithTabStop().WithID(idInfoArtist));
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Game:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
-		WithTabStop().WithID(idInfoGame));
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Year:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
-		WithTabStop().WithID(idInfoYear));
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Genre:").WithSize(25, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, 3)).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(140, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
-		WithTabStop().WithID(idInfoGenre));
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Copyright:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 4).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
-		WithTabStop().WithID(idInfoCopyright));
-	this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Comment:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
-	this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 54).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoVScroll().WithBorder().
-		WithTabStop().WithID(idInfoComment).WithVerticalScrollbar().WithWantReturn().IsMultiline());
+	if (!this->dialogsGenerated)
+	{
+		this->dialogsGenerated = true;
 
-	this->configDialog = DialogBuilder().WithTitle(XSFConfig::CommonNameWithVersion()).IsPopup().WithBorder().WithDialogFrame().WithDialogModalFrame().WithSystemMenu().WithFont(L"MS Shell Dlg", 8);
-	this->configDialog.AddGroupControl(DialogGroupBuilder(L"General").WithRelativePositionToParent(RelativePositionToParent::PositionType::FromTopLeft, Point<short>(7, 7)));
-	this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Play infinitely").WithSize(60, 10).InGroup(L"General").WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 11)).WithTabStop().
-		WithID(idPlayInfinitely));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Default play length (m:s)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)).
-		IsLeftJustified());
-	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
-		WithAutoHScroll().WithBorder().WithTabStop().WithID(idDefaultLength));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Default fadeout length (m:s)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).
-		IsLeftJustified());
-	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
-		WithAutoHScroll().WithBorder().WithTabStop().WithID(idDefaultFade));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Skip silence on start (sec)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).
-		IsLeftJustified());
-	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
-		WithAutoHScroll().WithBorder().WithTabStop().WithID(idSkipSilenceOnStartSec));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Detect silence (sec)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).
-		IsLeftJustified());
-	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
-		WithAutoHScroll().WithBorder().WithTabStop().WithID(idDetectSilenceSec));
-	this->configDialog.AddGroupControl(DialogGroupBuilder(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Volume").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 14)).IsLeftJustified());
-	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
-		WithAutoHScroll().WithBorder().WithTabStop().WithID(idVolume));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"ReplayGain").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idReplayGain).
-		IsDropDownList().WithTabStop());
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Clip Protect").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idClipProtect).
-		IsDropDownList().WithTabStop());
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Sample Rate").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
-	this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(50, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idSampleRate).
-		IsDropDownList().WithTabStop());
-	/*this->configDialog.AddGroupControl(DialogGroupBuilder(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"NOTE: This is only used if Advanced Title Formatting is disabled in Winamp.").WithSize(150, 16).InGroup(L"Title Format").
-		WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 11)).IsLeftJustified());
-	this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(150, 14).InGroup(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 4)).IsLeftJustified().
-		WithAutoHScroll().WithBorder().WithTabStop().WithID(idTitleFormat));
-	this->configDialog.AddLabelControl(DialogLabelBuilder(L"Names between percent symbols (e.g. %game%, %title%) will be replaced with the respective value from the file's tags. Using square brackets around any "
-			L"items will cause them to only be displayed if there was a replacement done (e.g. [%disc%.] will display 01. if disc was in the tags as 01, but will display nothing if disc was not in the tags). Square "
-			L"bracket blocks can be nested.").WithSize(150, 72).InGroup(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 4)).IsLeftJustified());
-*/
-	this->GenerateSpecificDialogs();
+		/*this->infoDialog = DialogBuilder().IsPopup().WithBorder().WithDialogFrame().WithDialogModalFrame().WithSystemMenu().WithFont(L"MS Shell Dlg", 8);
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Title:").WithSize(50, 8).WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(7, 10)).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
+			WithTabStop().WithID(idInfoTitle));
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Artist:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
+			WithTabStop().WithID(idInfoArtist));
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Game:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
+			WithTabStop().WithID(idInfoGame));
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Year:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
+			WithTabStop().WithID(idInfoYear));
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Genre:").WithSize(25, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, 3)).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(140, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
+			WithTabStop().WithID(idInfoGenre));
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Copyright:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 4).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoHScroll().WithBorder().
+			WithTabStop().WithID(idInfoCopyright));
+		this->infoDialog.AddLabelControl(DialogLabelBuilder(L"Comment:").WithSize(50, 8).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsRightJustified());
+		this->infoDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(200, 54).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().WithAutoVScroll().WithBorder().
+			WithTabStop().WithID(idInfoComment).WithVerticalScrollbar().WithWantReturn().IsMultiline());*/
 
-	this->infoDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(-104, 7)).WithID(IDOK).IsDefault().WithTabStop());
-	this->infoDialog.AddButtonControl(DialogButtonBuilder(L"Cancel").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(4, 0)).WithID(IDCANCEL).WithTabStop());
-	this->infoDialog.AutoSize();
+		this->configDialog = DialogBuilder().WithTitle(XSFConfig::CommonNameWithVersion()).IsPopup().WithBorder().WithDialogFrame().WithDialogModalFrame().WithSystemMenu().WithFont(L"MS Shell Dlg", 8);
+		this->configDialog.AddGroupControl(DialogGroupBuilder(L"General").WithRelativePositionToParent(RelativePositionToParent::PositionType::FromTopLeft, Point<short>(7, 7)));
+		this->configDialog.AddCheckBoxControl(DialogCheckBoxBuilder(L"Play infinitely").WithSize(60, 10).InGroup(L"General").WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 11)).WithTabStop().
+			WithID(idPlayInfinitely));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Default play length (m:s)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)).
+			IsLeftJustified());
+		this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
+			WithAutoHScroll().WithBorder().WithTabStop().WithID(idDefaultLength));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Default fadeout length (m:s)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).
+			IsLeftJustified());
+		this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
+			WithAutoHScroll().WithBorder().WithTabStop().WithID(idDefaultFade));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Skip silence on start (sec)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).
+			IsLeftJustified());
+		this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
+			WithAutoHScroll().WithBorder().WithTabStop().WithID(idSkipSilenceOnStartSec));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Detect silence (sec)").WithSize(85, 8).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).
+			IsLeftJustified());
+		this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"General").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
+			WithAutoHScroll().WithBorder().WithTabStop().WithID(idDetectSilenceSec));
+		this->configDialog.AddGroupControl(DialogGroupBuilder(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Volume").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 14)).IsLeftJustified());
+		this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(25, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).IsLeftJustified().
+			WithAutoHScroll().WithBorder().WithTabStop().WithID(idVolume));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"ReplayGain").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+		this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idReplayGain).
+			IsDropDownList().WithTabStop());
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Clip Protect").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+		this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(78, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idClipProtect).
+			IsDropDownList().WithTabStop());
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Sample Rate").WithSize(50, 8).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 10), 2).IsLeftJustified());
+		this->configDialog.AddComboBoxControl(DialogComboBoxBuilder().WithSize(50, 14).InGroup(L"Output").WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(5, -3)).WithID(idSampleRate).
+			IsDropDownList().WithTabStop());
+		/*this->configDialog.AddGroupControl(DialogGroupBuilder(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"NOTE: This is only used if Advanced Title Formatting is disabled in Winamp.").WithSize(150, 16).InGroup(L"Title Format").
+			WithRelativePositionToParent(RelativePosition::PositionType::FromTopLeft, Point<short>(6, 11)).IsLeftJustified());
+		this->configDialog.AddEditBoxControl(DialogEditBoxBuilder().WithSize(150, 14).InGroup(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 4)).IsLeftJustified().
+			WithAutoHScroll().WithBorder().WithTabStop().WithID(idTitleFormat));
+		this->configDialog.AddLabelControl(DialogLabelBuilder(L"Names between percent symbols (e.g. %game%, %title%) will be replaced with the respective value from the file's tags. Using square brackets around any "
+				L"items will cause them to only be displayed if there was a replacement done (e.g. [%disc%.] will display 01. if disc was in the tags as 01, but will display nothing if disc was not in the tags). Square "
+				L"bracket blocks can be nested.").WithSize(150, 72).InGroup(L"Title Format").WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 4)).IsLeftJustified());
+	*/
+		this->GenerateSpecificDialogs();
 
-	this->configDialogProperty = this->configDialog;
-	this->configDialogProperty = DialogBuilder().IsChild().IsControlWindow().WithFont(L"MS Shell Dlg", 8);
-	this->configDialogProperty.AutoSize();
+		/*this->infoDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(-104, 7)).WithID(IDOK).IsDefault().WithTabStop());
+		this->infoDialog.AddButtonControl(DialogButtonBuilder(L"Cancel").WithSize(50, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(4, 0)).WithID(IDCANCEL).WithTabStop());
+		this->infoDialog.AutoSize();*/
 
-	this->configDialog.AddButtonControl(DialogButtonBuilder(L"Defaults").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)).WithID(idResetDefaults).
-		WithTabStop());
-	this->configDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(4, -14)).WithID(IDOK).IsDefault().WithTabStop());
-	this->configDialog.AddButtonControl(DialogButtonBuilder(L"Cancel").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(4, 0)).WithID(IDCANCEL).WithTabStop());
-	this->configDialog.AutoSize();
+		this->configDialogProperty = this->configDialog;
+		this->configDialogProperty = DialogBuilder().IsChild().IsControlWindow().WithFont(L"MS Shell Dlg", 8);
+		this->configDialogProperty.AutoSize();
+
+		this->configDialog.AddButtonControl(DialogButtonBuilder(L"Defaults").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomLeft, Point<short>(0, 7)).WithID(idResetDefaults).
+			WithTabStop());
+		this->configDialog.AddButtonControl(DialogButtonBuilder(L"OK").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromBottomRight, Point<short>(4, -14)).WithID(IDOK).IsDefault().WithTabStop());
+		this->configDialog.AddButtonControl(DialogButtonBuilder(L"Cancel").WithSize(45, 14).WithRelativePositionToSibling(RelativePosition::PositionType::FromTopRight, Point<short>(4, 0)).WithID(IDCANCEL).WithTabStop());
+		this->configDialog.AutoSize();
+	}
 }
 
 INT_PTR CALLBACK XSFConfig::ConfigDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -222,7 +227,7 @@ INT_PTR CALLBACK XSFConfig::ConfigDialogProcStatic(HWND hwndDlg, UINT uMsg, WPAR
 		return false;
 }
 
-INT_PTR CALLBACK XSFConfig::InfoDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/*INT_PTR CALLBACK XSFConfig::InfoDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	XSFConfig *thisPtr = nullptr;
 
@@ -239,7 +244,7 @@ INT_PTR CALLBACK XSFConfig::InfoDialogProcStatic(HWND hwndDlg, UINT uMsg, WPARAM
 		return thisPtr->InfoDialogProc(hwndDlg, uMsg, wParam, lParam);
 	else
 		return false;
-}
+}*/
 
 INT_PTR CALLBACK XSFConfig::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM)
 {
@@ -299,7 +304,7 @@ INT_PTR CALLBACK XSFConfig::ConfigDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPa
 	return true;
 }
 
-extern XSFFile *xSFFileInInfo;
+/*extern XSFFile *xSFFileInInfo;
 
 INT_PTR CALLBACK XSFConfig::InfoDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM)
 {
@@ -344,17 +349,19 @@ INT_PTR CALLBACK XSFConfig::InfoDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
 			return false;
 	}
 	return true;
-}
+}*/
 
 void XSFConfig::CallConfigDialog(HINSTANCE hInstance, HWND hwndParent)
 {
+	GenerateDialogs();
 	DialogBoxIndirectParamW(hInstance, this->configDialog.GenerateTemplate(), hwndParent, XSFConfig::ConfigDialogProcStatic, reinterpret_cast<LPARAM>(this));
 }
 
-void XSFConfig::CallInfoDialog(HINSTANCE hInstance, HWND hwndParent)
+/*void XSFConfig::CallInfoDialog(HINSTANCE hInstance, HWND hwndParent)
 {
+	GenerateDialogs();
 	DialogBoxIndirectParamW(hInstance, this->infoDialog.GenerateTemplate(), hwndParent, XSFConfig::InfoDialogProcStatic, reinterpret_cast<LPARAM>(this));
-}
+}*/
 
 void XSFConfig::ResetConfigDefaults(HWND hwndDlg)
 {

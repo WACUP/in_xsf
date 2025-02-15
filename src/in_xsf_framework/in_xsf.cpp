@@ -29,7 +29,7 @@
 
 extern In_Module inMod;
 static const XSFFile *xSFFile = nullptr;
-XSFFile *xSFFileInInfo = nullptr;
+/*XSFFile *xSFFileInInfo = nullptr;*/
 static XSFPlayer *xSFPlayer = nullptr;
 XSFConfig *xSFConfig = nullptr;
 static bool paused;
