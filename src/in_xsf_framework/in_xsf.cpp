@@ -212,14 +212,16 @@ int infoBox(const in_char *file, HWND hwndParent)
 	// TODO: Eventually make a dialog box for editing the info
 	/*xSFFileInInfo = xSF.get();
 	xSFConfig->CallInfoDialog(inMod.hDllInstance, hwndParent);*/
-	auto tags = xSF->GetAllTags();
-	auto keys = tags.GetKeys();
+	const auto& tags = xSF->GetAllTags();
+	const auto& keys = tags.GetKeys();
 	std::wstring info;
 	for (size_t x = 0, numTags = keys.size(); x < numTags; ++x)
 	{
 		if (x)
 			info += L"\n";
-		info += ConvertFuncs::StringToWString(keys[x] + "=" + tags[keys[x]]);
+
+		const auto& key = keys[x];
+		info += ConvertFuncs::StringToWString(key + "=" + tags[key]);
 	}
 	MessageBoxW(hwndParent, info.c_str(), ConvertFuncs::StringToWString(xSF->GetFilenameWithoutPath()).c_str(), MB_OK);
 	return INFOBOX_EDITED;
@@ -246,9 +248,9 @@ int play(const in_char *fn)
 		decode_pos_ms = 0;
 
 		const int sampleRate = tmpxSFPlayer->GetSampleRate();
-		int maxlatency = (inMod.outMod->Open && sampleRate && NumChannels ?
-						  inMod.outMod->Open(sampleRate, NumChannels,
-											  BitsPerSample, -1, -1) : -1);
+		int maxlatency = (inMod.outMod && inMod.outMod->Open && sampleRate &&
+						  NumChannels ? inMod.outMod->Open(sampleRate,
+						  NumChannels, BitsPerSample, -1, -1) : -1);
 		if (maxlatency < 0)
 			return 1;
 		inMod.SetInfo((sampleRate * NumChannels * BitsPerSample) / 1000, sampleRate / 1000, NumChannels, 1);
