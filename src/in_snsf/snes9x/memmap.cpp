@@ -416,7 +416,7 @@ char *CMemory::Safe(const char *s)
 #include <strsafe.h>
 void CMemory::ParseSNESHeader(uint8_t *RomHeader)
 {
-	StringCchCopyA(this->ROMName, ROM_NAME_LEN, reinterpret_cast<char *>(&RomHeader[0x10]));/*/
+	CopyCchStrA(this->ROMName, ROM_NAME_LEN, reinterpret_cast<char *>(&RomHeader[0x10]));/*/
 	strncpy(this->ROMName, reinterpret_cast<char *>(&RomHeader[0x10]), ROM_NAME_LEN - 1);/**/
 
 	this->SRAMSize = RomHeader[0x28];

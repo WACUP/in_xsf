@@ -411,7 +411,7 @@ extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, H
 {
 	// TODO
 	// prompt to remove our settings with default as no (just incase)
-	/*if (plugin.language->UninstallSettingsPrompt(reinterpret_cast<const wchar_t*>(plugin.description)))
+	/*if (UninstallSettingsPrompt(reinterpret_cast<const wchar_t*>(plugin.description)))
 	{
 		REMOVE_INI_SECTION_W(app_nameW, 0);
 	}*/
