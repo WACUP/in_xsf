@@ -22,6 +22,7 @@
 #include <winamp/in2.h>
 #include <winamp/wa_ipc.h>
 #define WA_UTILS_SIMPLE
+#define SKIP_SUBCLASS
 #include <loader/loader/utils.h>
 #include <loader/loader/runtime_helper.h>
 #include <api/memmgr/api_memmgr.h>

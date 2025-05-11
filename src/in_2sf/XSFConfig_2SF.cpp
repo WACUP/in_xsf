@@ -14,6 +14,7 @@
 #include "desmume/NDSSystem.h"
 #include "desmume/version.h"
 #define WA_UTILS_SIMPLE
+#define SKIP_SUBCLASS
 #include <loader/loader/utils.h>
 
 class XSFPlayer;

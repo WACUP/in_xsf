@@ -17,6 +17,7 @@
 #include "convert.h"
 #include "snes9x/apu/apu.h"
 #define WA_UTILS_SIMPLE
+#define SKIP_SUBCLASS
 #include <loader/loader/utils.h>
 
 enum
@@ -29,7 +30,7 @@ enum
 
 unsigned XSFConfig::initSampleRate = 44100;
 const std::wstring XSFConfig::commonName = L"SNSF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.10";
+const std::wstring XSFConfig::versionNumber = L"1.0.11";
 //bool XSFConfig_SNSF::initSixteenBitSound = true;
 bool XSFConfig_SNSF::initReverseStereo = false;
 unsigned XSFConfig_SNSF::initResampler = 1;

@@ -21,6 +21,7 @@
 # include <CommCtrl.h>
 #endif
 #define WA_UTILS_SIMPLE
+#define SKIP_SUBCLASS
 #include <loader/loader/utils.h>
 
 enum

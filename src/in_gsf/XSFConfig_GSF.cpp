@@ -12,6 +12,7 @@
 #include "convert.h"
 #include "vbam/gba/Sound.h"
 #define WA_UTILS_SIMPLE
+#define SKIP_SUBCLASS
 #include <loader/loader/utils.h>
 
 class XSFPlayer;
