@@ -15,6 +15,7 @@
 #include "sdd1.h"
 
 #define WA_UTILS_SIMPLE
+#define SKIP_SUBCLASS
 #include <loader/loader/utils.h>
 
 // deinterleave

@@ -323,7 +323,7 @@ void stop()
 
 int getLength()
 {
-	if (!xSFFile->HasFile())
+	if (!xSFFile || !xSFFile->HasFile())
 		return -1000;
 	return xSFFile->GetLengthMS(xSFConfig->GetDefaultLength()) + xSFFile->GetFadeMS(xSFConfig->GetDefaultFade());
 }
@@ -340,7 +340,7 @@ void setOutputTime(int time_in_ms)
 
 void setVolume(int volume)
 {
-	if (inMod.outMod)
+	if (inMod.outMod && inMod.outMod->SetVolume)
 	{
 		inMod.outMod->SetVolume(volume);
 	}
@@ -348,7 +348,7 @@ void setVolume(int volume)
 
 void setPan(int pan)
 {
-	if (inMod.outMod)
+	if (inMod.outMod && inMod.outMod->SetPan)
 	{
 		inMod.outMod->SetPan(pan);
 	}
