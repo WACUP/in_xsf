@@ -435,10 +435,12 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 		dest[1] = L'\0';
 		return 1;
 	}
-	else if (SameStrA(data, "streamgenre") ||
-			 SameStrA(data, "streamtype") ||
-			 SameStrA(data, "streamurl") ||
-			 SameStrA(data, "streamname"))
+    else if (SameStrNA(data, "stream", 6) &&
+             (SameStrA((data + 6), "type") ||
+              SameStrA((data + 6), "genre") ||
+              SameStrA((data + 6), "url") ||
+              SameStrA((data + 6), "name") ||
+			  SameStrA((data + 6), "title")))
 	{
 		return 0;
 	}
