@@ -219,7 +219,9 @@ int infoBox(const in_char *file, HWND hwndParent)
 	for (size_t x = 0, numTags = keys.size(); x < numTags; ++x)
 	{
 		if (x)
-			info += L"\n";
+		{
+			info += std::wstring(L"\n", 1);
+		}
 
 		const auto& key = keys[x];
 		info += ConvertFuncs::StringToWString(key + "=" + tags[key]);
@@ -261,9 +263,7 @@ int play(const in_char *fn)
 
 		xSFPlayer = tmpxSFPlayer.release();
 		killThread = false;
-		thread_handle = StartThread(playThread, &killThread, static_cast<int>(inMod.
-									config->GetInt(playbackConfigGroupGUID, L"priority",
-									THREAD_PRIORITY_HIGHEST)), 0, nullptr);
+		thread_handle = StartPlaybackThread(playThread, &killThread, 0, nullptr);
 		return 0;
 	}
 	catch (const std::exception &)
