@@ -13,6 +13,7 @@
 
 class XSFPlayer;
 
+#pragma pack(1)
 class XSFConfig_SNSF : public XSFConfig
 {
 protected:
@@ -37,3 +38,4 @@ public:
 
 	void About(HWND parent) override;
 };
+#pragma pack()

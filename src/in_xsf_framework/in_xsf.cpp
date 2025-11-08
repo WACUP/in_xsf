@@ -220,7 +220,7 @@ int infoBox(const in_char *file, HWND hwndParent)
 	{
 		if (x)
 		{
-			info += std::wstring(L"\n", 1);
+			info.append(L"\n", 1);
 		}
 
 		const auto& key = keys[x];

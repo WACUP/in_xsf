@@ -59,7 +59,15 @@ XSFConfig::XSFConfig() : skipSilenceOnStartSec(0), detectSilenceSec(0), defaultL
 
 const std::wstring &XSFConfig::CommonNameWithVersion()
 {
-	static const auto commonNameWithVersion = XSFConfig::commonName + L" v" + XSFConfig::versionNumber;
+	/*static const auto commonNameWithVersion = XSFConfig::commonName + L" v" + XSFConfig::versionNumber;/*/
+	static std::wstring commonNameWithVersion;
+	if (commonNameWithVersion.empty())
+	{
+		wchar_t temp[24];
+		const size_t copied = PrintfCch(temp, ARRAYSIZE(temp), L"%s v%s", XSFConfig::
+											   commonName, XSFConfig::versionNumber);
+		commonNameWithVersion.assign(temp, copied);
+	}/**/
 	return commonNameWithVersion;
 }
 

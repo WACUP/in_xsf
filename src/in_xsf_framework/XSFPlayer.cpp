@@ -17,13 +17,13 @@
 extern XSFConfig *xSFConfig;
 
 XSFPlayer::XSFPlayer() : xSF(), sampleRate(0), detectedSilenceSample(0), detectedSilenceSec(0), skipSilenceOnStartSec(5), lengthSample(0), fadeSample(0), currentSample(0),
-	prevSampleL(CHECK_SILENCE_BIAS), prevSampleR(CHECK_SILENCE_BIAS), lengthInMS(-1), fadeInMS(-1), volume(1.0), ignoreVolume(false), uses32BitSamplesClampedTo16Bit(false)
+	prevSampleL(CHECK_SILENCE_BIAS), prevSampleR(CHECK_SILENCE_BIAS), lengthInMS(-1), volume(1.0), fadeInMS(-1), ignoreVolume(false), uses32BitSamplesClampedTo16Bit(false)
 {
 }
 
 XSFPlayer::XSFPlayer(const XSFPlayer &xSFPlayer) : xSF(new XSFFile()), sampleRate(xSFPlayer.sampleRate), detectedSilenceSample(xSFPlayer.detectedSilenceSample), detectedSilenceSec(xSFPlayer.detectedSilenceSec),
 	skipSilenceOnStartSec(xSFPlayer.skipSilenceOnStartSec), lengthSample(xSFPlayer.lengthSample), fadeSample(xSFPlayer.fadeSample), currentSample(xSFPlayer.currentSample), prevSampleL(xSFPlayer.prevSampleL),
-	prevSampleR(xSFPlayer.prevSampleR), lengthInMS(xSFPlayer.lengthInMS), fadeInMS(xSFPlayer.fadeInMS), volume(xSFPlayer.volume), ignoreVolume(xSFPlayer.ignoreVolume),
+	prevSampleR(xSFPlayer.prevSampleR), lengthInMS(xSFPlayer.lengthInMS), volume(xSFPlayer.volume), fadeInMS(xSFPlayer.fadeInMS), ignoreVolume(xSFPlayer.ignoreVolume),
 	uses32BitSamplesClampedTo16Bit(xSFPlayer.uses32BitSamplesClampedTo16Bit)
 {
 	*this->xSF = *xSFPlayer.xSF;
@@ -46,8 +46,8 @@ XSFPlayer &XSFPlayer::operator=(const XSFPlayer &xSFPlayer)
 		this->prevSampleL = xSFPlayer.prevSampleL;
 		this->prevSampleR = xSFPlayer.prevSampleR;
 		this->lengthInMS = xSFPlayer.lengthInMS;
-		this->fadeInMS = xSFPlayer.fadeInMS;
 		this->volume = xSFPlayer.volume;
+		this->fadeInMS = xSFPlayer.fadeInMS;
 		this->ignoreVolume = xSFPlayer.ignoreVolume;
 		this->uses32BitSamplesClampedTo16Bit = xSFPlayer.uses32BitSamplesClampedTo16Bit;
 	}

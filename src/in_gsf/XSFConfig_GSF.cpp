@@ -23,6 +23,7 @@ enum
 	idMutes
 };
 
+#pragma pack(1)
 class XSFConfig_GSF : public XSFConfig
 {
 protected:
@@ -44,10 +45,11 @@ protected:
 public:
 	void About(HWND parent);
 };
+#pragma pack()
 
 unsigned XSFConfig::initSampleRate = 44100;
-const std::wstring XSFConfig::commonName = L"GSF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.10";
+const wchar_t* XSFConfig::commonName = L"GSF Decoder";
+const wchar_t* XSFConfig::versionNumber = L"1.0.11";
 bool XSFConfig_GSF::initLowPassFiltering = true;
 std::string XSFConfig_GSF::initMutes = "000000";
 
@@ -139,5 +141,5 @@ void XSFConfig_GSF::About(HWND parent)
 	AboutMessageBox(parent, (XSFConfig::CommonNameWithVersion() + L"\n\nBuild date: " +
 		TEXT(__DATE__) + L"\n\nUsing xSF Winamp plugin framework (based on the vio*sf "
 		L"plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes "
-		L"modified VBA-M, SVN revision 1231 for playback.").c_str(), XSFConfig::commonName.c_str());
+		L"modified VBA-M, SVN revision 1231 for playback.").c_str(), XSFConfig::commonName);
 }

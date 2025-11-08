@@ -22,6 +22,7 @@
 #include "SSEQPlayer/SDAT.h"
 #include "SSEQPlayer/Player.h"
 
+#pragma pack(1)
 class XSFPlayer_NCSF : public XSFPlayer
 {
 	std::uint32_t sseq;
@@ -51,3 +52,4 @@ public:
 	const Channel &GetChannel(std::size_t chanNum) const;
 #endif
 };
+#pragma pack()

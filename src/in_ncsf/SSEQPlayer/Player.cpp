@@ -15,8 +15,13 @@
 #include "consts.h"
 #include "convert.h"
 
-Player::Player() : prio(0), nTracks(0), tempo(0), tempoCount(0), tempoRate(0), masterVol(0), sseqVol(0), sseq(nullptr), allowedChannels(0), sampleRate(0),
-	interpolation(Interpolation::None)
+#ifndef _WIN64
+Player::Player() : prio(0), nTracks(0), tempo(0), tempoCount(0), tempoRate(0), masterVol(0), sseqVol(0),
+				   sseq(nullptr), allowedChannels(0), sampleRate(0), interpolation(Interpolation::None)
+#else
+Player::Player() : prio(0), nTracks(0), tempo(0), tempoCount(0), tempoRate(0), masterVol(0), sseqVol(0),
+				   interpolation(Interpolation::None), sseq(nullptr), allowedChannels(0), sampleRate(0)
+#endif
 {
 	std::fill_n(&this->trackIds[0], FSS_TRACKCOUNT, static_cast<std::uint8_t>(0));
 	for (std::int8_t i = 0; i < 16; ++i)

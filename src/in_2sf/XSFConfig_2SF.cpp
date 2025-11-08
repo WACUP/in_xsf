@@ -25,6 +25,7 @@ enum
 	idMutes
 };
 
+#pragma pack(1)
 class XSFConfig_2SF : public XSFConfig
 {
 protected:
@@ -32,7 +33,7 @@ protected:
 	static std::string initMutes;
 
 	friend class XSFConfig;
-	unsigned short interpolation;
+	unsigned char interpolation;
 	std::bitset<16> mutes;
 
 	XSFConfig_2SF();
@@ -46,10 +47,11 @@ protected:
 public:
 	void About(HWND parent);
 };
+#pragma pack()
 
 unsigned XSFConfig::initSampleRate = DESMUME_SAMPLE_RATE;
-const std::wstring XSFConfig::commonName = L"2SF Decoder";
-const std::wstring XSFConfig::versionNumber = L"1.0.14";
+const wchar_t* XSFConfig::commonName = L"2SF Decoder";
+const wchar_t* XSFConfig::versionNumber = L"1.0.15";
 unsigned XSFConfig_2SF::initInterpolation = 2;
 std::string XSFConfig_2SF::initMutes = "0000000000000000";
 
@@ -142,5 +144,5 @@ void XSFConfig_2SF::About(HWND parent)
 		TEXT(__DATE__) + "\n\nUsing xSF Winamp plugin framework (based on the vio*sf "
 		L"plugins) by Naram Qashat (CyberBotX) [cyberbotx@cyberbotx.com]\n\nUtilizes "
 		L"modified " + ConvertFuncs::StringToWString(EMU_DESMUME_NAME_AND_VERSION()) +
-		L" for playback.").c_str(), XSFConfig::commonName.c_str());
+		L" for playback.").c_str(), XSFConfig::commonName);
 }

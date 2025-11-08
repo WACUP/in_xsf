@@ -426,7 +426,7 @@ std::string XSFFile::GetFormattedTitle(const std::string &format) const
 				std::string tagname = format.substr(origX + 1, x - origX - 1);
 				std::string value = this->GetTagValue(tagname);
 				if (value.empty())
-					formattedTitle += std::string("???", 3);
+					formattedTitle.append("???", 3);
 				else
 					formattedTitle += value;
 			}

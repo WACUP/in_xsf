@@ -375,13 +375,28 @@ class DialogTemplate
 		DialogControlType controlType;
 		std::uint32_t style, exstyle;
 		Rect<short> rect;
+#ifdef _WIN64
+		short id;	// memory hole after this
+		std::uint16_t type;
+#endif
 		std::unique_ptr<RelativePosition> relativePosition;
-		short id;
+#ifndef _WIN64
+		short id;	// memory hole after this
+		std::uint16_t type;
+#endif
 
 		friend class DialogTemplate;
-		DialogControl() : controlType(DialogControlType::None), style(0), exstyle(0), rect(), relativePosition(), id(-1) { }
-		DialogControl(const DialogControl &control) : controlType(control.controlType), style(control.style), exstyle(control.exstyle), rect(control.rect), id(control.id),
-			relativePosition(control.relativePosition ? control.relativePosition->Clone() : nullptr) { }
+#ifndef _WIN64
+		DialogControl() : controlType(DialogControlType::None), style(0), exstyle(0), rect(), relativePosition(), id(-1), type(0) { }
+		DialogControl(const DialogControl &control) : controlType(control.controlType), style(control.style), exstyle(control.exstyle),
+													  rect(control.rect), relativePosition(control.relativePosition ?
+													  control.relativePosition->Clone() : nullptr), id(control.id), type(control.type) { }
+#else
+		DialogControl() : controlType(DialogControlType::None), style(0), exstyle(0), id(-1), type(0), rect(), relativePosition() { }
+		DialogControl(const DialogControl &control) : controlType(control.controlType), style(control.style), exstyle(control.exstyle),
+													  rect(control.rect), id(control.id), type(control.type), relativePosition(control.relativePosition ?
+													  control.relativePosition->Clone() : nullptr) { }
+#endif
 		DialogControl &operator=(const DialogControl &control)
 		{
 			this->controlType = control.controlType;
@@ -461,12 +476,10 @@ class DialogTemplate
 	class DialogControlWithoutLabel : public DialogControl
 	{
 	protected:
-		std::uint16_t type;
-
 		friend class DialogTemplate;
 		friend class DialogControl;
-		DialogControlWithoutLabel() : DialogControl(), type(0) { }
-		DialogControlWithoutLabel(const DialogControlWithoutLabel &control) : DialogControl(control), type(control.type) { }
+		DialogControlWithoutLabel() : DialogControl() { this->type = 0; }
+		DialogControlWithoutLabel(const DialogControlWithoutLabel& control) : DialogControl(control) { this->type = control.type; }
 		DialogControlWithoutLabel &operator=(const DialogControlWithoutLabel &control)
 		{
 			DialogControl::operator=(control);
@@ -491,13 +504,12 @@ class DialogTemplate
 	class DialogControlWithLabel : public DialogControl
 	{
 	protected:
-		std::uint16_t type;
 		std::wstring label;
 
 		friend class DialogTemplate;
 		friend class DialogControl;
-		DialogControlWithLabel() : DialogControl(), type(0), label(L"") { }
-		DialogControlWithLabel(const DialogControlWithLabel &control) : DialogControl(control), type(control.type), label(control.label) { }
+		DialogControlWithLabel() : DialogControl(), label(L"") { }
+		DialogControlWithLabel(const DialogControlWithLabel &control) : DialogControl(control), label(control.label) { }
 		DialogControlWithLabel &operator=(const DialogControlWithLabel &control)
 		{
 			DialogControl::operator=(control);
@@ -591,7 +603,7 @@ class DialogTemplate
 	std::uint32_t style, exstyle;
 	std::wstring fontName;
 	std::uint16_t fontSizeInPts;
-	Size<short> size;
+	Size<short> size;	// memory hole after this
 	DialogTemplate::Controls controls;
 	std::vector<std::uint8_t> templateData;
 

@@ -27,9 +27,10 @@ protected:
 	std::unique_ptr<XSFFile> xSF;
 	unsigned sampleRate, detectedSilenceSample, detectedSilenceSec, skipSilenceOnStartSec, lengthSample, fadeSample, currentSample;
 	std::uint32_t prevSampleL, prevSampleR;
-	int lengthInMS, fadeInMS;
+	int lengthInMS;
 	double volume;
-	bool ignoreVolume, uses32BitSamplesClampedTo16Bit;
+	int fadeInMS;
+	bool ignoreVolume, uses32BitSamplesClampedTo16Bit;	// memory hole after this
 
 	XSFPlayer();
 	XSFPlayer(const XSFPlayer &xSFPLayer);

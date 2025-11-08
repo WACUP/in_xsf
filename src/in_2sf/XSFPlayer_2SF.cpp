@@ -23,6 +23,7 @@
 
 class XSFPlayer_2SF : public XSFPlayer
 {
+	// memory hole exists before this
 	std::vector<std::uint8_t> rom;
 
 	void Map2SFSection(const std::vector<std::uint8_t> &section);

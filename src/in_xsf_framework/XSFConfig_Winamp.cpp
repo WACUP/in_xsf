@@ -62,7 +62,7 @@ XSFConfigIO_Winamp::XSFConfigIO_Winamp()// : iniFilename(L"")
 
 void XSFConfigIO_Winamp::SetValueString(const std::string &name, const std::string &value)
 {
-	WritePrivateProfileStringW(XSFConfig::commonName.c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(value).c_str(), GetPaths()->winamp_ini_file);
+	WritePrivateProfileStringW(XSFConfig::commonName, ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(value).c_str(), GetPaths()->winamp_ini_file);
 }
 
 std::string XSFConfigIO_Winamp::GetValueString(const std::string &name, const std::string &defaultValue) const
@@ -73,7 +73,7 @@ std::string XSFConfigIO_Winamp::GetValueString(const std::string &name, const st
 	do
 	{
 		value.resize(value.size() * 2);
-		result = GetPrivateProfileStringW(XSFConfig::commonName.c_str(), ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(defaultValue).c_str(), &value[0], static_cast<DWORD>(value.size()), GetPaths()->winamp_ini_file);
+		result = GetPrivateProfileStringW(XSFConfig::commonName, ConvertFuncs::StringToWString(name).c_str(), ConvertFuncs::StringToWString(defaultValue).c_str(), &value[0], static_cast<DWORD>(value.size()), GetPaths()->winamp_ini_file);
 	} while (result + 1 == static_cast<DWORD>(value.size()));
 
 	if (!result)

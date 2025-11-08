@@ -37,6 +37,7 @@ struct SoundViewData
 };
 #endif
 
+#pragma pack(1)
 class XSFConfig_NCSF : public XSFConfig
 {
 protected:
@@ -45,7 +46,7 @@ protected:
 
 	friend class XSFConfig;
 	friend struct SoundViewData;
-	unsigned short interpolation;
+	unsigned char interpolation;
 	std::bitset<16> mutes;
 
 	XSFConfig_NCSF();
@@ -71,3 +72,4 @@ public:
 	void CloseSoundView();
 #endif
 };
+#pragma pack()

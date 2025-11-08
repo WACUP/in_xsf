@@ -23,6 +23,9 @@ struct Player
 	std::uint8_t prio, nTracks;
 	std::uint16_t tempo, tempoCount, tempoRate /* 8.8 fixed point */;
 	std::int16_t masterVol, sseqVol;
+#ifdef _WIN64
+	Interpolation interpolation;
+#endif
 
 	const SSEQ *sseq;
 
@@ -33,7 +36,9 @@ struct Player
 	std::int16_t variables[32];
 
 	std::uint32_t sampleRate;
+#ifndef _WIN64
 	Interpolation interpolation;
+#endif
 
 	Player();
 
