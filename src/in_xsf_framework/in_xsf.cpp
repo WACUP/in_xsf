@@ -257,8 +257,12 @@ int play(const in_char *fn)
 		if (maxlatency < 0)
 			return 1;
 		inMod.SetInfo((sampleRate * NumChannels * BitsPerSample) / 1000, sampleRate / 1000, NumChannels, 1);
+#ifndef _WIN64
 		inMod.SAVSAInit(maxlatency, sampleRate);
 		inMod.VSASetInfo(sampleRate, NumChannels);
+#else
+		inMod.VisInitInfo(maxlatency, sampleRate, NumChannels);
+#endif
 		inMod.outMod->SetVolume(-666);
 
 		xSFPlayer = tmpxSFPlayer.release();
@@ -365,9 +369,14 @@ void GetFileExtensions(void)
 	}
 }
 
+#define OUR_INPUT_PLUG_IN_FEATURES INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | \
+								   INPUT_USES_UNIFIED_ALT3 | INPUT_HAS_FORMAT_CONVERSION_UNICODE | \
+								   INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE
+
 In_Module inMod =
 {
 	IN_VER_WACUP,
+	IN_INIT_PRE_FEATURES
 	const_cast<char *>(XSFConfig::CommonNameWithVersion().c_str()), /* Unsafe but Winamp's SDK requires this */
 	nullptr, /* Filled by Winamp */
 	nullptr, /* Filled by Winamp */
@@ -397,8 +406,7 @@ In_Module inMod =
 	nullptr, /* Filled by Winamp */
 	nullptr, /* Filled by Winamp */
 	NULL,	// api_service
-	INPUT_HAS_READ_META | INPUT_HAS_WRITE_META | INPUT_USES_UNIFIED_ALT3 |
-	INPUT_HAS_FORMAT_CONVERSION_UNICODE | INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE,
+	IN_INIT_POST_FEATURES
 	GetFileExtensions,	// loading optimisation
 	IN_INIT_WACUP_END_STRUCT
 };
