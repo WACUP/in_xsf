@@ -478,7 +478,13 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 
 			std::string info;
 			LPCSTR tag = tagToGet.c_str();
-			if (!file.GetTagExists(tagToGet))
+			const bool length_seconds = SameStrA(tag, "length_seconds");
+			if (length_seconds || SameStrA(tag, "length"))
+			{
+				const auto length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade());
+				info = std::to_string((!length_seconds ? length : (length / 1000)));
+			}
+			else if (!file.GetTagExists(tagToGet))
 			{
 				if (SameStrA(tag, "replaygain_track_gain"))
 					return 1;
@@ -514,8 +520,6 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 					return 1;
 				}
 			}
-			else if (SameStrA(tag, "length"))
-				info = std::to_string(file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade()));
 			else if (SameStrA(tag, "year"))
 			{
 				const int year = AStr2I(file.GetTagValue(tagToGet).c_str());

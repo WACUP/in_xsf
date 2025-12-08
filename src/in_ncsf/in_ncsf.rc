@@ -307,8 +307,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,13,5,0
- PRODUCTVERSION 1,13,5,0
+ FILEVERSION 1,13,6,0
+ PRODUCTVERSION 1,13,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -325,12 +325,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "WACUP"
             VALUE "FileDescription", "Input Plug-in"
-            VALUE "FileVersion", "1.13.5.0"
+            VALUE "FileVersion", "1.13.6.0"
             VALUE "InternalName", "in_ncsf.dll"
             VALUE "LegalCopyright", "WACUP modifications by Darren Owen aka DrO (2021-2025)"
             VALUE "OriginalFilename", "in_ncsf.dll"
             VALUE "ProductName", "NCSF Decoder"
-            VALUE "ProductVersion", "1.13.5.0"
+            VALUE "ProductVersion", "1.13.6.0"
         END
     END
     BLOCK "VarFileInfo"
