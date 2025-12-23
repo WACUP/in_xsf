@@ -50,23 +50,3 @@ template<typename T> inline typename std::enable_if_t<std::is_integral_v<T>, T> 
 		value |= value >> i;
 	return value + 1;
 }
-
-inline void CopyToString(const std::wstring &src, wchar_t *dst)
-{
-	std::wcscpy(dst, src.c_str());
-}
-
-inline void CopyToString(const std::string &src, wchar_t *dst)
-{
-	std::wcscpy(dst, ConvertFuncs::StringToWString(src).c_str());
-}
-
-inline void CopyToString(const std::string &src, char *dst)
-{
-	std::strcpy(dst, src.c_str());
-}
-
-inline void CopyToString(const std::wstring &src, char *dst)
-{
-	std::strcpy(dst, ConvertFuncs::WStringToString(src).c_str());
-}

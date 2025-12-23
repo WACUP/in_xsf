@@ -42,6 +42,13 @@ static bool killThread = false;
 static const unsigned NumChannels = 2;
 static const unsigned BitsPerSample = 16;
 
+size_t CopyToString(const std::string& src, wchar_t* dst)
+{
+	const auto str = ConvertFuncs::StringToWString(src);
+	std::wcscpy(dst, str.c_str());
+	return str.size();
+}
+
 DWORD WINAPI playThread(void *b)
 {
 	bool done = false;
@@ -454,8 +461,7 @@ template<typename T> int nonspecificWinampGetExtendedFileInfo(const char *data, 
 	}
 	else if (SameStrA(data, "family"))
 	{
-		CopyToString(const_cast<char *>(XSFPlayer::ShellDescription), dest);
-		return 1;
+		return (int)CopyToString(const_cast<char *>(XSFPlayer::ShellDescription), dest);
 	}
 	return 0;
 }
@@ -517,7 +523,7 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 					dest[0] = L'1';
 					dest[1] = L'6';
 					dest[2] = 0;
-					return 1;
+					return 2;
 				}
 			}
 			else if (SameStrA(tag, "year"))
@@ -533,8 +539,7 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 
 			if (!info.empty())
 			{
-				CopyToString(info.substr(0, destlen - 1), dest);
-				return 1;
+				return (int)CopyToString(info.substr(0, destlen - 1), dest);
 			}
 		}
 		catch (const std::exception&)
@@ -587,7 +592,8 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 	try
 	{
 		const bool reset = SameStrA(data, "reset");
-		if (!reset && !nonspecificWinampGetExtendedFileInfo(data, dest, destlen))
+		const int ret = (!reset ? nonspecificWinampGetExtendedFileInfo(data, dest, destlen) : 0);
+		if (!reset && !ret)
 		{
 			static XSFFile *info_file;
 			if (reset || !info_file || ConvertFuncs::StringToWString(info_file->GetFilename()) != fn)
@@ -605,7 +611,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 			}
 			return (info_file ? wrapperWinampGetExtendedFileInfo(*info_file, data, dest, destlen) : 0);
 		}
-		return 0;
+		return ret;
 	}
 	catch (const std::exception &)
 	{

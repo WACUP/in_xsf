@@ -22,6 +22,11 @@ static inline std::uint32_t getNextMultipleOf4(std::uint32_t origNum)
 	return origNum + 4 - remainder;
 }
 
+void CopyToString(const std::wstring& src, wchar_t* dst)
+{
+	std::wcscpy(dst, src.c_str());
+}
+
 Point<short> RelativePosition::CalculatePosition(const Rect<short> &child, const Rect<short> &other)
 {
 	Point<short> newPosition = child.position;
