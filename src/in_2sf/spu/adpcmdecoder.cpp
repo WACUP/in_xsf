@@ -1,5 +1,4 @@
 #include "adpcmdecoder.h"
-#include <iostream>
 
 template <typename T, typename T2>
 static inline T clamp(T2 value, T lower, T upper)

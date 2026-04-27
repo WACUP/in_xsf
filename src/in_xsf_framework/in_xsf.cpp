@@ -39,6 +39,9 @@ static int decode_pos_ms;
 static HANDLE thread_handle = INVALID_HANDLE_VALUE;
 static bool killThread = false;
 
+static CRITICAL_SECTION info_cs;
+static XSFFile* info_file;
+
 static const unsigned NumChannels = 2;
 static const unsigned BitsPerSample = 16;
 
@@ -131,6 +134,8 @@ int init()
 	{
 		inMod.description = (char*)XSFConfig::CommonNameWithVersion().c_str();
 
+		InitializeCriticalSectionEx(&info_cs, 400, CRITICAL_SECTION_NO_DEBUG_INFO);
+
 		// changed from doing this to delaying until it's
 		// needed to minimise the impact on loading times
 		//xSFConfig->LoadConfig();
@@ -153,6 +158,8 @@ void quit()
 	{
 		delete xSFConfig;
 		xSFConfig = nullptr;
+
+		DeleteCriticalSection(&info_cs);
 	}
 }
 
@@ -472,79 +479,72 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 	{
 		xSFConfig->InitConfig();
 
-		try
+		std::string tagToGet = data;
+		if (SameStrA(data, "album"))
+			tagToGet = "game";
+		else if (SameStrA(data, "publisher"))
+			tagToGet = "copyright";
+		else if (SameStrA(data, "tool"))
+			tagToGet = XSFPlayer::SFby;
+
+		std::string info;
+		LPCSTR tag = tagToGet.c_str();
+		const bool length_seconds = SameStrA(tag, "length_seconds");
+		if (length_seconds || SameStrA(tag, "length"))
 		{
-			std::string tagToGet = data;
-			if (SameStrA(data, "album"))
-				tagToGet = "game";
-			else if (SameStrA(data, "publisher"))
-				tagToGet = "copyright";
-			else if (SameStrA(data, "tool"))
-				tagToGet = XSFPlayer::SFby;
-
-			std::string info;
-			LPCSTR tag = tagToGet.c_str();
-			const bool length_seconds = SameStrA(tag, "length_seconds");
-			if (length_seconds || SameStrA(tag, "length"))
+			const auto length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade());
+			info = std::to_string((!length_seconds ? length : (length / 1000)));
+		}
+		else if (!file.GetTagExists(tagToGet))
+		{
+			if (SameStrA(tag, "replaygain_track_gain"))
+				return 1;
+			else if (SameStrA(tag, "formatinformation"))
 			{
-				const auto length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade());
-				info = std::to_string((!length_seconds ? length : (length / 1000)));
+				const int fade = file.GetFadeMS(xSFConfig->GetDefaultFade()),
+							length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + fade;
+
+				info = "Length: " + std::to_string(((length > 0) ? (length / 1000) : 0)) + " seconds\n"
+						"Fade: " + std::to_string((fade > 0) ? (fade / 1000) : 0) + " seconds\n"
+						"Data: " + file.GetTagValue("_lib") + "\nRipped by: " +
+						file.GetTagValue(XSFPlayer::SFby) + "\nTagger: " + file.GetTagValue("tagger");
 			}
-			else if (!file.GetTagExists(tagToGet))
+			else if (SameStrA(tag, "bitrate"))
 			{
-				if (SameStrA(tag, "replaygain_track_gain"))
-					return 1;
-				else if (SameStrA(tag, "formatinformation"))
+				const int br = (xSFConfig->GetSampleRate() * NumChannels * BitsPerSample);
+				if (br > 0)
 				{
-					const int fade = file.GetFadeMS(xSFConfig->GetDefaultFade()),
-							  length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + fade;
-
-					info = "Length: " + std::to_string(((length > 0) ? (length / 1000) : 0)) + " seconds\n"
-						   "Fade: " + std::to_string((fade > 0) ? (fade / 1000) : 0) + " seconds\n"
-						   "Data: " + file.GetTagValue("_lib") + "\nRipped by: " +
-						   file.GetTagValue(XSFPlayer::SFby) + "\nTagger: " + file.GetTagValue("tagger");
-				}
-				else if (SameStrA(tag, "bitrate"))
-				{
-					const int br = (xSFConfig->GetSampleRate() * NumChannels * BitsPerSample);
-					if (br > 0)
-					{
-						info = std::to_string((br / 1000));
-					}
-				}
-				else if (SameStrA(tag, "samplerate"))
-				{
-					info = std::to_string(xSFConfig->GetSampleRate());
-				}
-				else if (SameStrA(tag, "bitdepth"))
-				{
-					// TODO is this correct though as it's been
-					//      hard-coded to be 16-bit it should
-					dest[0] = L'1';
-					dest[1] = L'6';
-					dest[2] = 0;
-					return 2;
+					info = std::to_string((br / 1000));
 				}
 			}
-			else if (SameStrA(tag, "year"))
+			else if (SameStrA(tag, "samplerate"))
 			{
-				const int year = AStr2I(file.GetTagValue(tagToGet).c_str());
-				if (year > 0)
-				{
-					info = std::to_string(year);
-				}
+				info = std::to_string(xSFConfig->GetSampleRate());
 			}
-			else
-				info = file.GetTagValue(tagToGet);
-
-			if (!info.empty())
+			else if (SameStrA(tag, "bitdepth"))
 			{
-				return (int)CopyToString(info.substr(0, destlen - 1), dest);
+				// TODO is this correct though as it's been
+				//      hard-coded to be 16-bit it should
+				dest[0] = L'1';
+				dest[1] = L'6';
+				dest[2] = 0;
+				return 2;
 			}
 		}
-		catch (const std::exception&)
+		else if (SameStrA(tag, "year"))
 		{
-			return 0;
+			const int year = AStr2I(file.GetTagValue(tagToGet).c_str());
+			if (year > 0)
+			{
+				info = std::to_string(year);
+			}
+		}
+		else
+			info = file.GetTagValue(tagToGet);
+
+		if (!info.empty())
+		{
+			return (int)CopyToString(info.substr(0, destlen - 1), dest);
 		}
 	}
 	return 0;
@@ -589,34 +589,31 @@ extern "C" __declspec(dllexport) HWND winampAddUnifiedFileInfoPane(int n, const 
 
 extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *fn, const char *data, wchar_t *dest, std::size_t destlen)
 {
-	try
+	const bool reset = SameStrA(data, "reset");
+	int ret = (!reset ? nonspecificWinampGetExtendedFileInfo(data, dest, destlen) : 0);
+	if (!reset && !ret)
 	{
-		const bool reset = SameStrA(data, "reset");
-		const int ret = (!reset ? nonspecificWinampGetExtendedFileInfo(data, dest, destlen) : 0);
-		if (!reset && !ret)
-		{
-			static XSFFile *info_file;
-			if (reset || !info_file || ConvertFuncs::StringToWString(info_file->GetFilename()) != fn)
-			{
-				if (info_file)
-				{
-					delete info_file;
-					info_file = nullptr;
-				}
+		EnterCriticalSection(&info_cs);
 
-				if (!reset && FilePathExists(fn, NULL))
-				{
-					info_file = new XSFFile(fn);
-				}
+		if (reset || !info_file || ConvertFuncs::StringToWString(info_file->GetFilename()) != fn)
+		{
+			if (info_file)
+			{
+				delete info_file;
+				info_file = nullptr;
 			}
-			return (info_file ? wrapperWinampGetExtendedFileInfo(*info_file, data, dest, destlen) : 0);
+
+			if (!reset && FilePathExists(fn, NULL))
+			{
+				info_file = new XSFFile(fn);
+			}
 		}
-		return ret;
+
+		ret = (info_file ? wrapperWinampGetExtendedFileInfo(*info_file, data, dest, destlen) : 0);
+
+		LeaveCriticalSection(&info_cs);
 	}
-	catch (const std::exception &)
-	{
-		return 0;
-	}
+	return ret;
 }
 
 static std::unique_ptr<XSFFile> extendedXSFFile;
