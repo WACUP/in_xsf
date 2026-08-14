@@ -23,6 +23,7 @@
 #include <winamp/wa_ipc.h>
 #define WA_UTILS_SIMPLE
 #define SKIP_SUBCLASS
+#include <loader/hook/lock.h>
 #include <loader/loader/utils.h>
 #include <loader/loader/runtime_helper.h>
 #include <api/memmgr/api_memmgr.h>
@@ -318,12 +319,13 @@ void stop()
 	if (thread_handle != INVALID_HANDLE_VALUE)
 	{
 		killThread = true;
+		WaitForThreadToClose(&thread_handle, 2000);/*/
 		if (WaitForSingleObject(thread_handle, 2000) == WAIT_TIMEOUT)
 		{
 			//MessageBoxW(inMod.hMainWindow, L"error asking thread to die!", L"error killing decode thread", 0);
 			TerminateThread(thread_handle, 0);
 		}
-		CloseHandle(thread_handle);
+		CloseHandle(thread_handle);/**/
 		thread_handle = INVALID_HANDLE_VALUE;
 	}
 	if (inMod.outMod)
@@ -593,7 +595,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 	int ret = (!reset ? nonspecificWinampGetExtendedFileInfo(data, dest, destlen) : 0);
 	if (!reset && !ret)
 	{
-		EnterCriticalSection(&info_cs);
+		const LockGuard lock(info_cs);
 
 		if (reset || !info_file || ConvertFuncs::StringToWString(info_file->GetFilename()) != fn)
 		{
@@ -605,13 +607,18 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 
 			if (!reset && FilePathExists(fn, NULL))
 			{
-				info_file = new XSFFile(fn);
+				try
+				{
+					info_file = new XSFFile(fn);
+				}
+				catch (const std::exception&)
+				{
+					return 0;
+				}
 			}
 		}
 
 		ret = (info_file ? wrapperWinampGetExtendedFileInfo(*info_file, data, dest, destlen) : 0);
-
-		LeaveCriticalSection(&info_cs);
 	}
 	return ret;
 }
@@ -763,5 +770,3 @@ extern "C" __declspec(dllexport) void winampGetExtendedRead_close(std::intptr_t 
 	if (tmpxSFPlayer)
 		delete tmpxSFPlayer;
 }
-
-RUNTIME_HELPER_HANDLER

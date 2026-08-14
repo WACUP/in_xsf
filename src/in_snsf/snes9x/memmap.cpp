@@ -414,7 +414,6 @@ char *CMemory::Safe(const char *s)
 	return safe.get();
 }
 
-#include <strsafe.h>
 void CMemory::ParseSNESHeader(uint8_t *RomHeader)
 {
 	CopyCchStrA(this->ROMName, ROM_NAME_LEN, reinterpret_cast<char *>(&RomHeader[0x10]));/*/
