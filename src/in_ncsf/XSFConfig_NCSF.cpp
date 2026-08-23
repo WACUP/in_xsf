@@ -32,7 +32,7 @@ enum
 
 unsigned XSFConfig::initSampleRate = 44100;
 const wchar_t* XSFConfig::commonName = L"NCSF Decoder";
-const wchar_t* XSFConfig::versionNumber = L"1.13.8";
+const wchar_t* XSFConfig::versionNumber = L"1.13.9";
 unsigned XSFConfig_NCSF::initInterpolation = 4;
 std::string XSFConfig_NCSF::initMutes = "0000000000000000";
 

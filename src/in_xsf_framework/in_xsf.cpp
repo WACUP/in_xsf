@@ -34,7 +34,7 @@ static const XSFFile *xSFFile = nullptr;
 /*XSFFile *xSFFileInInfo = nullptr;*/
 static XSFPlayer *xSFPlayer = nullptr;
 XSFConfig *xSFConfig = nullptr;
-static bool paused;
+static bool is_paused;
 static int seek_needed;
 static int decode_pos_ms;
 static HANDLE thread_handle = INVALID_HANDLE_VALUE;
@@ -261,7 +261,7 @@ int play(const in_char *fn)
 			return 1;
 		xSFConfig->CopyConfigToMemory(tmpxSFPlayer.get(), false);
 		xSFFile = tmpxSFPlayer->GetXSFFile();
-		paused = false;
+		is_paused = false;
 		seek_needed = -1;
 		decode_pos_ms = 0;
 
@@ -291,27 +291,41 @@ int play(const in_char *fn)
 	}
 }
 
-void pause()
+#ifndef _WIN64
+void pause(void)
 {
-	paused = true;
+	is_paused = true;
+
 	if (inMod.outMod)
 	{
 		inMod.outMod->Pause(1);
 	}
 }
 
-void unPause()
+void unPause(void)
 {
-	paused = false;
+	is_paused = false;
+
 	if (inMod.outMod)
 	{
 		inMod.outMod->Pause(0);
 	}
 }
+#else
+void setPause(const int paused)
+{
+	is_paused = paused;
+
+	if (inMod.outMod)
+	{
+		inMod.outMod->Pause(paused);
+	}
+}
+#endif
 
 int isPaused()
 {
-	return paused;
+	return is_paused;
 }
 
 void stop()
@@ -407,8 +421,12 @@ In_Module inMod =
 	infoBox,
 	0/*isOurFile*/,
 	play,
+#ifndef _WIN64
 	pause,
 	unPause,
+#else
+	setPause,
+#endif
 	isPaused,
 	stop,
 	getLength,
