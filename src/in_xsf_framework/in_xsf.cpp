@@ -249,8 +249,11 @@ int infoBox(const in_char *file, HWND hwndParent)
 {
 	return 0;
 }*/
-
+#ifndef _WIN64
 int play(const in_char *fn)
+#else
+int play(const in_char *fn, const int seek_offset)
+#endif
 {
 	try
 	{
@@ -262,7 +265,11 @@ int play(const in_char *fn)
 		xSFConfig->CopyConfigToMemory(tmpxSFPlayer.get(), false);
 		xSFFile = tmpxSFPlayer->GetXSFFile();
 		is_paused = false;
+#ifndef _WIN64
 		seek_needed = -1;
+#else
+		seek_needed = seek_offset;
+#endif
 		decode_pos_ms = 0;
 
 		const int sampleRate = tmpxSFPlayer->GetSampleRate();
