@@ -128,7 +128,7 @@ void about(HWND hwndParent)
 		xSFConfig->About(hwndParent);
 }
 
-int init()
+int init(void)
 {
 	xSFConfig = XSFConfig::Create();
 	if (xSFConfig)
@@ -147,7 +147,7 @@ int init()
 	return IN_INIT_FAILURE;
 }
 
-void quit()
+void quit(void)
 {
 	if (xSFPlayer)
 	{
@@ -330,12 +330,12 @@ void setPause(const int paused)
 }
 #endif
 
-int isPaused()
+int isPaused(void)
 {
 	return is_paused;
 }
 
-void stop()
+void stop(void)
 {
 	if (thread_handle != INVALID_HANDLE_VALUE)
 	{
@@ -362,24 +362,24 @@ void stop()
 	xSFFile = nullptr;
 }
 
-int getLength()
+int getLength(void)
 {
 	if (!xSFFile || !xSFFile->HasFile())
 		return -1000;
 	return xSFFile->GetLengthMS(xSFConfig->GetDefaultLength()) + xSFFile->GetFadeMS(xSFConfig->GetDefaultFade());
 }
 
-int getOutputTime()
+int getOutputTime(void)
 {
 	return (inMod.outMod ? inMod.outMod->GetOutputTime() : 0);
 }
 
-void setOutputTime(int time_in_ms)
+void setOutputTime(const int time_in_ms)
 {
 	seek_needed = time_in_ms;
 }
 
-void setVolume(int volume)
+void setVolume(const int volume)
 {
 	if (inMod.outMod && inMod.outMod->SetVolume)
 	{
@@ -387,7 +387,7 @@ void setVolume(int volume)
 	}
 }
 
-void setPan(int pan)
+void setPan(const int pan)
 {
 	if (inMod.outMod && inMod.outMod->SetPan)
 	{
@@ -516,8 +516,10 @@ template<typename T> int wrapperWinampGetExtendedFileInfo(const XSFFile &file, c
 
 		std::string info;
 		LPCSTR tag = tagToGet.c_str();
-		const bool length_seconds = SameStrA(tag, "length_seconds");
-		if (length_seconds || SameStrA(tag, "length"))
+
+		const bool length = SameStrNA(tag, "length", 6),
+				   length_seconds = (length ? SameStrA((tag + 6), "_seconds") : false);
+		if (length || length_seconds)
 		{
 			const auto length = file.GetLengthMS(xSFConfig->GetDefaultLength()) + file.GetFadeMS(xSFConfig->GetDefaultFade());
 			info = std::to_string((!length_seconds ? length : (length / 1000)));
