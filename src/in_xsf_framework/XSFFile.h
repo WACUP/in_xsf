@@ -75,5 +75,5 @@ public:
 	std::string GetFormattedTitle(const std::string &format) const;
 	std::string GetFilename() const;
 	std::string GetFilenameWithoutPath() const;
-	void SaveFile() const;
+	void SaveFile(int* error_code) const;
 };

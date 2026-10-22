@@ -272,10 +272,8 @@ int play(const in_char *fn, const int seek_offset)
 #endif
 		decode_pos_ms = 0;
 
-		const int sampleRate = tmpxSFPlayer->GetSampleRate();
-		int maxlatency = (inMod.outMod && inMod.outMod->Open && sampleRate &&
-						  NumChannels ? inMod.outMod->Open(sampleRate,
-						  NumChannels, BitsPerSample, -1, -1) : -1);
+		const int sampleRate = tmpxSFPlayer->GetSampleRate(),
+				  maxlatency = OpenOutputPlugin(&inMod, sampleRate, NumChannels, BitsPerSample);
 		if (maxlatency < 0)
 			return 1;
 		inMod.SetInfo((sampleRate * NumChannels * BitsPerSample) / 1000, sampleRate / 1000, NumChannels, 1);
@@ -688,11 +686,18 @@ extern "C" __declspec(dllexport) int winampSetExtendedFileInfoW(const wchar_t *f
 	}
 }
 
-extern "C" __declspec(dllexport) int winampWriteExtendedFileInfo()
+extern "C" __declspec(dllexport) int winampWriteExtendedFileInfo(WEFIPARAM)
 {
 	if (!extendedXSFFile || extendedXSFFile->GetFilename().empty())
+	{
+		if (error_code)
+		{
+			*error_code = -1;
+		}
 		return 0;
-	extendedXSFFile->SaveFile();
+	}
+
+	extendedXSFFile->SaveFile(error_code);
 	return 1;
 }
 

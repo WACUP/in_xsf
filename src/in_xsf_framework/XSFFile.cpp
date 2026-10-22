@@ -471,7 +471,7 @@ std::string XSFFile::GetFilenameWithoutPath() const
 	return std::filesystem::path(this->fileName).filename().string();
 }
 
-void XSFFile::SaveFile() const
+void XSFFile::SaveFile(int* error_code) const
 {
 #if defined(_WIN32) && !defined(_MSC_VER)
 	ofstream_wfopen xSF;
@@ -495,6 +495,13 @@ void XSFFile::SaveFile() const
 		{
 			xSF.write(tag.c_str(), tag.length());
 			xSF.write("\n", 1);
+		}
+	}
+	else
+	{
+		if (error_code)
+		{
+			*error_code = -2;
 		}
 	}
 }
