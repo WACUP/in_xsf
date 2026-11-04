@@ -76,7 +76,7 @@ void DialogTemplate::DialogGroup::CalculatePositions(bool doRightAndBottom)
 				Rect<short> other = this->rect;
 				if (control->relativePosition->type == RelativePosition::BaseType::ToSibling)
 				{
-					short siblingsBack = dynamic_cast<const RelativePositionToSibling *>(control->relativePosition.get())->siblingsBack;
+					short siblingsBack = reinterpret_cast<const RelativePositionToSibling *>(control->relativePosition.get())->siblingsBack;
 					if (x - siblingsBack >= 0)
 						other = this->controls[x - siblingsBack]->rect;
 				}
@@ -264,7 +264,7 @@ bool DialogTemplate::CalculateControlPosition(short index, bool doRightAndBottom
 			Rect<short> other = Rect<short>(Point<short>(), this->size);
 			if (control->relativePosition->type == RelativePosition::BaseType::ToSibling)
 			{
-				short siblingsBack = dynamic_cast<const RelativePositionToSibling *>(control->relativePosition.get())->siblingsBack;
+				short siblingsBack = reinterpret_cast<const RelativePositionToSibling *>(control->relativePosition.get())->siblingsBack;
 				if (index - siblingsBack >= 0)
 					other = this->controls[index - siblingsBack]->rect;
 			}
@@ -324,9 +324,9 @@ void DialogTemplate::AutoSize()
 		bool valid = this->CalculateControlPosition(x, false);
 		if (valid && control->controlType == DialogControlType::Group)
 		{
-			dynamic_cast<DialogGroup *>(control.get())->CalculatePositions(false);
+			reinterpret_cast<DialogGroup *>(control.get())->CalculatePositions(false);
 			// Technically step 2, but calculate the size of the group
-			dynamic_cast<DialogGroup *>(control.get())->CalculateSize();
+			reinterpret_cast<DialogGroup *>(control.get())->CalculateSize();
 			if (control->rect.size.width > maxGroupWidth)
 				maxGroupWidth = control->rect.size.width;
 		}
@@ -338,7 +338,7 @@ void DialogTemplate::AutoSize()
 		if (control->controlType != DialogControlType::Group)
 			continue;
 		control->rect.size.width = maxGroupWidth;
-		dynamic_cast<DialogGroup *>(control.get())->CalculatePositions(true);
+		reinterpret_cast<DialogGroup *>(control.get())->CalculatePositions(true);
 	}
 	// Step 3: Resize the dialog box itself
 	this->CalculateSize();

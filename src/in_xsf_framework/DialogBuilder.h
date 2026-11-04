@@ -146,7 +146,7 @@ protected:
 	int index;
 	std::unique_ptr<RelativePosition> relativePosition;
 
-	T &me() { return dynamic_cast<T &>(*this); }
+	T &me() { return reinterpret_cast<T &>(*this); }
 public:
 	DialogControlBuilder(DialogControlType Type = DialogControlType::None) : controlType(Type), style(0), exstyle(0), rect(), id(-1), index(-1), relativePosition() { }
 	virtual ~DialogControlBuilder() { }
@@ -462,7 +462,7 @@ class DialogTemplate
 		{
 			auto control = DialogControl::CreateControl<DialogGroup>(builder);
 
-			control->groupName = dynamic_cast<const DialogGroupBuilder &>(builder).groupName;
+			control->groupName = reinterpret_cast<const DialogGroupBuilder &>(builder).groupName;
 
 			return control;
 		}
@@ -525,7 +525,7 @@ class DialogTemplate
 			auto control = DialogControl::CreateControl<Control>(builder);
 
 			control->type = Type;
-			control->label = dynamic_cast<const DialogControlWithLabelBuilder<Builder> &>(builder).label;
+			control->label = reinterpret_cast<const DialogControlWithLabelBuilder<Builder> &>(builder).label;
 
 			return control;
 		}
@@ -609,7 +609,7 @@ class DialogTemplate
 
 	template<typename Builder> void AddControlToGroup(std::unique_ptr<DialogControl> &&control, const DialogControlBuilder<Builder> &builder)
 	{
-		const auto &groupBuilder = dynamic_cast<const DialogInGroupBuilder<Builder> &>(builder);
+		const auto &groupBuilder = reinterpret_cast<const DialogInGroupBuilder<Builder> &>(builder);
 		if (groupBuilder.groupName.empty())
 		{
 			if (builder.index == -1)
@@ -623,7 +623,7 @@ class DialogTemplate
 			{
 				if ((*curr)->controlType != DialogControlType::Group)
 					continue;
-				DialogGroup *group = dynamic_cast<DialogGroup *>(curr->get());
+				DialogGroup *group = reinterpret_cast<DialogGroup *>(curr->get());
 				if (group->groupName == groupBuilder.groupName)
 				{
 					if (builder.index == -1)
