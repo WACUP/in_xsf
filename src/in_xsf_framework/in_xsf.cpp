@@ -249,6 +249,17 @@ int infoBox(const in_char *file, HWND hwndParent)
 {
 	return 0;
 }*/
+
+static int StorePlaybackThread(HANDLE thread, LPVOID parameter)
+{
+	if (parameter != nullptr)
+	{
+		thread_handle = thread;
+		return 1;
+	}
+	return 0;
+}
+
 #ifndef _WIN64
 int play(const in_char *fn)
 #else
@@ -287,8 +298,8 @@ int play(const in_char *fn, const int seek_offset)
 
 		xSFPlayer = tmpxSFPlayer.release();
 		killThread = false;
-		thread_handle = StartPlaybackThread(playThread, &killThread, 0, nullptr);
-		return 0;
+		return !StartPlaybackThread(playThread, &killThread,
+									0, StorePlaybackThread);
 	}
 	catch (const std::exception &)
 	{
